@@ -6,7 +6,7 @@ from multiprocessing import Process, Queue
 from datetime import datetime, timedelta
 import atexit
 
-class Scrape_Squad():
+class ScrapeSquad():
     def __init__(self, pool_size = 1,semesters = ['letni']):
         self.semesters = semesters
         self.pool_size = pool_size
@@ -21,7 +21,7 @@ class Scrape_Squad():
         self.scrapers_finished = 0
         self.failures = 0
         self.timer = Scraper.get_timer()
-        atexit.register(self.clean_up)
+        atexit.register(self.finish)
 
     def run(self):
         try:
@@ -30,7 +30,7 @@ class Scrape_Squad():
             self.gather_data()
         except (SystemExit, KeyboardInterrupt) as e:
             printf(f'Squad: Exception occured \n{e}')
-            self.clean_up()
+            self.finish()
 
     def set_up(self):
         self.leader.login()
@@ -97,6 +97,6 @@ def printf(content):
     print(content,flush=True)
 
 if __name__ == '__main__':
-    squad = Scrape_Squad(pool_size = 4)
+    squad = ScrapeSquad(pool_size = 4)
     squad.run()
     
