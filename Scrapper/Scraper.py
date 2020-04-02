@@ -16,19 +16,22 @@ from creds import username, password
 
 class Scraper():
 
-    def __init__(self,headless=True,bot_init=False,semester=None, index = None):
+    def __init__(self, headless = True, bot_init = False, semester = None, index = 0):
         self.options = Options()
         self.options.add_argument("--headless") if headless else None
-        self.bot = self.get_bot() if bot_init == True else None
+        self.options.add_argument('--ignore-ssl-errors=yes')
+        self.options.add_argument('--ignore-certificate-errors')
+        self.bot = self.get_bot() if bot_init else None
         self.semester = semester
         self.index = index
 
         self.groups = None
-        self.url = {'letni':None,'zimowy':None}
+        self.url = {'letni': None,'zimowy': None}
         self.data = {}
+        self.in_groups = False
 
-        self.pool_size = None
-        self.queue=None
+        self.pool_size = 1
+        self.queue = None
 
         self.current_group = None
         self.groups_scraped = 0
@@ -45,50 +48,66 @@ class Scraper():
         assert self.url[self.semester] or url, 'Scraper must have an url'
 
     def run(self):
-        self.bot = self.get_bot() if not self.bot else None
-        self.get(self.url[self.semester])
-        if not self.groups:
-            self.get_groups()
-        if self.index and self.pool_size:
+        try:
+            self.bot = self.bot if self.bot else self.get_bot()
+            self.get(self.url[self.semester])
+            self.in_groups=True
+
+            if not self.groups:
+                self.get_groups()
             self.groups = np.array_split(self.groups,self.pool_size)[self.index]
-        for group in self.groups:
-            self.scrape_semester(group)
-        self.time_finish = datetime.now()-self.time_born
-        print(f'Scraper-{self.index} finished within {self.time_finish}')
+            for group in self.groups:
+                self.scrape_semester(group)
+
+            finish = self.timer['finish'] = datetime.now()-self.timer['born']
+            printf(f'Scraper-{self.index} finished within {finish}')
+            self.close(message='finished')
+
+        except Exception as e:
+            if e not in (NoSuchElementException, ValueError):
+                printf(f'Scrapper-{self.index}: unexpected Exception: \n{e}\n')
+                self.close()
 
     # method -> 'class name' 'id' 'xpath' 'link text' 'name' 'css selector'
     def find(self, method, element: str):   
         el = []
-        send_msg = 0
+        attempts = 0
+        sleep_time = 0.1
+        time_out = 20
         while not len(el):
-            el = self.bot.find_elements(method, element)
-            if not len(el):
-                send_msg += 1
-                if not send_msg % 20:
-                    print('Trying to find the element')
-                    if send_msg > 10:
-                        print('Could not find element: ' + element)
-                        print('Refreshing page')
-                        self.get(self.curl)
-                    if send_msg > 30:
-                        print('Could not find element: ' + element)
-                        return None
-                time.sleep(0.5)
+            try:
+                el = self.bot.find_elements(method, element)
+                if not len(el):
+                    attempts+=1
+                    if attempts*sleep_time == time_out:
+                        raise ValueError
+                    elif not attempts*sleep_time % 5:
+                        printf(f'Trying to find {element}')
+                    time.sleep(sleep_time)
+            except ValueError:
+                printf(f'Element not found:{element} in group {self.current_group}')
+                return None
         return el if len(el) > 1 else el[0]
 
     def login(self):
-        bot = self.bot
-        bot.get('https://s1.wcy.wat.edu.pl/ed1/')
+        self.bot.get('https://s1.wcy.wat.edu.pl/ed1/')
+        try:
+            inputs = self.find('class name', 'inputChaLog')
+            if not len(inputs): raise ValueError
+            inputs[0].send_keys(username)
+            inputs[1].send_keys(password)
+            self.find('css selector', 'input.inputLogL').click()
 
-        inputs = self.find('class name', 'inputChaLog')
-        for i, k in zip(inputs, [username, password]):
-            i.send_keys(k)
+        except (ValueError,IndexError) as e:
+            printf(f'Scraper-{self.index}: login failed Exception: {e}\n')
+            self.close()
+            return
 
-        self.find('css selector', 'input.inputLogL').click()
-
-    def get_to_groups(self, semester):
+    def get_to_groups(self, semester=None):
         self.in_groups=False
-        self.semester = semester
+        self.semester = semester if semester else self.semester
+        assert self.semester, 'a Semester must be assigned to Scraper'
+
         menus = self.find('class name', 'ThemeIEMainFolderText')
         schedules = self.find('class name', 'ThemeIEMenuFolderText')
         semesters = self.find('class name', 'ThemeIEMenuItemText')
@@ -100,13 +119,15 @@ class Scraper():
         for sem in semesters:
             if semester in sem.get_attribute('innerHTML'):
                 sems.append(sem)
-
         for button in [menus[1], schedules[2], sems[2]]:
             button.click()
-        self.in_groups = True
+
         self.url[self.semester] = self.curl()
+        self.in_groups=True
 
     def get_groups(self):
+        assert self.in_groups, 'Groups page must be open in order to get groups'
+
         groups = []
         aMenus = self.find('class name', "aMenu")
         for aMenu in aMenus:
@@ -116,17 +137,30 @@ class Scraper():
         return groups
 
     def scrape_semester(self,group_name):
+        assert self.in_groups, 'Groups page must be open in order to scrape'
+
         self.current_group = group_name
         scrape_start = datetime.now()
         group_link = self.find('link text', group_name)
         if group_link==None:
-            self.data[group_name] = None
+            self.in_groups = False
+            self.login()
+            self.get_to_groups()
+            self.scrape_semester(group_name)
             return
         group_link.click()
         page_loaded = datetime.now()
-        delta_loading = (page_loaded-scrape_start).microseconds
+        delta_loading = page_loaded-scrape_start
 
         soup = BeautifulSoup(self.bot.page_source, features='lxml')
+        cells = soup.find_all('td',class_='tdFormList1DSheTeaGrpHTM3')
+        if not len(cells):
+            printf(f'Plan of {self.current_group} is empty')
+            self.notify(delta_loading, timedelta(seconds=0), delta_loading)
+            self.data[group_name] = None
+            post_result(self.current_group,self.semester,None)
+            return
+
         roman_notation={
             'I':1,'II':2,'III':3,'IV':4,'V':5,'VI':6,'VII':7,'VIII':8,'IX':9,'X':10,'XI':11,'XII':12
         }
@@ -134,25 +168,31 @@ class Scraper():
         day,month = day[0].get_attribute('innerText').split('\n')
         month = roman_notation[month]
         day = date(date.today().year,month,int(day))
-        data={}
 
-        for plan_day in self.scrape_day(soup):
+        data={}
+        for plan_day in self.scrape_day(cells=cells):
             data[str(day)] = plan_day
             day+=timedelta(days=1)
 
-        delta_scraping = (datetime.now()-page_loaded).microseconds
+        delta_scraping = datetime.now() - page_loaded
         delta_total = delta_loading + delta_scraping
         self.notify(delta_loading,delta_scraping,delta_total)
         self.data[group_name] = data.copy()
+        post_result(self.current_group,self.semester,data.copy())
 
-    def scrape_day(self,soup):
-        """this is a generator function yelding one day of whole plan"""
-        assert self.scrape_ready, 'Plan of a group must be opened in order to scrape'
-
+    def scrape_day(self, soup=None, cells = None):
+        """
+        scrape_day is a generator function yelding one day of whole plan
+        """
+        assert soup or cells, 'No data to scrape'
         # finding all the block cells in a plan & rearanging them for easier manipulation
-        days,blocks_per_day =7,7
-        cells = soup.find_all('td',class_='tdFormList1DSheTeaGrpHTM3')
+        cells = soup.find_all('td',class_='tdFormList1DSheTeaGrpHTM3') if not cells else cells
+        if not len(cells):
+            printf(f'Plan of {self.current_group} is empty')
+            yield None
+
         cells = pd.Series(cells)
+        days, blocks_per_day = 7, 7
         cells = np.array_split(cells.values,days*blocks_per_day)
         df = pd.DataFrame(cells).T
         day_data = {}
@@ -175,7 +215,6 @@ class Scraper():
 
                 if i and (i+1) % 7 == 0 :
                     yield day_data.copy()
-    
 
     def curl(self):
         return self.bot.current_url
@@ -201,27 +240,30 @@ class Scraper():
             scraping = self.timer['scraping']
             total = self.timer['total']
             born = self.timer['born']
-            print(f'Average time for {self.semester}-{self.index}')
-            print(f'Loading: {round(loading/self.groups_scraped/100000,2)} seconds')
-            print(f'Scraping: {round(scraping/self.groups_scraped/100000,2)} seconds')
-            print(f'Total: {round(total/self.groups_scraped/100000,2)} seconds')
-            print(f'Time alive: {datetime.now()-born}')
-            print('')
-
+            printf(f'Average time for {self.semester}-{self.index}')
+            printf(f'Loading: {round(loading/self.groups_scraped/100000,2)} seconds')
+            printf(f'Scraping: {round(scraping/self.groups_scraped/100000,2)} seconds')
+            printf(f'Total: {round(total/self.groups_scraped/100000,2)} seconds')
+            printf(f'Time alive: {datetime.now()-born}')
+            printf('')
     
     def get(self,url):
-        self.in_groups=True
         self.bot.get(url)
 
-    def close(self):
+    def close(self,message='failure'):
+        if message and self.queue:
+            self.queue.put({message:True})
         self.bot.close()
 
 def get_timer():
         timer ={}
         for name in ['born','alive','loading','scraping','total','finish']:
             if name =='born': timer[name] = datetime.now() 
-            else: timer[name] = 0
+            else: timer[name] = timedelta(seconds=0)
         return timer.copy()
 
-def post_result(data):
-        print('posting')
+def post_result(group,semester,data):
+    pass
+
+def printf(content):
+    print(content, flush=True)
