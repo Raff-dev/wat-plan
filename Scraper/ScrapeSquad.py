@@ -6,13 +6,14 @@ from multiprocessing import Process, Queue
 from datetime import datetime, timedelta
 import atexit
 
+
 class ScrapeSquad():
-    def __init__(self, pool_size = 1,semesters = ['letni']):
+    def __init__(self, pool_size=1, semesters=['letni']):
         self.semesters = semesters
         self.pool_size = pool_size
-        self.leader = Scraper.Scraper(bot_init = True, headless = False)
-        self.squad= None
-        self.squad_handle= {}
+        self.leader = Scraper.Scraper(bot_init=True, headless=False)
+        self.squad = None
+        self.squad_handle = {}
         self.url = {}
         self.groups = {}
         self.queue = Queue()
@@ -43,16 +44,17 @@ class ScrapeSquad():
             self.groups_count += len(self.leader.groups)
         self.leader.close()
 
-    def create_squad(self,*args):
-        self.squad = [[Scraper.Scraper(semester = sem, index = index,headless=False)
-            for index in range(self.pool_size)] for sem in self.semesters]
+    def create_squad(self, *args):
+        self.squad = [[Scraper.Scraper(semester=sem, index=index, headless=False)
+                       for index in range(self.pool_size)] for sem in self.semesters]
 
     def begin(self):
         for semester_squad in self.squad:
             for scraper in semester_squad:
-                scraper.set_up(url = self.url[scraper.semester], pool_size=self.pool_size)
+                scraper.set_up(
+                    url=self.url[scraper.semester], pool_size=self.pool_size)
                 scraper.queue = self.queue
-                process =  Process(target=scraper.run)
+                process = Process(target=scraper.run)
                 self.squad_handle[scraper] = process
                 process.start()
 
@@ -61,42 +63,49 @@ class ScrapeSquad():
             msg = self.queue.get()
             if 'finished' in msg.keys() or 'failure' in msg.keys():
                 if 'failure' in msg.keys():
-                    self.failures+=1
-                self.scrapers_finished+=1
+                    self.failures += 1
+                self.scrapers_finished += 1
                 if self.scrapers_finished == self.pool_size*len(self.semesters):
                     break
             else:
-                self.groups_scraped+=1
+                self.groups_scraped += 1
                 self.timer['loading'] += msg['loading']
                 self.timer['scraping'] += msg['scraping']
+                self.timer['posting'] += msg['posting']
                 self.timer['total'] += msg['total']
                 av_loading = self.timer['loading']/self.groups_scraped
                 av_scraping = self.timer['scraping']/self.groups_scraped
+                av_posting = self.timer['posting']/self.groups_scraped
                 av_total = self.timer['total']/self.groups_scraped
                 group = msg['group']
-                total =  msg['total']
+                total = msg['total']
                 index = msg['index']
                 estimated = av_total*self.groups_count/self.pool_size
                 printf(f'Scraper {index} finished {group} in {total}')
-                printf(f'Groups scraped {self.groups_scraped}/{self.groups_count}')
+                printf(
+                    f'Groups scraped {self.groups_scraped}/{self.groups_count}')
                 printf(f'Loading average: {av_loading}')
                 printf(f'Scraping average: {av_scraping}')
+                printf(f'Posting average: {av_posting}')
                 printf(f'Total average: {av_total}')
-                printf(f'Estimated Scraping time: {int(estimated.seconds/60)}m {estimated.seconds%60}s')
-                printf(f'Finished: {self.scrapers_finished}/{self.pool_size} Failures: {self.failures}\n')
+                printf(
+                    f'Estimated Scraping time: {int(estimated.seconds/60)}m {estimated.seconds%60}s')
+                printf(
+                    f'Finished: {self.scrapers_finished}/{self.pool_size} Failures: {self.failures}\n')
+        self.finish()
+
+    def finish(self):
         finished = self.timer['finish'] = datetime.now() - self.timer['born']
         printf(f'Scraping completed in {finished}')
-    
-    def finish(self):
         printf(f'Groups scraped {self.groups_scraped}/{self.groups_count}')
-        printf(f'Finished: {self.scrapers_finished}/{self.pool_size} Failures: {self.failures}\n')
-
+        printf(
+            f'Finished: {self.scrapers_finished}/{self.pool_size} Failures: {self.failures}\n')
 
 
 def printf(content):
-    print(content,flush=True)
+    print(content, flush=True)
+
 
 if __name__ == '__main__':
-    squad = ScrapeSquad(pool_size = 4)
+    squad = ScrapeSquad(pool_size=4)
     squad.run()
-    
