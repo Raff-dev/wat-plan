@@ -1,14 +1,16 @@
 from django.contrib import admin
 from django.urls import include, path
 
-from Plan.router import router
+from rest_framework import routers
+from Plan.views import Plan
 
-
+router = routers.DefaultRouter()
+router.register('Plan', Plan, basename='Plan')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include((router.urls, 'Plan'),namespace='Plan')),
+    path('', include((router.urls, 'Plan'), namespace='Plan')),
 ]
 
 for url in router.urls:
-     print(url)
+    print(url)
