@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="70dp"
+    android:layout_height="52dp"
+    android:background="#23df">
+
+    <TextView
+        android:id="@+id/subjectTextView"
+        android:layout_width="match_parent"
+        android:layout_height="13dp"
+        android:text="subject" 
+        android:layout_alignParentTop="true"
+        android:padding="1dp"
+        android:textSize="7sp"
+        android:textAlignment="center"/>
+    <TextView
+        android:id="@+id/typeTextView"
+        android:layout_width="match_parent"
+        android:layout_height="13dp"
+        android:text="type" 
+        android:layout_below="@id/subjectTextView"
+        android:padding="1dp"
+        android:textSize="7sp"
+        android:textAlignment="center"
+        />
+    <TextView
+        android:id="@+id/roomTextView"
+        android:layout_width="match_parent"
+        android:layout_height="13dp"
+        android:text="room" 
+        android:layout_below="@id/typeTextView"
+        android:padding="1dp"
+        android:textSize="7sp"
+        android:textAlignment="center"/>
+    <TextView
+        android:id="@+id/teacherTextView"
+        android:layout_width="match_parent"
+        android:layout_height="13dp"
+        android:layout_below="@id/roomTextView"
+        android:text="teacher"
+        android:padding="1dp"
+        android:textSize="7sp"
+        android:textAlignment="center"/>
+</RelativeLayout>
