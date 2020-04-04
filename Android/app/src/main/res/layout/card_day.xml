@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="70dp"
+    android:layout_height="416dp"
+    android:background="#363d">
+
+    <RelativeLayout
+        android:id="@+id/dayNameContainer"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_alignParentTop="true"
+        android:gravity="center">
+        <TextView
+            android:id="@+id/dayNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Day Name"
+            android:gravity="center"
+            android:padding="2dp"/>
+        <TextView
+            android:id="@+id/dayDateTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Day Date"
+            android:gravity="center"
+            android:layout_below="@id/dayNameTextView"
+            android:padding="2dp"/>
+
+    </RelativeLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/blockRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/dayNameContainer"
+        android:orientation="vertical"/>
+</RelativeLayout>
