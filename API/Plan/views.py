@@ -62,6 +62,9 @@ class Plan(ViewSet):
             semester = Semester.objects.get(name=semester, group=group)
         except (ObjectDoesNotExist, EmptyResultSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
+        except KeyError as e:
+            result = f'{e} not specified'
+            return Response(result, status=status.HTTP_204_NO_CONTENT)
 
         blocks = Block.objects.filter(
             semester=semester).order_by('date', 'index')
@@ -72,7 +75,8 @@ class Plan(ViewSet):
         result = Block.objects.annotate(
             semester_name=F('semester__name'),
             group=F('semester__group__name')).values(*values)
-        return Response(result)
+        print(result)
+        return Response({'yes': result})
 
     @action(methods=['get'], detail=False)
     def get_versions(self, request, *args, **kwargs):
