@@ -21,12 +21,12 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     private Context context;
     private ArrayList<Week> weekArrayList;
 
-    public WeekAdapter(Context context,ArrayList<Week> weekArrayList){
-        this.context=context;
-        this.weekArrayList=weekArrayList;
+    public WeekAdapter(Context context, ArrayList<Week> weekArrayList) {
+        this.context = context;
+        this.weekArrayList = weekArrayList;
     }
-    public static class WeekViewHolder extends RecyclerView.ViewHolder{
 
+    public static class WeekViewHolder extends RecyclerView.ViewHolder {
         RecyclerView dayRecyclerView;
 
         public WeekViewHolder(@NonNull View itemView) {
@@ -38,26 +38,23 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     @NonNull
     @Override
     public WeekViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_week,parent,false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_week, parent, false);
         return new WeekViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull WeekViewHolder holder, int position) {
-            Week week = weekArrayList.get(position);
-            ArrayList<Day> dayArrayList=week.getDayArrayList();
-            DayAdapter dayAdapter = new DayAdapter(context,dayArrayList);
+        Week week = weekArrayList.get(position);
+        ArrayList<Day> dayArrayList = week.getDayArrayList();
+        DayAdapter dayAdapter = new DayAdapter(context, dayArrayList);
 
-            holder.dayRecyclerView.setHasFixedSize(true);
-            holder.dayRecyclerView.setLayoutManager(new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false));
-            holder.dayRecyclerView.setAdapter(dayAdapter);
+        holder.dayRecyclerView.setHasFixedSize(true);
+        holder.dayRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        holder.dayRecyclerView.setAdapter(dayAdapter);
     }
 
     @Override
     public int getItemCount() {
         return weekArrayList.size();
     }
-
-
-
 }

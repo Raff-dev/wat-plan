@@ -1,5 +1,6 @@
 package com.example.watplan;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,47 +15,51 @@ import com.example.watplan.Models.Week;
 import java.util.ArrayList;
 
 public class DBHandler extends SQLiteOpenHelper {
-    public static final String DATABASE_NAME = "WAT_PLAN";
-    public static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "WAT_PLAN";
+    private static final String SEMESTER = "semester";
+    private static final String GROUP = "'group'";
+    public static final String DAY = "day";
+    public static final String BLOCK = "block";
+    private static final int DATABASE_VERSION = 1;
 
-    public DBHandler(@Nullable Context context) {
+    DBHandler(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE 'group' (id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name varchar(30) NOT NULL UNIQUE)");
-        db.execSQL("create table semester (id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                "group_id integer NOT NULL REFERENCES group_ (id) DEFERRABLE INITIALLY DEFERRED," +
-                "name varchar(30) NOT NULL," +
-                "version integer NOT NULL default 0)");
+        createDatabase(db);
+        onCreateInsert(db);
+    }
 
-        db.execSQL("CREATE TABLE block (" +
-                "semester_id integer NOT NULL REFERENCES semester (id) DEFERRABLE INITIALLY DEFERRED," +
-                "id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                "'date' date NOT NULL," +
-                " 'index' integer NOT NULL," +
-                "title varchar(100)," +
-                "subject varchar(30)," +
-                "teacher varchar(30)," +
-                "place varchar(30)," +
-                "class_type varchar(30)," +
-                "class_index varchar(1))");
+
+    public boolean addPlan(String nameSemester, String nameGroup) {
+        ContentValues values = new ContentValues();
+        values.put("name", "letni");
+        SQLiteDatabase db = getWritableDatabase();
+        long result = db.insert("semester", null, values);
+        System.out.println("result" + result);
+        return result != -1;
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS 'group'");
         db.execSQL("DROP TABLE IF EXISTS semester");
+        db.execSQL("DROP TABLE IF EXISTS 'group'");
+        db.execSQL("DROP TABLE IF EXISTS day");
         db.execSQL("DROP TABLE IF EXISTS block");
-        onCreate(db);
+        onCreate(getWritableDatabase());
     }
 
-    public ArrayList<Week> getPlan(String nameGroup, String nameSemester) {
+    ArrayList<Week> getPlan(String nameSemester, String nameGroup) {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery("select * from block where block.semester_id =" +
-                " (select id from semester where name =" + nameSemester + "and group_id=" +
-                "(select id from 'group' where name =" + nameGroup + ")) order by ('date','index') asc", null);
+        Cursor cursor = db.rawQuery("select block.*,day.date from (semester" +
+                " join 'group' on 'group.semester_id'=semester.id and 'group.name'=" + nameGroup +
+                " join day on day.group_id = 'group.id'" +
+                " join block on block.day_id = day.id)" +
+                " where semester.name =" + nameSemester +
+                " group by ('block.index')" +
+                " order by ('day.date','block.index') asc", null);
         cursor.moveToFirst();
 
         ArrayList<Week> plan = new ArrayList<>();
@@ -81,5 +86,52 @@ public class DBHandler extends SQLiteOpenHelper {
         }
         cursor.close();
         return plan;
+    }
+
+    private void createDatabase(SQLiteDatabase db) {
+        db.execSQL("create table semester (" +
+                "name varchar(30) PRIMARY KEY NOT NULL)");
+
+        db.execSQL("CREATE TABLE 'group' (" +
+                "id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                "semester_name varchar(30) NOT NULL REFERENCES semester (name) DEFERRABLE INITIALLY DEFERRED," +
+                "name varchar(30) NOT NULL," +
+                "version integer NOT NULL default 0)");
+
+        db.execSQL("CREATE TABLE day (" +
+                "id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                "group_id integer NOT NULL REFERENCES 'group' (id) DEFERRABLE INITIALLY DEFERRED," +
+                "'date' date NOT NULL)");
+
+        db.execSQL("CREATE TABLE block (" +
+                "id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                "day_id integer NOT NULL REFERENCES day (id) DEFERRABLE INITIALLY DEFERRED," +
+                "'index' integer NOT NULL," +
+                "title varchar(100)," +
+                "subject varchar(30)," +
+                "teacher varchar(30)," +
+                "place varchar(30)," +
+                "class_type varchar(30)," +
+                "class_index varchar(1))");
+    }
+
+    private void onCreateInsert(SQLiteDatabase db) {
+        new Thread(() -> {
+            ArrayList<String> semesters = UpdateHandler.getSemesterList();
+            ContentValues values = new ContentValues();
+            for (String nameSemester : semesters) {
+                values.put("name", nameSemester);
+                db.insert(SEMESTER, null, values);
+                values.clear();
+
+                ArrayList<String> groups = UpdateHandler.getGroupList(nameSemester);
+                for (String nameGroup : groups) {
+                    values.put("semester_name", nameSemester);
+                    values.put("name", nameGroup);
+                    db.insert(GROUP, null, values);
+                    values.clear();
+                }
+            }
+        }).start();
     }
 }

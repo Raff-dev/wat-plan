@@ -9,19 +9,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.watplan.Adapters.WeekAdapter;
+import com.example.watplan.Models.Block;
+import com.example.watplan.Models.Day;
 import com.example.watplan.Models.Week;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
-
-import static android.widget.Toast.*;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 //wjebac pliki DO BAZY
 //czytac z bazy danych
@@ -29,12 +23,14 @@ import static android.widget.Toast.*;
 //loading na klik w inna grupe
 
 public class MainActivity extends AppCompatActivity {
-    RecyclerView weekRecyclerView;
-    ArrayList<Week> weekArrayList = new ArrayList<>();
-    RecyclerView.Adapter weekAdapter = new WeekAdapter(this, weekArrayList);
-    Button burger, settings;
-    Context context;
-    DBHandler dbHandler = new DBHandler(this);
+    private static final UpdateHandler updateHandler = new UpdateHandler();
+    private final DBHandler dbHandler = new DBHandler(this);
+    private ArrayList<Week> plan = new ArrayList<>();
+    private RecyclerView planRecyclerView;
+    private RecyclerView.Adapter weekAdapter = new WeekAdapter(
+            this, plan);
+    private Context context;
+    private Button burger, settings, drop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +38,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setUp();
         addListeners();
-        displayGroup(getActiveGroup(), getActivetSemester());
+//        ArrayList<Week> plan = dbHandler.getPlan(getActiveGroup(), getActivetSemester());
+//        displayGroup(plan);
+    }
+
+    private void setUp() {
+        planRecyclerView = findViewById(R.id.planRecyclerView);
+        planRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        testData();
+        planRecyclerView.setAdapter(weekAdapter);
+
+        burger = findViewById(R.id.burger);
+        drop = findViewById(R.id.drop);
+        settings = findViewById(R.id.settings);
+        context = getApplicationContext();
     }
 
     private String getActivetSemester() {
@@ -53,27 +62,45 @@ public class MainActivity extends AppCompatActivity {
         return "WCY18IY5S1";
     }
 
-    private void displayGroup(String nameGroup, String nameSemester) {
-        ArrayList<Week> plan = dbHandler.getPlan(nameGroup, nameSemester);
-        weekArrayList.clear();
-        weekArrayList.addAll(plan);
-    }
-
-    private void setUp() {
-        weekRecyclerView = findViewById(R.id.weekRecyclerView);
-        weekRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        weekRecyclerView.setAdapter(weekAdapter);
-
-        burger = findViewById(R.id.burger);
-        settings = findViewById(R.id.settings);
-        context = getApplicationContext();
+    private void displayGroup(ArrayList<Week> plan) {
+        this.plan.clear();
+        this.plan.addAll(plan);
     }
 
     private void addListeners() {
-        burger.setOnClickListener(v -> System.out.println("none"));
-        settings.setOnClickListener(v -> makeText(this, "text", LENGTH_LONG).show());
+        drop.setOnClickListener(v -> dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1));
+
+        burger.setOnClickListener(v -> {
+            updateHandler.getGroupBlocks(getActivetSemester(), getActiveGroup());
+        });
+
+        settings.setOnClickListener(v->testData());
     }
 
+    private void testData(){
+        String string = String.valueOf(new Random().nextInt(60));
+        System.out.println(string);
+        ArrayList<Week> plan = new ArrayList<>();
+        IntStream.range(0,7).forEach(i->{
+            ArrayList<Day> week = new ArrayList<>();
+            IntStream.range(0,7).forEach(j->{
+                ArrayList<Block> day = new ArrayList<>();
+
+                IntStream.range(0,7).forEach(k->{
+                    day.add(new Block(string,string,string,string,string,String.valueOf(k)));
+                });
+                week.add(new Day(day,"date"));
+            });
+            plan.add(new Week(week));
+        });
+        setPlan(plan);
+    }
+
+    public void setPlan(ArrayList<Week> plan) {
+        this.plan.clear();
+        this.plan.addAll(plan);
+        planRecyclerView.setAdapter(weekAdapter);
+    }
 
     public Context getContext() {
         return context;

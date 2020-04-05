@@ -21,29 +21,29 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     private Context context;
     private ArrayList<Day> dayArrayList;
 
-    public DayAdapter(Context context, ArrayList<Day> dayArrayList){
-        this.context=context;
-        this.dayArrayList=dayArrayList;
+    public DayAdapter(Context context, ArrayList<Day> dayArrayList) {
+        this.context = context;
+        this.dayArrayList = dayArrayList;
 
     }
-    public static class DayViewHolder extends RecyclerView.ViewHolder{
+
+    public static class DayViewHolder extends RecyclerView.ViewHolder {
         TextView dateTextView;
         TextView dayNameTextView;
         RecyclerView blockRecyclerView;
 
         public DayViewHolder(@NonNull View itemView) {
             super(itemView);
-            dateTextView=itemView.findViewById(R.id.dayDateTextView);
-            dayNameTextView=itemView.findViewById(R.id.dayNameTextView);
-            blockRecyclerView=itemView.findViewById(R.id.blockRecyclerView);
-
+            dateTextView = itemView.findViewById(R.id.dayDateTextView);
+            dayNameTextView = itemView.findViewById(R.id.dayNameTextView);
+            blockRecyclerView = itemView.findViewById(R.id.blockRecyclerView);
         }
     }
 
     @NonNull
     @Override
     public DayViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_day,parent,false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_day, parent, false);
         return new DayViewHolder(v);
     }
 
@@ -51,22 +51,37 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
         Day day = dayArrayList.get(position);
         String date = day.getDate();
-        String dayName="Day Name";
-        switch (position){
-            case 0: dayName="Mon"; break;
-            case 1: dayName="Tue"; break;
-            case 2: dayName="Wed"; break;
-            case 3: dayName="Thu"; break;
-            case 4: dayName="Fri"; break;
-            case 5: dayName="Sat"; break;
-            case 6: dayName="Sun"; break;
-            default: dayName="nie dziala";
+        String dayName = "Day Name";
+        switch (position) {
+            case 0:
+                dayName = "Mon";
+                break;
+            case 1:
+                dayName = "Tue";
+                break;
+            case 2:
+                dayName = "Wed";
+                break;
+            case 3:
+                dayName = "Thu";
+                break;
+            case 4:
+                dayName = "Fri";
+                break;
+            case 5:
+                dayName = "Sat";
+                break;
+            case 6:
+                dayName = "Sun";
+                break;
+            default:
+                dayName = "nie dziala";
         }
         holder.dateTextView.setText(date);
         holder.dayNameTextView.setText(dayName);
 
-        ArrayList<Block> blockArrayList=day.getBlockArrayList();
-        BlockAdapter blockAdapter = new BlockAdapter(context,blockArrayList);
+        ArrayList<Block> blockArrayList = day.getBlockArrayList();
+        BlockAdapter blockAdapter = new BlockAdapter(context, blockArrayList);
 
         holder.blockRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager blocklayoutManager = new LinearLayoutManager(context) {
