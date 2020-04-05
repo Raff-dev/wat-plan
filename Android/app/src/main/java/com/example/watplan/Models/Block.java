@@ -1,43 +1,52 @@
 package com.example.watplan.Models;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Block {
-    private String title;
-    private String subject;
-    private String teacher;
-    private String place;
-    private String classType;
-    private String classIndex;
+    private Map<String, String> values = new HashMap<>();
+    public Block(){
+
+    }
+    public Block(Block block){
+        this.values=block.values;
+
+    }
 
     public Block(String title, String subject, String teacher, String place, String classType, String classIndex) {
-        this.title = title;
-        this.subject = subject;
-        this.teacher = teacher;
-        this.place = place;
-        this.classType = classType;
-        this.classIndex = classIndex;
+        this.values.put("title", title);
+        this.values.put("subject", subject);
+        this.values.put("teacher", teacher);
+        this.values.put("place", place);
+        this.values.put("class_type", classType);
+        this.values.put("class_index", classIndex);
     }
 
     public String getTitle() {
-        return title;
+        return values.get("title");
     }
 
     public String getSubject() {
-        return subject;
+        return values.get("subject");
     }
 
     public String getTeacher() {
-        return teacher;
+        return values.get("teacher");
     }
 
     public String getPlace() {
-        return place;
+        return values.get("place");
     }
 
     public String getClassType() {
-        return classType;
+        return values.get("class_type");
     }
 
     public String getClassIndex() {
-        return classIndex;
+        return values.get("class_index");
+    }
+
+    public void insert(String key, String value) {
+        values.put(key, value);
     }
 }
