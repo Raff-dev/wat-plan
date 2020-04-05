@@ -39,12 +39,11 @@ class Scraper():
         self.current_group = None
         self.groups_scraped = 0
         self.timer = get_timer()
-        print('timer:', self.timer['posting'])
 
     def get_bot(self):
         return webdriver.Chrome(ChromeDriverManager().install(), options=self.options)
 
-    def set_up(self, semester=None, url=None, groups=None, pool_size=None,):
+    def set_up(self, semester=None, url=None, groups=None, pool_size=None):
         self.semester = semester if semester else self.semester
         self.url[self.semester] = url if url else self.url[self.semester]
         self.groups = groups if groups else self.groups
@@ -133,8 +132,8 @@ class Scraper():
         self.in_groups = True
 
     def get_groups(self):
+        """saves all available groups of a given semester"""
         assert self.in_groups, 'Groups page must be open in order to get groups'
-
         groups = []
         aMenus = self.find('class name', "aMenu")
         for aMenu in aMenus:
@@ -160,30 +159,30 @@ class Scraper():
         cells = soup.find_all('td', class_='tdFormList1DSheTeaGrpHTM3')
         if not len(cells):
             printf(f'Plan of {self.current_group} is empty')
-            self.notify(delta_loading, timedelta(seconds=0), delta_loading)
-            self.data[group_name] = None
-            post_result(self.current_group, self.semester, None)
-            return
+            self.data[self.semester] = {group_name: None}
+        else:
+            roman_notation = {
+                'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10, 'XI': 11, 'XII': 12
+            }
+            day = self.find('css selector', '.thFormList1HSheTeaGrpHTM3 nobr')
+            day, month = day[0].get_attribute('innerText').split('\n')
+            month = roman_notation[month]
+            day = date(date.today().year, month, int(day))
 
-        roman_notation = {
-            'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10, 'XI': 11, 'XII': 12
-        }
-        day = self.find('css selector', '.thFormList1HSheTeaGrpHTM3 nobr')
-        day, month = day[0].get_attribute('innerText').split('\n')
-        month = roman_notation[month]
-        day = date(date.today().year, month, int(day))
-
-        data = {}
-        for plan_day in self.scrape_day(cells=cells):
-            data[str(day)] = plan_day
-            day += timedelta(days=1)
+            data = {}
+            for plan_day in self.scrape_day(cells=cells):
+                data[str(day)] = plan_day
+                day += timedelta(days=1)
+            self.data[self.semester] = {group_name: data.copy()}
 
         delta_scraping = datetime.now() - page_loaded
-        post_result(self.current_group, self.semester, data.copy())
+        post_result(
+            self.current_group,
+            self.semester,
+            self.data[self.semester][group_name]
+        )
         delta_posting = datetime.now() - page_loaded - delta_scraping
-
         self.notify(delta_loading, delta_scraping, delta_posting)
-        self.data[group_name] = data.copy()
 
     def scrape_day(self, soup=None, cells=None):
         """
@@ -191,11 +190,8 @@ class Scraper():
         """
         assert soup or cells, 'No data to scrape'
         # finding all the block cells in a plan & rearanging them for easier manipulation
-        cells = soup.find_all(
-            'td', class_='tdFormList1DSheTeaGrpHTM3') if not cells else cells
-        if not len(cells):
-            printf(f'Plan of {self.current_group} is empty')
-            yield None
+        if not cells:
+            cells = soup.find_all('td', class_='tdFormList1DSheTeaGrpHTM3')
 
         cells = pd.Series(cells)
         days, blocks_per_day = 7, 7
@@ -236,6 +232,7 @@ class Scraper():
         self.timer['posting'] += posting
         self.timer['total'] += total
         self.groups_scraped += 1
+        print('THATS POSTING:', posting, ' ppp ', self.timer['posting'])
 
         if self.queue:
             self.queue.put({
@@ -256,13 +253,13 @@ class Scraper():
             born = self.timer['born']
             printf(f'Average time for {self.semester}-{self.index}')
             printf(
-                f'Loading: {loading/self.groups_scraped} seconds')
+                f'Loading: {loading/self.groups_scraped}')
             printf(
-                f'Scraping: {scraping/self.groups_scraped} seconds')
+                f'Scraping: {scraping/self.groups_scraped}')
             printf(
-                f'Posting: {posting/self.groups_scraped} seconds')
+                f'Posting: {posting/self.groups_scraped}')
             printf(
-                f'Total: {total/self.groups_scraped} seconds')
+                f'Total: {total/self.groups_scraped}')
             printf(f'Time alive: {datetime.now()-born}')
             printf('')
 
@@ -306,4 +303,5 @@ def test():
     s = Scraper(headless=False, bot_init=True, semester='letni')
     s.login()
     s.get_to_groups()
+    s.scrape_semester('WCY')
     s.scrape_semester('WCY18IY5S1')
