@@ -1,27 +1,46 @@
 from django.db import models
 
 
-class Group(models.Model):
-    name = models.CharField(unique=True, max_length=30)
+class Semester(models.Model):
+    name = models.CharField(max_length=30)
+
+    class Meta():
+        ordering = ['name']
 
     def __str__(self):
         return self.name
 
 
-class Semester(models.Model):
-    group = models.ForeignKey(
-        Group, on_delete=models.CASCADE, related_name='semesters')
+class Group(models.Model):
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, related_name='groups')
     name = models.CharField(max_length=30)
-    empty = models.BooleanField(default=False)
     version = models.IntegerField(default=0)
+
+    class Meta():
+        ordering = ['semester__name', 'name']
+
+    def __str__(self):
+        return self.name
+
+
+class Day(models.Model):
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, related_name='blocks')
+    date = models.DateField(max_length=10)
+
+    class Meta():
+        unique_together = ['group', 'date']
+        ordering = [
+            'group__semester__name',
+            'group__name',
+            'date']
 
 
 class Block(models.Model):
-    semester = models.ForeignKey(
-        Semester, on_delete=models.CASCADE, related_name='blocks')
-    date = models.DateField(max_length=10)
     index = models.IntegerField()
-    empty = models.BooleanField(default=False)
+    day = models.ForeignKey(
+        Day, on_delete=models.CASCADE, related_name='blocks')
 
     title = models.CharField(
         default=None, max_length=100, null=True, blank=True)
@@ -37,8 +56,12 @@ class Block(models.Model):
         max_length=1, default=None, null=True, blank=True)
 
     class Meta():
-        unique_together = ['semester', 'date', 'index']
-        ordering = ['semester__group__name', 'semester__name', 'date', 'index']
+        unique_together = ['day', 'index']
+        ordering = [
+            'day__group__semester__name',
+            'day__group__name',
+            'day__date',
+            'index']
 
     # pervious_values = None
 

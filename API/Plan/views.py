@@ -10,7 +10,8 @@ from django.core.exceptions import ObjectDoesNotExist, EmptyResultSet
 from django.core import serializers
 from django.db.models import F
 import json
-from .models import Block, Group, Semester
+from .models import Block, Day, Group, Semester
+import datetime
 
 
 class Plan(ViewSet):
@@ -22,79 +23,103 @@ class Plan(ViewSet):
         semester = request.data['semester']
         plan = request.data['plan']
         outdated = False
+        plan_exists = plan is not None
 
-        group, gc = Group.objects.get_or_create(name=group)
-        semester, sc = Semester.objects.get_or_create(
-            name=semester, group=group)
-        outdated = not semester.empty == (plan == None)
-        semester.empty = plan == None
-        semester.save()
-        if semester.empty:
-            return Response({"That's": 'Tosted'}, status=status.HTTP_201_CREATED)
+        semester, screated = Semester.objects.get_or_create(
+            name=semester)
+        group, gcreated = Group.objects.get_or_create(
+            name=group, semester=semester)
 
-        for date, plan_day in plan.items():
-            for index, data in plan_day.items():
-                block, created = Block.objects.get_or_create(
-                    semester=semester, date=date, index=index)
+        if Day.objects.filter(group=group).exists() != plan_exists:
+            outdated = not gcreated
+            if plan is None and not gcreated:
+                Day.objects.filter(group=group).delete()
 
-                if data == None and not block.empty:
-                    block.empty = True
-                    block.save()
-                    outdated = True
-                else:
-                    check = data.copy()
-                    check.pop('place')
-                    if not check.items() <= block.__dict__.items():
-                        outdated = True
-                        Block.objects.filter(id=block.id).update(**data)
-        print(
-            F'Plan of group {group.name}for semester {semester.name} Updated')
-        semester.version += 1 if outdated else 0
+        if plan_exists:
+            for date, plan_day in plan.items():
+                date = [int(d) for d in date.split('-')]
+                date = datetime.date(*date)
+                day, dcreated = Day.objects.get_or_create(
+                    group=group, date=date)
+
+                for index, data in plan_day.items():
+                    if data is None:
+                        outdated = bool(Block.objects.filter(
+                            day=day, index=index
+                        ).delete()[0]) or outdated
+                    else:
+                        block, bcreated = Block.objects.get_or_create(
+                            day=day, index=index)
+                        check = data.copy()
+                        check.pop('place')
+                        if not check.items() <= block.__dict__.items():
+                            outdated = not bcreated
+                            Block.objects.filter(id=block.id).update(**data)
+
+        print(F'{group.name} : {semester.name} Updated')
+        group.version += 1 if outdated else 0
         return Response({"That's": 'Tosted'}, status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=False)
-    def get_semester(self, request, *args, **kwargs):
+    def get_group(self, request, *args, **kwargs):
         print(f'headers {request.headers}\n')
         try:
-            group = request.headers['group']
-            group = Group.objects.get(name=group)
             semester = request.headers['semester']
-            semester = Semester.objects.get(name=semester, group=group)
+            semester = Semester.objects.get(name=semester)
+            group = request.headers['group']
+            group = Group.objects.get(name=group, semester=semester)
+
+            days = Day.objects.filter(group=group)
+            result = {
+                'version': group.version,
+                'data': [{
+                    'date': str(d.date),
+                    'blocks': d.blocks.values()}
+                    for d in days if d.blocks.exists()]
+            }
         except (ObjectDoesNotExist, EmptyResultSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except KeyError as e:
             result = f'{e} not specified'
             return Response(result, status=status.HTTP_204_NO_CONTENT)
-
-        blocks = Block.objects.filter(
-            semester=semester).order_by('date', 'index')
-
-        values = [f.name for f in Block._meta.get_fields() if f.name not in [
-            'semester', 'id']] + ['group', 'semester_name']
-
-        result = Block.objects.annotate(
-            semester_name=F('semester__name'),
-            group=F('semester__group__name')).values(*values)
-        print(result)
-        return Response({'yes': result})
+        return Response(result)
 
     @action(methods=['get'], detail=False)
     def get_versions(self, request, *args, **kwargs):
-        vals = Semester.objects.all().values()
-        result = [{
-            'group': Group.objects.get(id=v['group_id']).name,
-            'name': v['name'],
-            'version': v['version']
-        } for v in vals]
-        return Response(result)
+        groups = Group.objects.all().values()
+        semesters = Semester.objects.all().values()
+        result = [
+            {'semester': s['name'],
+             'groups': [{
+                 'group': g['name'],
+                 'version': g['version']
+             } for g in groups]
+             } for s in semesters
+        ]
+
+        # result = {{
+        #     'semester': Semester.objects.get(id=v['semester_id']).name,
+        #     'group': v['name'],
+        #     'version': v['version']
+        # } for v in vals}
+        return Response(result, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'post'], detail=False)
-    def test(self, request, *args, **kwargs):
-        print(f'headers {request.headers}\n')
-        group, created = Group.objects.get_or_create(
-            name=request.headers['group'])
-        print(group)
-        groups = list(Group.objects.all().values('name'))
-        print(groups)
+    def get_semesters(self, request, *args, **kwargs):
+        result = [s.name for s in Semester.objects.all()]
+        return Response(result, status=status.HTTP_200_OK)
 
-        return Response(groups)
+    @action(methods=['get', 'post'], detail=False)
+    def get_groups(self, request, *args, **kwargs):
+        try:
+            semester = request.headers['semester']
+            semester = Semester.objects.get(name=semester)
+            result = [g.name for g in Group.objects.filter(semester=semester)]
+
+            return Response(result, status=status.HTTP_200_OK)
+
+        except (ObjectDoesNotExist, EmptyResultSet):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except KeyError as e:
+            result = f'{e} not specified'
+            return Response(result, status=status.HTTP_204_NO_CONTENT)
