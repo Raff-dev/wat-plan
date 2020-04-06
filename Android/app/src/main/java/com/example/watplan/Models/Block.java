@@ -5,21 +5,27 @@ import java.util.Map;
 
 public class Block {
     private Map<String, String> values = new HashMap<>();
-    public Block(){
 
-    }
-    public Block(Block block){
-        this.values=block.values;
+    public Block() {
 
     }
 
-    public Block(String title, String subject, String teacher, String place, String classType, String classIndex) {
+    public Block(Block block) {
+        this.values = block.values;
+
+    }
+
+    public Block(String index, String title, String subject, String teacher, String place, String classType, String classIndex) {
         this.values.put("title", title);
         this.values.put("subject", subject);
         this.values.put("teacher", teacher);
         this.values.put("place", place);
         this.values.put("class_type", classType);
         this.values.put("class_index", classIndex);
+    }
+
+    public String getIndex() {
+        return values.get("index");
     }
 
     public String getTitle() {

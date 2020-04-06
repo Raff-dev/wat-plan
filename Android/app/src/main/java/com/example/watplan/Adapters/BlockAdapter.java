@@ -57,7 +57,7 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
                 holder.placeTextView.setText(block.getPlace());
                 holder.teacherTextView.setText(block.getTeacher());
                 holder.classTypeTextView.setText(block.getClassType());
-                holder.classIndexTextView.setText(block.getClassType());
+                holder.classIndexTextView.setText(block.getIndex());
 //            }
 //        });
     }

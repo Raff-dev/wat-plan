@@ -17,18 +17,13 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-//wjebac pliki DO BAZY
-//czytac z bazy danych
-//sprawdzic ile czasu bedzie czytac | zrobic loading
-//loading na klik w inna grupe
 
 public class MainActivity extends AppCompatActivity {
-    private static final UpdateHandler updateHandler = new UpdateHandler();
-    private final DBHandler dbHandler = new DBHandler(this);
     private ArrayList<Week> plan = new ArrayList<>();
-    private RecyclerView planRecyclerView;
     private RecyclerView.Adapter weekAdapter = new WeekAdapter(
             this, plan);
+    private UpdateManager updateManager = new UpdateManager(this,this);
+    private static RecyclerView planRecyclerView;
     private Context context;
     private Button burger, settings, drop;
 
@@ -54,32 +49,25 @@ public class MainActivity extends AppCompatActivity {
         context = getApplicationContext();
     }
 
-    private String getActivetSemester() {
-        return "letni";
-    }
-
-    private String getActiveGroup() {
-        return "WCY18IY5S1";
-    }
-
-    private void displayGroup(ArrayList<Week> plan) {
-        this.plan.clear();
-        this.plan.addAll(plan);
-    }
-
     private void addListeners() {
-        drop.setOnClickListener(v -> dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1));
+        drop.setOnClickListener(v -> {
+            updateManager.changeGroup("letni","WCY18IY5S1");
 
-        burger.setOnClickListener(v -> {
-            updateHandler.getGroupBlocks(getActivetSemester(), getActiveGroup());
         });
 
-        settings.setOnClickListener(v->testData());
+        burger.setOnClickListener(v -> {
+            DBHandler dbHandler = new DBHandler(this,updateManager);
+            dbHandler.onUpgrade(dbHandler.getReadableDatabase(),0,0);
+
+        });
+
+        settings.setOnClickListener(v->{
+
+        });
     }
 
     private void testData(){
         String string = String.valueOf(new Random().nextInt(60));
-        System.out.println(string);
         ArrayList<Week> plan = new ArrayList<>();
         IntStream.range(0,7).forEach(i->{
             ArrayList<Day> week = new ArrayList<>();
@@ -87,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<Block> day = new ArrayList<>();
 
                 IntStream.range(0,7).forEach(k->{
-                    day.add(new Block(string,string,string,string,string,String.valueOf(k)));
+                    day.add(new Block(string,string,string,string,string,string,String.valueOf(k)));
                 });
                 week.add(new Day(day,"date"));
             });
@@ -100,6 +88,15 @@ public class MainActivity extends AppCompatActivity {
         this.plan.clear();
         this.plan.addAll(plan);
         planRecyclerView.setAdapter(weekAdapter);
+        System.out.println("FINISHED APPLYTING PLAN");
+    }
+
+    private String getActivetSemester() {
+        return "letni";
+    }
+
+    private String getActiveGroup() {
+        return "WCY18IY5S1";
     }
 
     public Context getContext() {
