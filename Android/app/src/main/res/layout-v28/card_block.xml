@@ -14,10 +14,7 @@
         android:layout_alignParentTop="true"
         android:text="Subject"
         android:textAlignment="center"
-        android:textColor="#ffff"
         android:textSize="12sp"
-        android:textStyle="bold"
-
 
         />
 
@@ -26,13 +23,14 @@
         android:layout_width="match_parent"
         android:layout_height="16dp"
         android:layout_below="@id/subjectTextView"
-        android:fadingEdge="horizontal"
         android:text="Room"
         android:textAlignment="center"
-        android:textColor="#f0f"
-
         android:textSize="12sp"
-        android:textStyle="bold" />
+
+        android:textFontWeight="600"
+        android:fadingEdge="horizontal"
+        android:textColorLink="@color/colorAccent"
+        />
 
     <TextView
         android:id="@+id/teacherTextView"
@@ -41,11 +39,11 @@
         android:layout_below="@id/roomTextView"
         android:text="Teacher"
         android:textAlignment="center"
-        android:textColor="#fff"
-
         android:textSize="12sp"
 
-        android:textStyle="bold" />
+
+        android:textAppearance="@color/colorPrimaryDark"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -62,10 +60,8 @@
             android:layout_weight=".5"
             android:text="Type"
             android:textAlignment="center"
-            android:textColor="#fff"
             android:textSize="12sp"
 
-            android:textStyle="bold"
 
 
             />
@@ -76,13 +72,12 @@
             android:layout_height="16dp"
             android:layout_gravity="center"
             android:layout_weight=".5"
-            android:elegantTextHeight="true"
             android:text="Index"
             android:textAlignment="center"
-            android:textColor="#fff"
-
             android:textSize="12sp"
-            android:textStyle="bold"
+
+            android:textCursorDrawable="@color/cardview_dark_background"
+            android:elegantTextHeight="true"
 
             />
     </LinearLayout>
