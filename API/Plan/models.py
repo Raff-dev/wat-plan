@@ -26,7 +26,7 @@ class Group(models.Model):
 
 class Day(models.Model):
     group = models.ForeignKey(
-        Group, on_delete=models.CASCADE, related_name='blocks')
+        Group, on_delete=models.CASCADE, related_name='days')
     date = models.DateField(max_length=10)
 
     class Meta():

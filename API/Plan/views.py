@@ -9,6 +9,7 @@ from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist, EmptyResultSet
 from django.core import serializers
 from django.db.models import F
+from django.db.models import Count
 import json
 from .models import Block, Day, Group, Semester
 import datetime
@@ -72,6 +73,8 @@ class Plan(ViewSet):
             days = Day.objects.filter(group=group)
             result = {
                 'version': group.version,
+                'first_day': group.days.first().date,
+                'last_day': group.days.last().date,
                 'data': [{
                     'date': str(d.date),
                     'blocks': d.blocks.values()}
@@ -88,20 +91,13 @@ class Plan(ViewSet):
     def get_versions(self, request, *args, **kwargs):
         groups = Group.objects.all().values()
         semesters = Semester.objects.all().values()
-        result = [
-            {'semester': s['name'],
-             'groups': [{
-                 'group': g['name'],
-                 'version': g['version']
-             } for g in groups]
-             } for s in semesters
-        ]
-
-        # result = {{
-        #     'semester': Semester.objects.get(id=v['semester_id']).name,
-        #     'group': v['name'],
-        #     'version': v['version']
-        # } for v in vals}
+        result = {
+            'versions': [{
+                'semester': s['name'],
+                'groups': [{'group': g['name'], 'version': g['version']} for g in groups]
+            } for s in semesters]
+        }
+        print(result)
         return Response(result, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'post'], detail=False)
