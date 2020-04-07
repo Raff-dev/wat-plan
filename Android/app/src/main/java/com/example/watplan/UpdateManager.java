@@ -1,7 +1,6 @@
 package com.example.watplan;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import androidx.core.util.Pair;
 
@@ -14,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.Objects;
 
 //wjebac pliki DO BAZY
 //czytac z bazy danych
@@ -40,8 +39,7 @@ public class UpdateManager extends Thread {
     private Context context;
     private MainActivity mainActivity;
 
-    private Map<String, Map<String, String>> currentVersions;
-    private Map<Pair<String, String>, Block> activeBlocksMap = new HashMap<>();
+    private Map<String, Map<String, String>> upToDateVersions;
     private String activeSemester;
     private String activeGroup;
 
@@ -52,74 +50,96 @@ public class UpdateManager extends Thread {
     }
 
     private void setUp() {
-        new Thread(()->{
-        currentVersions = ConnectionHandler.getVersionMap();
-        dbHandler = new DBHandler(context, this);
-//        activeSemester = dbHandler.getAcviteSemester();
-//        activeGroup = dbHandler.getActiveGroup();
-        activeSemester = "letni";
-        activeGroup = "WCY18IY5S1";
-        changeGroup(activeSemester, activeGroup);
+        new Thread(() -> {
+            upToDateVersions = ConnectionHandler.getVersionMap();
+            dbHandler = new DBHandler(context, this);
+            activeSemester = dbHandler.getActiveSemester();
+            activeGroup = dbHandler.getActiveGroup();
         }).start();
     }
 
-    Map<String, Map<String, String>> getVersionMap() {
-        return currentVersions;
-    }
-
     public void changeGroup(String semesterName, String groupName) {
-            Map<Pair<String, String>, Block> newBlocks;
-            Map<String, String> version = dbHandler.getVersion(semesterName, groupName);
-            boolean upToDate = currentVersions.containsValue(version);
-            if (upToDate)
-                newBlocks = dbHandler.getGroupBlocks(semesterName, groupName);
-            else {
-                newBlocks = ConnectionHandler.getGroupBlocks(semesterName, groupName);
-                if (newBlocks == null) throw new NullPointerException("Null blocks");
-                dbHandler.updateGroup(semesterName, groupName, activeBlocksMap);
-            }
-            dbHandler.setActiveGroup(groupName);
-            dbHandler.setActiveSemester(semesterName);
-            activeBlocksMap = newBlocks;
-            ArrayList<Week> plan = new ArrayList<>();
+        Map<Pair<String, String>, Block> newBlocks = getBlockMap(semesterName, groupName);
+        Pair<LocalDate, LocalDate> borderDates = getBorderDates(semesterName, groupName);
+        LocalDate firstDay = borderDates.first;
+        LocalDate lastDay = borderDates.second;
 
-            Pair<String, String> borderDates = ConnectionHandler.getBorderDates(semesterName, groupName);
-            if (borderDates == null) throw new NullPointerException("Null border dates");
-
-            ArrayList<String> first = new ArrayList<>(Arrays.asList(borderDates.first.split("-")));
-            ArrayList<String> second = new ArrayList<>(Arrays.asList(borderDates.second.split("-")));
-            LocalDate firstDay = LocalDate.of(
-                    Integer.parseInt(first.get(0)),
-                    Integer.parseInt(first.get(1)),
-                    Integer.parseInt(first.get(2)));
-            LocalDate lastDay = LocalDate.of(
-                    Integer.parseInt(second.get(0)),
-                    Integer.parseInt(second.get(1)),
-                    Integer.parseInt(second.get(2)));
-
+        ArrayList<Week> plan = new ArrayList<>();
         while (!firstDay.equals(lastDay.plusDays(1))) {
 
-                ArrayList<Day> week = new ArrayList<>();
-                for (int dayCounter = 0; dayCounter < 7; dayCounter++) {
+            ArrayList<Day> week = new ArrayList<>();
+            for (int dayCounter = 0; dayCounter < 7; dayCounter++) {
 
-                    ArrayList<Block> day = new ArrayList<>();
-                    String date = firstDay.toString();
-                    for (int index = 0; index < 7; index++) {
+                String date = firstDay.toString();
+                ArrayList<Block> day = new ArrayList<>();
+                for (int index = 0; index < 7; index++) {
 
-                        Pair<String, String> key = new Pair<>(date, String.valueOf(index));
-                        if (activeBlocksMap.containsKey(key)) {
-                            System.out.println(activeBlocksMap.get(key).getTeacher());
-                            day.add(activeBlocksMap.get(key));
-                        } else day.add(new Block());
-                    }
-                    week.add(new Day(day, date));
-                    firstDay = firstDay.plusDays(1);
+                    Pair<String, String> key = new Pair<>(date, String.valueOf(index));
+                    if (newBlocks.containsKey(key)) {
+                        day.add(newBlocks.get(key));
+                    } else day.add(new Block());
                 }
-                plan.add(new Week(week));
+                week.add(new Day(day, date));
+                firstDay = firstDay.plusDays(1);
             }
+            plan.add(new Week(week));
+        }
+        dbHandler.setActiveGroup(groupName);
+        dbHandler.setActiveSemester(semesterName);
+        mainActivity.runOnUiThread(() -> {
+            mainActivity.setPlan(plan);
+            mainActivity.setNames(semesterName,groupName);
+        });
+    }
 
-            mainActivity.runOnUiThread(()->{
-                mainActivity.setPlan(plan);
-            });
+    private Pair<LocalDate, LocalDate> getBorderDates(String semesterName, String groupName) {
+        Pair<String, String> borderDates = dbHandler.getBorderDates(semesterName, groupName);
+        if (borderDates == null) {
+            borderDates = ConnectionHandler.getBorderDates(semesterName, groupName);
+            assert borderDates != null;
+            dbHandler.updateBorderDates(semesterName, groupName, borderDates);
+        }
+        ArrayList<String> first = new ArrayList<>(Arrays.asList(borderDates.first.split("-")));
+        ArrayList<String> second = new ArrayList<>(Arrays.asList(borderDates.second.split("-")));
+        LocalDate firstDay = LocalDate.of(
+                Integer.parseInt(first.get(0)),
+                Integer.parseInt(first.get(1)),
+                Integer.parseInt(first.get(2)));
+        LocalDate lastDay = LocalDate.of(
+                Integer.parseInt(second.get(0)),
+                Integer.parseInt(second.get(1)),
+                Integer.parseInt(second.get(2)));
+        return new Pair<>(firstDay, lastDay);
+    }
+
+    private Map<Pair<String, String>, Block> getBlockMap(String semesterName, String groupName) {
+
+        Map<Pair<String, String>, Block> newBlockMap = new HashMap<>();
+        try {
+            if (!upToDateVersions.containsKey(semesterName)) throw new AssertionError();
+            if (!upToDateVersions.get(semesterName).containsKey(groupName))
+                throw new AssertionError();
+
+            String version = dbHandler.getVersion(semesterName, groupName);
+            String upToDateVersion = upToDateVersions.get(semesterName).get(groupName);
+            if (version.equals(upToDateVersion))
+                newBlockMap = dbHandler.getGroupBlocks(semesterName, groupName);
+            else {
+                newBlockMap = ConnectionHandler.getGroupBlocks(semesterName, groupName);
+                dbHandler.updateGroup(semesterName, groupName, newBlockMap, upToDateVersion);
+            }
+        } catch (NullPointerException e) {
+            System.out.println("NULL EXCEPTION");
+            System.out.println(e.getMessage());
+            return dbHandler.getGroupBlocks(semesterName, groupName);
+        } catch (AssertionError e) {
+            System.out.println("assertion");
+            System.out.println(e.getMessage());
+        }
+        return newBlockMap;
+    }
+
+    Map<String, Map<String, String>> getVersionMap() {
+        return upToDateVersions;
     }
 }

@@ -16,6 +16,7 @@ import com.example.watplan.Models.Week;
 import com.example.watplan.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     private Context context;
@@ -51,32 +52,10 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
         Day day = dayArrayList.get(position);
         String date = day.getDate();
-        String dayName = "Day Name";
-        switch (position) {
-            case 0:
-                dayName = "Mon";
-                break;
-            case 1:
-                dayName = "Tue";
-                break;
-            case 2:
-                dayName = "Wed";
-                break;
-            case 3:
-                dayName = "Thu";
-                break;
-            case 4:
-                dayName = "Fri";
-                break;
-            case 5:
-                dayName = "Sat";
-                break;
-            case 6:
-                dayName = "Sun";
-                break;
-            default:
-                dayName = "nie dziala";
-        }
+        if (date.length()>5) date= date.substring(5);
+        ArrayList<String> dayNames = new ArrayList<>(Arrays.asList(
+                "Mon","Tue","Wed","Thu","Fri","Sat","Sun"));
+        String dayName = dayNames.get(position);
         holder.dateTextView.setText(date);
         holder.dayNameTextView.setText(dayName);
 

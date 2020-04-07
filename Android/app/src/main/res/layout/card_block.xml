@@ -2,10 +2,8 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="70dp"
-    android:layout_height="66dp"
-    android:background="@drawable/outline"
-
-    >
+    android:layout_height="68dp"
+    android:foreground="@drawable/outline">
 
     <TextView
         android:id="@+id/subjectTextView"
@@ -14,7 +12,7 @@
         android:layout_alignParentTop="true"
         android:text="Subject"
         android:textAlignment="center"
-        android:textColor="#ffff"
+        android:textColor="#fff"
         android:textSize="12sp"
         android:textStyle="bold"
 
@@ -45,7 +43,7 @@
 
         android:textSize="12sp"
 
-        android:textStyle="bold" />
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -58,15 +56,14 @@
             android:id="@+id/typeTextView"
             android:layout_width="0dp"
             android:layout_height="16dp"
-            android:layout_gravity="center"
+            android:layout_gravity="end"
+            android:layout_marginEnd="2dp"
             android:layout_weight=".5"
             android:text="Type"
-            android:textAlignment="center"
+            android:textAlignment="textEnd"
             android:textColor="#fff"
             android:textSize="12sp"
-
             android:textStyle="bold"
-
 
             />
 
@@ -74,13 +71,12 @@
             android:id="@+id/indexTextView"
             android:layout_width="0dp"
             android:layout_height="16dp"
-            android:layout_gravity="center"
+            android:layout_gravity="start"
+            android:layout_marginStart="2dp"
             android:layout_weight=".5"
-            android:elegantTextHeight="true"
             android:text="Index"
-            android:textAlignment="center"
+            android:textAlignment="textStart"
             android:textColor="#fff"
-
             android:textSize="12sp"
             android:textStyle="bold"
 

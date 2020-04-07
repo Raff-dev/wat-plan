@@ -1,27 +1,20 @@
 package com.example.watplan.Models;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Block {
     private Map<String, String> values = new HashMap<>();
+    private String[] valueNames = new String[]{
+            "date", "index", "title", "subject", "teacher", "place", "class_type", "class_index"};
 
     public Block() {
-
     }
 
-    public Block(Block block) {
-        this.values = block.values;
-
-    }
-
-    public Block(String index, String title, String subject, String teacher, String place, String classType, String classIndex) {
-        this.values.put("title", title);
-        this.values.put("subject", subject);
-        this.values.put("teacher", teacher);
-        this.values.put("place", place);
-        this.values.put("class_type", classType);
-        this.values.put("class_index", classIndex);
+    public Block(String... args) {
+        for (int i = 0; i < args.length; i++) values.put(valueNames[i], args[i]);
     }
 
     public String getIndex() {
@@ -54,5 +47,9 @@ public class Block {
 
     public void insert(String key, String value) {
         values.put(key, value);
+    }
+
+    public String get(String key) {
+        return values.get(key);
     }
 }
