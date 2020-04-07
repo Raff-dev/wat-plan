@@ -63,7 +63,6 @@ class Plan(ViewSet):
 
     @action(methods=['get'], detail=False)
     def get_group(self, request, *args, **kwargs):
-        print(f'headers {request.headers}\n')
         try:
             semester = request.headers['semester']
             semester = Semester.objects.get(name=semester)
@@ -89,7 +88,7 @@ class Plan(ViewSet):
 
     @action(methods=['get'], detail=False)
     def get_versions(self, request, *args, **kwargs):
-        groups = Group.objects.all().values()
+        groups = Group.objects.all().values().order_by('name')
         semesters = Semester.objects.all().values()
         result = {
             'versions': [{
@@ -97,7 +96,6 @@ class Plan(ViewSet):
                 'groups': [{'group': g['name'], 'version': g['version']} for g in groups]
             } for s in semesters]
         }
-        print(result)
         return Response(result, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'post'], detail=False)

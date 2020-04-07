@@ -12,8 +12,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,7 +26,7 @@ public class ConnectionHandler {
         String address = "get_versions/";
         try {
             String data = makeRequest(address, new HashMap<>());
-            if (data == null) throw new NullPointerException("Empty version list");
+            if (data == null) throw new NullPointerException("Null version list");
 
             JSONObject jData = new JSONObject(data);
             JSONArray arr = jData.getJSONArray("versions");
@@ -53,7 +51,7 @@ public class ConnectionHandler {
         return versions;
     }
 
-    static Pair<String,String> getBorderDates(String semesterName, String groupName){
+    static Pair<String,String> getBorderDates(String semesterName, String groupName) throws NullPointerException{
         String address = "get_group/";
         Map<String, String> headers = new HashMap<>();
         headers.put("semester", semesterName);
@@ -62,7 +60,8 @@ public class ConnectionHandler {
         try {
             Map<Pair<String, String>, Block> blockMap = new HashMap<>();
             String data = makeRequest(address, headers);
-            if (data == null) throw new NullPointerException("Empty block list");
+            if (data == null) throw new NullPointerException("Null border dates");
+
             JSONObject jdata = new JSONObject(data);
             String firstDay = jdata.get("first_day").toString();
             String lastDay = jdata.get("last_day").toString();
@@ -74,7 +73,7 @@ public class ConnectionHandler {
         return null;
     }
 
-    static Map<Pair<String, String>, Block> getGroupBlocks(String semesterName, String groupName) {
+    static Map<Pair<String, String>, Block> getGroupBlocks(String semesterName, String groupName) throws NullPointerException {
         String address = "get_group/";
         Map<String, String> headers = new HashMap<>();
         headers.put("semester", semesterName);
@@ -83,7 +82,7 @@ public class ConnectionHandler {
         try {
             Map<Pair<String, String>, Block> blockMap = new HashMap<>();
             String data = makeRequest(address, headers);
-            if (data == null) throw new NullPointerException("Empty block list");
+            if (data == null) throw new NullPointerException("Null block list");
 
             JSONObject jdata = new JSONObject(data);
             String version = jdata.get("version").toString();
@@ -99,13 +98,14 @@ public class ConnectionHandler {
                     for (int k = 0; k < jblock.length(); k++) {
                         String name = Objects.requireNonNull(jblock.names()).get(k).toString();
                         block.insert(name, jblock.getString(name));
+                        block.insert("date",date);
                     }
                     String index = jblock.getString("index");
                     blockMap.put(new Pair<>(date,index),block);
                 }
             }
             return blockMap;
-        } catch (JSONException|NullPointerException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
             System.out.println("bad response");
         }
@@ -118,7 +118,9 @@ public class ConnectionHandler {
         Request request = builder.url(baseAddress + address).build();
         try {
             Response response = client.newCall(request).execute();
-            return response.body().string();
+            String data = response.body().string();
+            response.body().close();
+            return data;
         } catch (IOException e) {
             e.printStackTrace();
         }

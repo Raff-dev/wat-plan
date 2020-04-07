@@ -3,6 +3,7 @@ package com.example.watplan;
 import android.content.Context;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,18 +15,17 @@ import com.example.watplan.Models.Day;
 import com.example.watplan.Models.Week;
 
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.stream.IntStream;
 
 
 public class MainActivity extends AppCompatActivity {
     private ArrayList<Week> plan = new ArrayList<>();
-    private RecyclerView.Adapter weekAdapter = new WeekAdapter(
-            this, plan);
-    private UpdateManager updateManager = new UpdateManager(this,this);
+    private RecyclerView.Adapter weekAdapter = new WeekAdapter(this, plan);
+    private UpdateManager updateManager = new UpdateManager(this, this);
     private static RecyclerView planRecyclerView;
     private Context context;
-    private Button burger, settings, drop;
+    private Button burger, settings, search;
+    private TextView semesterName, groupName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setUp();
         addListeners();
-//        ArrayList<Week> plan = dbHandler.getPlan(getActiveGroup(), getActivetSemester());
-//        displayGroup(plan);
     }
 
     private void setUp() {
@@ -44,40 +42,44 @@ public class MainActivity extends AppCompatActivity {
         planRecyclerView.setAdapter(weekAdapter);
 
         burger = findViewById(R.id.burger);
-        drop = findViewById(R.id.drop);
+        search = findViewById(R.id.search);
         settings = findViewById(R.id.settings);
         context = getApplicationContext();
+
+        groupName = findViewById(R.id.groupTextView);
+        semesterName = findViewById(R.id.semesterTextView);
+
     }
 
     private void addListeners() {
-        drop.setOnClickListener(v -> {
-            updateManager.changeGroup("letni","WCY18IY5S1");
+        search.setOnClickListener(v -> {
+            new Thread(() ->
+                    updateManager.changeGroup("letni", "WCY18IY5S1")
+            ).start();
 
         });
-
         burger.setOnClickListener(v -> {
-            DBHandler dbHandler = new DBHandler(this,updateManager);
-            dbHandler.onUpgrade(dbHandler.getReadableDatabase(),0,0);
-
+            new Thread(() ->
+                    updateManager.changeGroup("letni", "WCY18ZZ1S1")
+            ).start();
         });
-
-        settings.setOnClickListener(v->{
-
+        settings.setOnClickListener(v -> {
+            new Thread(() ->
+                    updateManager.changeGroup("letni", "WCY18IY3S1")
+            ).start();
         });
     }
 
-    private void testData(){
-        String string = String.valueOf(new Random().nextInt(60));
+    private void testData() {
         ArrayList<Week> plan = new ArrayList<>();
-        IntStream.range(0,7).forEach(i->{
+        IntStream.range(0, 7).forEach(i -> {
             ArrayList<Day> week = new ArrayList<>();
-            IntStream.range(0,7).forEach(j->{
+            IntStream.range(0, 7).forEach(j -> {
                 ArrayList<Block> day = new ArrayList<>();
-
-                IntStream.range(0,7).forEach(k->{
-                    day.add(new Block(string,string,string,string,string,string,String.valueOf(k)));
+                IntStream.range(0, 7).forEach(k -> {
+                    day.add(new Block());
                 });
-                week.add(new Day(day,"date"));
+                week.add(new Day(day, ""));
             });
             plan.add(new Week(week));
         });
@@ -91,15 +93,14 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("FINISHED APPLYTING PLAN");
     }
 
-    private String getActivetSemester() {
-        return "letni";
-    }
-
-    private String getActiveGroup() {
-        return "WCY18IY5S1";
-    }
 
     public Context getContext() {
         return context;
+    }
+
+    public void setNames(String semesterName, String groupName) {
+        this.semesterName.setText(semesterName);
+        this.groupName.setText(groupName);
+
     }
 }
