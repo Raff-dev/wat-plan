@@ -1,4 +1,4 @@
-package com.example.watplan.Models;
+package com.example.WatPlan.Models;
 
 import java.util.ArrayList;
 

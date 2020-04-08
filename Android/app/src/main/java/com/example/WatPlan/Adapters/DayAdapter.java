@@ -1,4 +1,4 @@
-package com.example.watplan.Adapters;
+package com.example.WatPlan.Adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,10 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.watplan.Models.Block;
-import com.example.watplan.Models.Day;
-import com.example.watplan.Models.Week;
-import com.example.watplan.R;
+import com.example.WatPlan.Models.Block;
+import com.example.WatPlan.Models.Day;
+import com.example.WatPlan.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;

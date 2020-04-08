@@ -1,4 +1,4 @@
-package com.example.watplan;
+package com.example.WatPlan.Activities;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,42 +6,49 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.watplan.Adapters.WeekAdapter;
-import com.example.watplan.Models.Block;
-import com.example.watplan.Models.Day;
-import com.example.watplan.Models.Week;
+import com.example.WatPlan.Adapters.WeekAdapter;
+import com.example.WatPlan.Fragments.ScheduleFragment;
+import com.example.WatPlan.Handlers.UpdateHandler;
+import com.example.WatPlan.Models.Block;
+import com.example.WatPlan.Models.Day;
+import com.example.WatPlan.Models.Week;
+import com.example.WatPlan.R;
 
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
-
-public class MainActivity extends AppCompatActivity {
+public class save extends AppCompatActivity {
     private ArrayList<Week> plan = new ArrayList<>();
     private RecyclerView.Adapter weekAdapter = new WeekAdapter(this, plan);
-    private UpdateManager updateManager = new UpdateManager(this, this);
+//    private UpdateHandler updateHandler = new UpdateHandler(this, new ScheduleFragment()));
     private static RecyclerView planRecyclerView;
     private Context context;
-    private Button burger, settings, search;
+    private Button settings, search;
     private TextView semesterName, groupName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        Fragment scheduleFragment = new ScheduleFragment(this);
+//        getSupportFragmentManager().beginTransaction().replace(
+//                R.id.fragment_container,scheduleFragment).commit();
+
         setUp();
         addListeners();
+//        updateHandler.setDefaultgroup();
     }
 
     private void setUp() {
-        planRecyclerView = findViewById(R.id.planRecyclerView);
-        planRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        testData();
-        planRecyclerView.setAdapter(weekAdapter);
+//        planRecyclerView = findViewById(R.id.planRecyclerView);
+//        planRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+//        testData();
+//        planRecyclerView.setAdapter(weekAdapter);
 
-        burger = findViewById(R.id.burger);
         search = findViewById(R.id.search);
         settings = findViewById(R.id.settings);
         context = getApplicationContext();
@@ -53,20 +60,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void addListeners() {
         search.setOnClickListener(v -> {
-            new Thread(() ->
-                    updateManager.changeGroup("letni", "WCY18IY5S1")
-            ).start();
+
 
         });
-        burger.setOnClickListener(v -> {
-            new Thread(() ->
-                    updateManager.changeGroup("letni", "WCY18ZZ1S1")
-            ).start();
-        });
+
         settings.setOnClickListener(v -> {
-            new Thread(() ->
-                    updateManager.changeGroup("letni", "WCY18IY3S1")
-            ).start();
+//            new Thread(() ->
+//                    updateHandler.changeGroup("letni", "WCY18ZZ1S1")
+//            ).start();
+
         });
     }
 
@@ -89,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
     public void setPlan(ArrayList<Week> plan) {
         this.plan.clear();
         this.plan.addAll(plan);
-        planRecyclerView.setAdapter(weekAdapter);
+        weekAdapter.notifyDataSetChanged();
+//        planRecyclerView.setAdapter(weekAdapter);
         System.out.println("FINISHED APPLYTING PLAN");
     }
 
@@ -101,6 +104,5 @@ public class MainActivity extends AppCompatActivity {
     public void setNames(String semesterName, String groupName) {
         this.semesterName.setText(semesterName);
         this.groupName.setText(groupName);
-
     }
 }

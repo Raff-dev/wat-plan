@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">WatPlan</string>
+    <string name="loading">Establishing connection with the server…</string>
+    <string name="connection_failure">Failed to get response from the server.\nPlease check your internet connection, or try later.</string>
+
+
 </resources>

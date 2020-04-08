@@ -1,4 +1,4 @@
-package com.example.watplan;
+package com.example.WatPlan;
 
 import android.content.Context;
 
