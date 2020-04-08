@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="#557d">
-
+    android:layout_height="wrap_content">
 
     <RelativeLayout
         android:id="@+id/hourRelativeLayout"
-        android:layout_width="40dp"
+        android:layout_width="44dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
@@ -16,189 +14,229 @@
         <RelativeLayout
             android:id="@+id/nullHour"
             android:layout_width="match_parent"
-            android:layout_height="52dp">
+            android:layout_height="52dp"
+            >
 
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/firstHour"
             android:layout_width="wrap_content"
-            android:layout_height="52dp"
-            android:layout_below="@id/nullHour">
+
+            android:layout_height="72dp"
+            android:layout_below="@id/nullHour"
+            android:gravity="center"
+            android:background="@drawable/outline">
+
             <TextView
                 android:id="@+id/firstHour1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="8:00"
                 android:gravity="center"
+                android:text="8:00"
+                android:textAlignment="center"
                 android:textSize="13dp"
-                />
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/firstHour2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="9:35"
-                android:gravity="center"
-                android:textSize="13dp"
                 android:layout_below="@id/firstHour1"
-                />
+                android:gravity="center"
+                android:text="9:35"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:textStyle="bold" />
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/secondHour"
             android:layout_width="wrap_content"
-            android:layout_height="52dp"
-            android:layout_below="@id/firstHour">
+            android:layout_height="72dp"
+            android:layout_below="@id/firstHour"
+
+            android:background="@drawable/outline"
+
+            android:gravity="center">
+
             <TextView
                 android:id="@+id/secondHour1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="9:50"
                 android:gravity="center"
+                android:text="9:50"
+                android:textAlignment="center"
                 android:textSize="13dp"
+                android:textStyle="bold"
 
                 />
+
             <TextView
                 android:id="@+id/secondHour2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="11:25"
-                android:gravity="center"
-                android:textSize="13dp"
                 android:layout_below="@id/secondHour1"
-                />
+                android:gravity="center"
+                android:text="11:25"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:textStyle="bold" />
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/thirdHour"
             android:layout_width="wrap_content"
-            android:layout_height="52dp"
-            android:layout_below="@id/secondHour">
+            android:layout_height="72dp"
+            android:layout_below="@id/secondHour"
+            android:background="@drawable/outline"
+            android:gravity="center">
+
             <TextView
                 android:id="@+id/thirdHour1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="11:40"
                 android:gravity="center"
+                android:text="11:40"
+                android:textAlignment="center"
                 android:textSize="13dp"
-                />
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/thirdHour2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="13:15"
-                android:gravity="center"
-                android:textSize="13dp"
                 android:layout_below="@id/thirdHour1"
-                />
+                android:gravity="center"
+                android:text="13:15"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:textStyle="bold" />
         </RelativeLayout>
 
         <RelativeLayout
-        android:id="@+id/fourthHour"
-        android:layout_width="wrap_content"
-        android:layout_height="52dp"
-        android:layout_below="@id/thirdHour">
-        <TextView
-            android:id="@+id/fourthHour1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="13:30"
-            android:gravity="center"
-            android:textSize="13dp"
-            />
-        <TextView
-            android:id="@+id/fourthHour2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="15:05"
-            android:gravity="center"
-            android:textSize="13dp"
-            android:layout_below="@id/fourthHour1"
-            />
+            android:id="@+id/fourthHour"
+            android:layout_width="wrap_content"
+            android:layout_height="72dp"
+            android:layout_below="@id/thirdHour"
+            android:background="@drawable/outline"
+
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/fourthHour1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="13:30"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/fourthHour2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fourthHour1"
+                android:gravity="center"
+                android:text="15:05"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:textStyle="bold" />
 
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/fifthHour"
             android:layout_width="wrap_content"
-            android:layout_height="52dp"
-            android:layout_below="@id/fourthHour">
+            android:layout_height="72dp"
+            android:layout_below="@id/fourthHour"
+            android:background="@drawable/outline"
+
+            android:gravity="center">
+
             <TextView
                 android:id="@+id/fifthHour1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="15:45"
                 android:gravity="center"
+                android:text="15:45"
+                android:textAlignment="center"
                 android:textSize="13dp"
-                />
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/fifthHour2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="17:20"
-                android:gravity="center"
-                android:textSize="13dp"
                 android:layout_below="@id/fifthHour1"
-                />
+                android:gravity="center"
+                android:text="17:20"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:textStyle="bold" />
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/sixthHour"
             android:layout_width="wrap_content"
-            android:layout_height="52dp"
-            android:layout_below="@id/fifthHour">
+            android:layout_height="72dp"
+            android:layout_below="@id/fifthHour"
+
+            android:background="@drawable/outline"
+            android:gravity="center">
+
             <TextView
                 android:id="@+id/sixthHour1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="17:35"
                 android:gravity="center"
+                android:text="17:35"
+                android:textAlignment="center"
                 android:textSize="13dp"
-                />
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/sixthHour2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="19:10"
-                android:gravity="center"
-                android:textSize="13dp"
                 android:layout_below="@id/sixthHour1"
-                />
+                android:gravity="center"
+                android:text="19:10"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:textStyle="bold" />
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/seventhHour"
             android:layout_width="wrap_content"
-            android:layout_height="52dp"
-            android:layout_below="@id/sixthHour">
+            android:layout_height="72dp"
+            android:layout_below="@id/sixthHour"
+            android:background="@drawable/outline"
+
+            android:gravity="center">
+
             <TextView
                 android:id="@+id/seventhHour1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="19:25"
                 android:gravity="center"
+                android:text="19:25"
+                android:textAlignment="center"
                 android:textSize="13dp"
-                />
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/seventhHour2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="21:00"
-                android:gravity="center"
-                android:textSize="13dp"
                 android:layout_below="@id/seventhHour1"
-                />
+                android:gravity="center"
+                android:text="21:00"
+                android:textAlignment="center"
+                android:textSize="13dp"
+                android:textStyle="bold" />
         </RelativeLayout>
 
     </RelativeLayout>
@@ -208,10 +246,10 @@
         android:id="@+id/dayRecyclerView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:layout_toEndOf="@id/hourRelativeLayout"
         android:layout_toRightOf="@id/hourRelativeLayout"
-        android:orientation="horizontal"/>
+        android:orientation="horizontal" />
 </RelativeLayout>

@@ -1,8 +1,8 @@
-package com.example.watplan;
+package com.example.WatPlan.Handlers;
 
 import androidx.core.util.Pair;
 
-import com.example.watplan.Models.Block;
+import com.example.WatPlan.Models.Block;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -21,7 +21,7 @@ public class ConnectionHandler {
     private static final String baseAddress = "http://10.0.2.2:8000/Plan/";
     private static final OkHttpClient client = new OkHttpClient();
 
-    static Map<String, Map<String, String>> getVersionMap() {
+    public static Map<String, Map<String, String>> getVersionMap() throws NullPointerException {
         Map<String, Map<String, String>> versions = new HashMap<>();
         String address = "get_versions/";
         try {
@@ -44,7 +44,7 @@ public class ConnectionHandler {
                 }
                 versions.put(semester, groups);
             }
-        } catch (JSONException | NullPointerException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
             System.out.println("bad response");
         }
@@ -58,7 +58,6 @@ public class ConnectionHandler {
         headers.put("group", groupName);
 
         try {
-            Map<Pair<String, String>, Block> blockMap = new HashMap<>();
             String data = makeRequest(address, headers);
             if (data == null) throw new NullPointerException("Null border dates");
 
@@ -66,7 +65,7 @@ public class ConnectionHandler {
             String firstDay = jdata.get("first_day").toString();
             String lastDay = jdata.get("last_day").toString();
             return new Pair<>(firstDay,lastDay);
-        } catch (JSONException|NullPointerException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
             System.out.println("bad response");
         }
@@ -85,7 +84,6 @@ public class ConnectionHandler {
             if (data == null) throw new NullPointerException("Null block list");
 
             JSONObject jdata = new JSONObject(data);
-            String version = jdata.get("version").toString();
             JSONArray arr = jdata.getJSONArray("data");
 
             for (int i = 0; i < arr.length(); i++) {
@@ -122,7 +120,7 @@ public class ConnectionHandler {
             response.body().close();
             return data;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Request IOException");
         }
         return null;
     }
