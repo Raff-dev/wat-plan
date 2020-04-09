@@ -5,60 +5,171 @@
     android:layout_height="match_parent"
     android:background="@color/gray2">
 
-    <SearchView
-        android:id="@+id/searchView"
-
-        android:layout_width="200dp"
-        android:layout_height="40dp"
-        android:background="@drawable/outline"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/applyButton"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.703" />
-
-    <Button
-        android:id="@+id/applyButton"
+    <ImageView
+        android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/orange1"
-        android:text="Button"
-        android:textColor="@color/gray2"
-        app:layout_constraintBottom_toBottomOf="@+id/searchView"
-        app:layout_constraintLeft_toRightOf="@+id/searchView"
-        app:layout_constraintRight_toRightOf="parent"
-
-        app:layout_constraintTop_toTopOf="@+id/searchView" />
-
-    <RadioGroup
-        android:layout_width="208dp"
-        android:layout_height="96dp"
-        app:layout_constraintBottom_toTopOf="@+id/searchView"
+        app:layout_constraintBottom_toTopOf="@+id/settingsLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias=".2"
+        app:srcCompat="@drawable/ic_launcher_foreground" />
 
-        <RadioButton
-            android:id="@+id/radioButton"
-            android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/getStartedLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="RadioButton"
-            android:textColor="@color/orange1" />
+            android:layout_marginVertical="20dp"
+            android:layout_marginBottom="28dp"
+            android:gravity="center"
+            android:text="Semestr"
+            android:textColor="@color/gray3"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/semesterSpinner"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.101"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/semesterSpinner" />
 
-        <RadioButton
-            android:id="@+id/radioButton2"
-            android:layout_width="match_parent"
+        <Spinner
+            android:id="@+id/semesterSpinner"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="RadioButton"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginBottom="20dp"
+            android:backgroundTint="@color/gray3"
+            android:foreground="@drawable/outline2"
+            android:gravity="center"
+            android:paddingStart="3dp"
+            android:paddingVertical="3dp"
+            app:layout_constraintBottom_toTopOf="@+id/groupSpinner"
+            app:layout_constraintStart_toEndOf="@+id/textView2" />
 
-            android:textColor="@color/orange1" />
-
-        <RadioButton
-            android:id="@+id/radioButton3"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:gravity="center"
+            android:text="Grupa"
+            android:textColor="@color/gray3"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/groupSpinner"
+            app:layout_constraintEnd_toEndOf="@+id/textView2"
+            app:layout_constraintTop_toTopOf="@+id/groupSpinner" />
 
-            android:text="RadioButton"
-            android:textColor="@color/orange1" />
-    </RadioGroup>
+        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+            android:id="@+id/groupSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/gray3"
+            android:foreground="@drawable/outline2"
+            android:gravity="center"
+            android:paddingStart="3dp"
+            android:paddingVertical="3dp"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/semesterSpinner"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/settingsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/getStartedLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pokaż tylko"
+            android:textColor="@color/orange1"
+            android:textSize="25sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.563"
+            app:layout_constraintStart_toEndOf="@+id/showTextView"
+            app:layout_constraintTop_toTopOf="@+id/showTextView" />
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="66dp"
+            android:layout_height="28dp"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/gray3"
+            android:foreground="@drawable/outline2"
+            app:layout_constraintEnd_toEndOf="@+id/textView4"
+            app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+        <TextView
+            android:id="@+id/showTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ukryj"
+            android:textColor="@color/orange1"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.3"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Switch
+            android:id="@+id/lectureSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Wykłady "
+            android:textColor="@color/gray3"
+            android:theme="@style/switcheroo"
+            app:layout_constraintEnd_toEndOf="@+id/showTextView"
+            app:layout_constraintTop_toBottomOf="@+id/showTextView" />
+
+        <Switch
+            android:id="@+id/laboratorySwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Laboratoria "
+            android:textColor="@color/gray3"
+            android:theme="@style/switcheroo"
+            app:layout_constraintEnd_toEndOf="@+id/lectureSwitch"
+            app:layout_constraintTop_toBottomOf="@+id/lectureSwitch" />
+
+        <Switch
+            android:id="@+id/exerciseSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/orange1"
+            android:text="Ćwiczenia "
+            android:textColor="@color/gray3"
+            android:theme="@style/switcheroo"
+            app:layout_constraintEnd_toEndOf="@+id/laboratorySwitch"
+            app:layout_constraintTop_toBottomOf="@+id/laboratorySwitch" />
+
+        <Button
+            android:id="@+id/pullDataButton"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="52dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

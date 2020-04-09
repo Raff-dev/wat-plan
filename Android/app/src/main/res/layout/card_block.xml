@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/blockLayout"
     android:layout_width="70dp"
     android:layout_height="72dp"
     android:foreground="@drawable/outline">
@@ -24,10 +25,8 @@
         android:layout_height="16dp"
         android:layout_below="@id/subjectTextView"
         android:fadingEdge="horizontal"
-        android:text="Room"
         android:textAlignment="center"
-        android:textColor="#f0f"
-
+        android:textColor="#fff"
         android:textSize="12sp"
         android:textStyle="bold" />
 
