@@ -9,20 +9,30 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.WatPlan.Activities.MainActivity;
 import com.example.WatPlan.Models.Day;
 import com.example.WatPlan.R;
 import com.example.WatPlan.Models.Week;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder> {
-
-    private Context context;
+    private HashSet<BlockFilter> blockFilterHashSet = new HashSet<>();
+    private MainActivity mainActivity;
     private ArrayList<Week> weekArrayList;
 
-    public WeekAdapter(Context context, ArrayList<Week> weekArrayList) {
-        this.context = context;
+    public WeekAdapter(MainActivity mainActivity, ArrayList<Week> weekArrayList) {
+        this.mainActivity = mainActivity;
         this.weekArrayList = weekArrayList;
+    }
+
+
+    public void switchBlockFilter(BlockFilter blockFilter,boolean active) {
+        if (active)blockFilterHashSet.add(blockFilter);
+        else   blockFilterHashSet.remove(blockFilter);
     }
 
     public static class WeekViewHolder extends RecyclerView.ViewHolder {
@@ -45,11 +55,12 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     public void onBindViewHolder(@NonNull WeekViewHolder holder, int position) {
         Week week = weekArrayList.get(position);
         ArrayList<Day> dayArrayList = week.getDayArrayList();
-        DayAdapter dayAdapter = new DayAdapter(context, dayArrayList);
+        DayAdapter dayAdapter = new DayAdapter(mainActivity, dayArrayList, blockFilterHashSet);
 
-        holder.dayRecyclerView.setHasFixedSize(true);
-        holder.dayRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
         holder.dayRecyclerView.setAdapter(dayAdapter);
+        holder.dayRecyclerView.setHasFixedSize(true);
+        holder.dayRecyclerView.setLayoutManager(new LinearLayoutManager
+                (mainActivity, LinearLayoutManager.HORIZONTAL, false));
     }
 
     @Override

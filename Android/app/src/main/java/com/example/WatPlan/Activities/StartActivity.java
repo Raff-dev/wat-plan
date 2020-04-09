@@ -7,7 +7,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -17,13 +16,14 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.example.WatPlan.Handlers.ConnectionHandler;
 import com.example.WatPlan.Handlers.DBHandler;
 import com.example.WatPlan.R;
+import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class StartActivity extends AppCompatActivity {
     private DBHandler dbHandler;
-    private SearchView groupSearchView;
+    private SearchableSpinner groupSpinner;
     private Spinner semesterSpinner;
     private Button getStartedButton, tryAgainButton;
     private ConstraintLayout failureLayout, getStartedLayout;
@@ -32,7 +32,7 @@ public class StartActivity extends AppCompatActivity {
     private ArrayList<String> semesters = new ArrayList<>();
     private ArrayList<String> groups = new ArrayList<>();
     private Map<String, Map<String, String>> versions;
-    private ArrayAdapter<String> spinnerAdapter;
+    private ArrayAdapter<String> semesterAdapter,groupAdapter;
     private String activeGroup, activeSemester;
     private ProgressBar progressBar;
 
@@ -48,9 +48,15 @@ public class StartActivity extends AppCompatActivity {
 
     private void setUp() {
         dbHandler = new DBHandler(this);
+//        dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1);
+
         int spinnerItem = R.layout.support_simple_spinner_dropdown_item;
-        spinnerAdapter = new ArrayAdapter<>(this, spinnerItem, semesters);
-        semesterSpinner.setAdapter(spinnerAdapter);
+        semesterAdapter = new ArrayAdapter<>(this, spinnerItem, semesters);
+        groupAdapter = new ArrayAdapter<>(this, spinnerItem, groups);
+        semesterSpinner.setAdapter(semesterAdapter);
+        groupSpinner.setAdapter(groupAdapter);
+        groupSpinner.setTitle("Choose Group");
+        groupSpinner.setPositiveButton("OK");
         messageTextView.setText(getString(R.string.loading));
     }
 
@@ -60,7 +66,7 @@ public class StartActivity extends AppCompatActivity {
                 dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1);
                 versions = ConnectionHandler.getVersionMap();
                 semesters.addAll(versions.keySet());
-                spinnerAdapter.notifyDataSetChanged();
+                semesterAdapter.notifyDataSetChanged();
                 addListeners();
                 runOnUiThread(this::setLoaded);
             } catch (NullPointerException e) {
@@ -76,6 +82,7 @@ public class StartActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 activeSemester = semesterSpinner.getSelectedItem().toString();
                 groups.addAll(versions.get(activeSemester).keySet());
+                groupAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -84,29 +91,26 @@ public class StartActivity extends AppCompatActivity {
             }
         });
 
-        groupSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        groupSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                activeGroup = groupSearchView.getQuery().toString();
-                return false;
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                activeGroup = groupSpinner.getSelectedItem().toString();
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 
         getStartedButton.setOnClickListener(v -> {
-            //assert correct value
             activeSemester = semesterSpinner.getSelectedItem().toString();
-            activeGroup = groupSearchView.getQuery().toString();
+            activeGroup = groupSpinner.getSelectedItem().toString();
             dbHandler.setActiveSemester(activeSemester);
             dbHandler.setActiveGroup(activeGroup);
             dbHandler.initialInsert(versions);
             startActivity(new Intent(this, MainActivity.class));
         });
-
     }
 
     private void connectionFailed() {
@@ -144,6 +148,6 @@ public class StartActivity extends AppCompatActivity {
         getStartedLayout = findViewById(R.id.getStartedLayout);
         semesterSpinner = findViewById(R.id.semesterSpinner);
         getStartedButton = findViewById(R.id.getStartedButton);
-        groupSearchView = findViewById(R.id.groupSearchView);
+        groupSpinner = findViewById(R.id.groupSpinner);
     }
 }

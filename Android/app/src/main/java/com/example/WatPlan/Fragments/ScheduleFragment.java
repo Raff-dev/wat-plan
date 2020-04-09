@@ -21,30 +21,34 @@ import com.example.WatPlan.R;
 import java.util.ArrayList;
 
 public class ScheduleFragment extends Fragment {
+    private boolean loading = true;
     private ArrayList<Week> plan = new ArrayList<>();
-    private RecyclerView.Adapter weekAdapter = new WeekAdapter(getContext(), plan);
+    private WeekAdapter weekAdapter;
     private UpdateHandler updateHandler;
-    private TextView semesterName, groupName;
+    private TextView semesterNameTextView, groupNameTextView;
     private View view;
     public MainActivity mainActivity;
 
     public ScheduleFragment(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
-        updateHandler = new UpdateHandler(mainActivity, this);
+        weekAdapter = new WeekAdapter(mainActivity, plan);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        System.out.println("WIDOK JEST KREOWANY");
         this.view = inflater.inflate(R.layout.fragment_schedule, container, false);
+        switchLoading();
+        if (plan.size() == 0) {
+            updateHandler = mainActivity.getUpdateHandler();
+            updateHandler.setDefaultGroup();
+        }
         RecyclerView planRecyclerView = view.findViewById(R.id.planRecyclerView);
         planRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         planRecyclerView.setAdapter(weekAdapter);
-        groupName = view.findViewById(R.id.groupTextView);
-        semesterName = view.findViewById(R.id.semesterTextView);
-        updateHandler.setDefaultGroup();
-        System.out.println("DOMYSLNA GRUPA JEST USTAWIANA");
+        groupNameTextView = view.findViewById(R.id.groupTextView);
+        semesterNameTextView = view.findViewById(R.id.semesterTextView);
+        setNames(updateHandler.getActiveSemester(), updateHandler.getActiveGroup());
         return view;
     }
 
@@ -52,12 +56,29 @@ public class ScheduleFragment extends Fragment {
         this.plan.clear();
         this.plan.addAll(plan);
         weekAdapter.notifyDataSetChanged();
+        setLoading(false);
+        switchLoading();
         System.out.println("FINISHED APPLYTING PLAN");
     }
 
-    public void setNames(String semesterName, String groupName) {
-        this.semesterName.setText(semesterName);
-        this.groupName.setText(groupName);
+    private void switchLoading(){
+        if (this.loading) {
+            view.findViewById(R.id.planRecyclerView).setVisibility(View.GONE);
+            view.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+        }else{
+            view.findViewById(R.id.progressBar).setVisibility(View.GONE);
+            view.findViewById(R.id.planRecyclerView).setVisibility(View.VISIBLE);
+        }
     }
 
+    public void setNames(String semesterName, String groupName) {
+        this.semesterNameTextView.setText(semesterName);
+        this.groupNameTextView.setText(groupName);
+    }
+    public void setLoading(boolean loading){
+        this.loading = loading;
+    }
+    public WeekAdapter getWeekAdapter() {
+        return weekAdapter;
+    }
 }

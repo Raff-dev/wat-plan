@@ -188,6 +188,28 @@ public class DBHandler extends SQLiteOpenHelper {
                 " AND 'group.name'='" + groupName + "'", null);
     }
 
+    public boolean isEmpty() {
+        return getActiveGroup() == null || getActiveSemester() == null;
+    }
+
+    public void initialInsert(Map<String, Map<String, String>> versions) {
+        assert versions != null;
+        ContentValues values = new ContentValues();
+
+        versions.forEach((semester, groups) -> {
+            values.put("name", semester);
+            writableDb.insert(SEMESTER, null, values);
+            values.clear();
+            groups.forEach((group, version) -> {
+                values.put("semester_name", semester);
+                values.put("name", group);
+                values.put("version", "-1");
+                writableDb.insert(GROUP, null, values);
+                values.clear();
+            });
+        });
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + PREFERENCES + "(" +
@@ -225,27 +247,5 @@ public class DBHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS 'group'");
         db.execSQL("DROP TABLE IF EXISTS block");
         onCreate(db);
-    }
-
-    public boolean isEmpty() {
-        return getActiveGroup() == null || getActiveSemester() == null;
-    }
-
-    public void initialInsert(Map<String, Map<String, String>> versions) {
-        assert versions != null;
-        ContentValues values = new ContentValues();
-
-        versions.forEach((semester, groups) -> {
-            values.put("name", semester);
-            writableDb.insert(SEMESTER, null, values);
-            values.clear();
-            groups.forEach((group, version) -> {
-                values.put("semester_name", semester);
-                values.put("name", group);
-                values.put("version", "-1");
-                writableDb.insert(GROUP, null, values);
-                values.clear();
-            });
-        });
     }
 }

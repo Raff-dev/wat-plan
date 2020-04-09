@@ -16,15 +16,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UpdateHandler extends Thread {
-    private ArrayList<Runnable> tasks = new ArrayList<>();
-
+    private ArrayList<Runnable> queue = new ArrayList<>();
     private static DBHandler dbHandler;
     private Context context;
     private ScheduleFragment scheduleFragment;
-
     private Map<String, Map<String, String>> upToDateVersions;
     private String activeSemester;
     private String activeGroup;
+    private ArrayList<String> availableGroups = new ArrayList<>();
+    private ArrayList<String> availableSemesters = new ArrayList<>();
+
 
     public UpdateHandler(Context context, ScheduleFragment scheduleFragment) {
         this.context = context;
@@ -37,16 +38,40 @@ public class UpdateHandler extends Thread {
         dbHandler = new DBHandler(context);
         activeSemester = dbHandler.getActiveSemester();
         activeGroup = dbHandler.getActiveGroup();
-        System.out.println("updatehandler jest odpaleny " + activeSemester + activeGroup);
+        availableGroups.clear();
+        availableGroups.addAll(upToDateVersions.get(activeSemester).keySet());
+        availableSemesters.addAll(upToDateVersions.keySet());
+    }
+
+    public ArrayList<String> getAvailableGroups() {
+        return availableGroups;
+    }
+    public ArrayList<String> getAvaliableSemesters() {
+        return availableSemesters;
+    }
+    public String getActiveSemester() {
+        return activeSemester;
+    }
+    public String getActiveGroup() {
+        return activeGroup;
+    }
+
+    public void setActiveSemester(String semesterName) {
+        activeSemester = semesterName;
+        availableGroups.clear();
+        availableGroups.addAll(upToDateVersions.get(activeSemester).keySet());
+        activeGroup = availableGroups.get(0);
+        dbHandler.setActiveSemester(activeSemester);
+        dbHandler.setActiveGroup(activeGroup);
     }
 
     public void setDefaultGroup() {
-        addTask(()->changeGroup(activeSemester, activeGroup));
+        addToQueue(() -> changeGroup(activeSemester, activeGroup));
     }
 
     public void changeGroup(String semesterName, String groupName) {
-        addTask(() -> {
-            System.out.println("grupa jest zmieniana "+activeSemester+" "+upToDateVersions.keySet());
+        scheduleFragment.setLoading(true);
+        addToQueue(() -> {
             Map<Pair<String, String>, Block> newBlocks = getBlockMap(semesterName, groupName);
             Pair<LocalDate, LocalDate> borderDates = getBorderDates(semesterName, groupName);
             LocalDate firstDay = borderDates.first;
@@ -65,7 +90,7 @@ public class UpdateHandler extends Thread {
                         Pair<String, String> key = new Pair<>(date, String.valueOf(index));
                         if (newBlocks.containsKey(key)) {
                             day.add(newBlocks.get(key));
-                        } else day.add(new Block());
+                        } else day.add(null);
                     }
                     week.add(new Day(day, date));
                     firstDay = firstDay.plusDays(1);
@@ -75,11 +100,11 @@ public class UpdateHandler extends Thread {
             dbHandler.setActiveGroup(groupName);
             dbHandler.setActiveSemester(semesterName);
             scheduleFragment.mainActivity.runOnUiThread(() -> {
+                scheduleFragment.mainActivity.clearValues();
                 scheduleFragment.setPlan(plan);
                 scheduleFragment.setNames(semesterName, groupName);
             });
         });
-
     }
 
     private Pair<LocalDate, LocalDate> getBorderDates(String semesterName, String groupName) {
@@ -133,17 +158,17 @@ public class UpdateHandler extends Thread {
     }
 
 
-    private void addTask(Runnable runnable) {
-        tasks.add(runnable);
+    private void addToQueue(Runnable runnable) {
+        queue.add(runnable);
     }
 
     @Override
     public void run() {
         new Thread(() -> {
             setUp();
-            while (true) if (tasks.size() > 0) {
-                tasks.get(0).run();
-                tasks.remove(0);
+            while (true) if (queue.size() > 0) {
+                queue.get(0).run();
+                queue.remove(0);
             }
         }).start();
     }
