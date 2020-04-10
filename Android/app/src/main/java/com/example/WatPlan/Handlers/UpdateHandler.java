@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.Vector;
 
 public class UpdateHandler extends Thread {
@@ -26,7 +25,6 @@ public class UpdateHandler extends Thread {
     private ArrayList<Runnable> queue = new ArrayList<>();
     private ArrayList<String> availableGroups;
     private ArrayList<String> availableSemesters;
-    private String activeSemester, activeGroup;
     private Map<String, Map<String, String>> upToDateVersions;
     private Map<String, Vector<String>> values;
 
@@ -54,21 +52,16 @@ public class UpdateHandler extends Thread {
         if (upToDateVersions == null)
             upToDateVersions = dbHandler.getVersionMap();
 
-        activeSemester = dbHandler.getActiveSemester();
-        activeGroup = dbHandler.getActiveGroup();
-
         availableSemesters = new ArrayList<>(upToDateVersions.keySet());
         availableGroups = new ArrayList<>(Objects.requireNonNull(
-                upToDateVersions.get(activeSemester)).keySet());
+                upToDateVersions.get(dbHandler.getActiveSemester())).keySet());
     }
 
 
     public void setActiveSemester(String semesterName) {
-        activeSemester = semesterName;
         availableGroups.clear();
-        availableGroups.addAll(Objects.requireNonNull(upToDateVersions.get(activeSemester)).keySet());
-        activeGroup = availableGroups.get(0);
-        dbHandler.setActiveSemester(activeSemester);
+        availableGroups.addAll(Objects.requireNonNull(upToDateVersions.get(semesterName)).keySet());
+        dbHandler.setActiveSemester(availableGroups.get(0));
     }
 
     public void setDefaultGroup() {
@@ -80,8 +73,9 @@ public class UpdateHandler extends Thread {
 
     public void changeGroup(String semesterName, String groupName) {
         //check if the group differs from active
-        scheduleFragment.clearPlan();
-
+        mainActivity.runOnUiThread(() -> scheduleFragment.clearPlan());
+        dbHandler.setActiveSemester(semesterName);
+        dbHandler.setActiveGroup(groupName);
 
         addToQueue(() -> {
 //            Map<String, Set<String>> uniqueValues = new HashMap<>();
@@ -106,7 +100,6 @@ public class UpdateHandler extends Thread {
                         if (newBlocks.containsKey(key)) {
                             Block block = newBlocks.get(key);
                             //mb try getting unique values here
-                            System.out.println(block.getSubject());
                             day.add(block);
                         } else day.add(null);
                     }
@@ -115,11 +108,6 @@ public class UpdateHandler extends Thread {
                 }
                 plan.add(new Week(week));
             }
-
-            dbHandler.setActiveSemester(semesterName);
-            dbHandler.setActiveGroup(groupName);
-            activeSemester = semesterName;
-            activeGroup = groupName;
 
             settingsFragment.setUniqueValues(dbHandler.getUniqueValues(semesterName, groupName));
             scheduleFragment.mainActivity.runOnUiThread(() -> {
@@ -163,7 +151,7 @@ public class UpdateHandler extends Thread {
 
             String version = dbHandler.getVersion(semesterName, groupName);
             String upToDateVersion = upToDateVersions.get(semesterName).get(groupName);
-            System.out.println("versions"+ version + " "+ upToDateVersion);
+            System.out.println("versions" + version + " " + upToDateVersion);
             if (version.equals(upToDateVersion))
                 newBlockMap = dbHandler.getGroupBlocks(semesterName, groupName);
             else {
@@ -201,7 +189,8 @@ public class UpdateHandler extends Thread {
             System.out.println("Error downloading plan");
             scheduleFragment.displayFailureMessage();
         }
-        changeGroup(activeSemester, activeGroup);
+        //dbhandler set first
+        changeGroup(dbHandler.getActiveSemester(), dbHandler.getActiveGroup());
     }
 
     public ArrayList<String> getAvailableGroups() {
@@ -213,11 +202,11 @@ public class UpdateHandler extends Thread {
     }
 
     public String getActiveSemester() {
-        return activeSemester;
+        return dbHandler.getActiveSemester();
     }
 
     public String getActiveGroup() {
-        return activeGroup;
+        return dbHandler.getActiveGroup();
     }
 
     private void addToQueue(Runnable runnable) {

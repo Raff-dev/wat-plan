@@ -129,6 +129,7 @@ public class DBHandler extends SQLiteOpenHelper {
         Cursor cursor = readableDb.rawQuery("select name from 'group'" +
                 " where semester_name='" + semesterName + "'", null);
         cursor.moveToFirst();
+        assert cursor.getCount()>0;
         while (!cursor.isAfterLast()) {
             groups.add(cursor.getString(cursor.getColumnIndex("name")));
             cursor.moveToNext();

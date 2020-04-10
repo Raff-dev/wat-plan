@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -38,6 +40,10 @@ public class ScheduleFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         this.view = inflater.inflate(R.layout.fragment_schedule, container, false);
+        Animation enter = AnimationUtils.loadAnimation(mainActivity,R.anim.fragment_schedule_enter);
+        enter.setDuration(500);
+        this.view.startAnimation(enter);
+
         switchLoading(this.loading);
         if (plan.size() == 0) {
             updateHandler = mainActivity.getUpdateHandler();
@@ -74,6 +80,12 @@ public class ScheduleFragment extends Fragment {
         }
     }
 
+    public void exit(){
+        Animation exit = AnimationUtils.loadAnimation(mainActivity,R.anim.fragment_schedule_exit);
+        exit.setDuration(500);
+        view.startAnimation(exit);
+    }
+
     public void setNames(String semesterName, String groupName) {
         this.semesterNameTextView.setText(semesterName);
         this.groupNameTextView.setText(groupName);
@@ -83,5 +95,8 @@ public class ScheduleFragment extends Fragment {
     }
 
     public void displayFailureMessage() {
+    }
+
+    public void onCreateAnimation() {
     }
 }

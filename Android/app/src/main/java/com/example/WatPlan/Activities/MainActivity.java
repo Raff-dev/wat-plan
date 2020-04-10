@@ -2,10 +2,12 @@ package com.example.WatPlan.Activities;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -32,30 +34,46 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Animation expand = AnimationUtils.loadAnimation(this,R.anim.nav_button_expand);
-        Animation contract = AnimationUtils.loadAnimation(this,R.anim.nav_button_contract);
-        Animation rotate = AnimationUtils.loadAnimation(this,R.anim.settings_rotate);
-        Animation switchButton = AnimationUtils.loadAnimation(this,R.anim.switch_nav_button);
-        switchButton.setFillAfter(true);
-        switchButton.setDuration(500);
-        rotate.setDuration(500);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Animation hideButton = AnimationUtils.loadAnimation(this, R.anim.hide_nav_button);
+        Animation showButton = AnimationUtils.loadAnimation(this, R.anim.show_nav_button);
+        Animation rotateSettings = AnimationUtils.loadAnimation(this, R.anim.settings_rotate);
+        rotateSettings.setDuration(1000);
+        hideButton.setFillAfter(true);
+        showButton.setFillAfter(true);
+//        switchButton.setFillEnabled(true);
+        hideButton.setDuration(500);
+        showButton.setDuration(500);
+
+        FrameLayout search_frame = findViewById(R.id.search_frame);
+        FrameLayout settings_frame = findViewById(R.id.settings_frame);
+
         openFragment(scheduleFragment);
         Button search = findViewById(R.id.search);
+        search_frame.startAnimation(hideButton);
         Button settings = findViewById(R.id.settings);
-        search.setOnClickListener(v -> {
-            openFragment(scheduleFragment);
-//            search.startAnimation(switchButton);
-//            settings.startAnimation(switchButton);
+        search_frame.setTranslationZ(0);
+        settings_frame.setTranslationZ(1);
 
-        });
-        settings.setOnClickListener(v ->{
+        settings.setOnClickListener(v -> {
+
+            search_frame.setTranslationZ(1);
+            settings_frame.setTranslationZ(0);
+            search_frame.startAnimation(showButton);
+            settings_frame.startAnimation(hideButton);
+            settings.startAnimation(rotateSettings);
+            scheduleFragment.exit();
             openFragment(settingsFragment);
-//            search.startAnimation(switchButton);
-//            settings.startAnimation(switchButton);
-
-
+        });
+        search.setOnClickListener(v -> {
+            search_frame.setTranslationZ(0);
+            settings_frame.setTranslationZ(1);
+            settings.startAnimation(rotateSettings);
+            settings_frame.startAnimation(showButton);
+            search_frame.startAnimation(hideButton);
+            settingsFragment.exit();
+            openFragment(scheduleFragment);
         });
     }
 
@@ -65,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addValue(String type, String value) {
-        System.out.println("ADDING VALUE "+type+" " + value);
+        System.out.println("ADDING VALUE " + type + " " + value);
         if (value == null) return;
         if (values.containsKey(type)) Objects.requireNonNull(values.get(type)).add(value);
         else {

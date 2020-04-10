@@ -49,7 +49,7 @@ public class StartActivity extends AppCompatActivity {
 
     private void setUp() {
         dbHandler = new DBHandler(this);
-//        dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1);
+        dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1);
 
         int spinnerItem = R.layout.support_simple_spinner_dropdown_item;
         semesterAdapter = new ArrayAdapter<>(this, spinnerItem, semesters);
@@ -82,7 +82,6 @@ public class StartActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 activeSemester = semesterSpinner.getSelectedItem().toString();
-                dbHandler.setActiveSemester(activeSemester);
                 groups.addAll(Objects.requireNonNull(versions.get(activeSemester)).keySet());
                 groupAdapter.notifyDataSetChanged();
             }
@@ -108,9 +107,9 @@ public class StartActivity extends AppCompatActivity {
         getStartedButton.setOnClickListener(v -> {
             activeSemester = semesterSpinner.getSelectedItem().toString();
             activeGroup = groupSpinner.getSelectedItem().toString();
+            dbHandler.initialInsert(versions);
             dbHandler.setActiveSemester(activeSemester);
             dbHandler.setActiveGroup(activeGroup);
-            dbHandler.initialInsert(versions);
             startActivity(new Intent(this, MainActivity.class));
         });
     }
