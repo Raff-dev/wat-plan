@@ -13,13 +13,13 @@
 
     <FrameLayout
         android:id="@+id/settings_frame"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="5dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
         android:background="@drawable/search_background"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/search_frame"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
         <Button
@@ -36,12 +36,11 @@
     </FrameLayout>
 
     <FrameLayout
-        android:foreground="#a333"
         android:id="@+id/search_frame"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_margin="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="15dp"
         android:background="@drawable/search_background"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"

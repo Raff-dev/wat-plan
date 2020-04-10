@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -34,7 +36,6 @@ public class SettingsFragment extends Fragment {
     private boolean ready = false;
     private UpdateHandler updateHandler;
     private MainActivity mainActivity;
-    private Button pullDataButton;
     private ArrayAdapter<String> groupAdapter, smesterAdapter, subjectAdapter;
     private ArrayList<String> groups, semesters, subjects = new ArrayList<>();
     private Spinner semesterSpinner, subjectSpinner;
@@ -49,6 +50,7 @@ public class SettingsFragment extends Fragment {
             block -> !block.getClassType().equals("L")
     };
     private Map<String, Set<String>> uniqueValues;
+    private View view;
 
     public SettingsFragment(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -57,13 +59,14 @@ public class SettingsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_settings, container, false);
-
+        view = inflater.inflate(R.layout.fragment_settings, container, false);
+        Animation enter = AnimationUtils.loadAnimation(mainActivity, R.anim.fragment_settings_enter);
+        enter.setDuration(500);
+        view.startAnimation(enter);
 
         //check if plan is opened
         for (int i = 0; i < switchIds.length; i++)
             switchMap.put(view.findViewById(switchIds[i]), switchFilters[i]);
-        pullDataButton = view.findViewById(R.id.pullDataButton);
         semesterSpinner = view.findViewById(R.id.semesterSpinner);
         groupSpinner = view.findViewById(R.id.groupSpinner);
         subjectSpinner = view.findViewById(R.id.subjectSpinner);
@@ -85,7 +88,7 @@ public class SettingsFragment extends Fragment {
         subjectSpinner.setAdapter(subjectAdapter);
 
         addListeners();
-        return view;
+        return this.view;
     }
 
     private void addListeners() {
@@ -95,18 +98,18 @@ public class SettingsFragment extends Fragment {
 //                    weekAdapter.notifyDataSetChanged();
                 })
         );
-        pullDataButton.setOnClickListener(v -> {
-            Toast.makeText(mainActivity, "TOASTY", Toast.LENGTH_LONG).show();
-        });
+
 
         semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String semester = semesterSpinner.getSelectedItem().toString();
+                if (semester.equals(updateHandler.getActiveSemester())) return;
+                System.out.println("changin");
                 updateHandler.setActiveSemester(semester);
-                String group = updateHandler.getActiveGroup();
                 groups = updateHandler.getAvailableGroups();
                 groupAdapter.notifyDataSetChanged();
+                String group = updateHandler.getActiveGroup();
                 updateHandler.changeGroup(semester, group);
                 groupSpinner.setSelection(0);
                 subjectSpinner.setSelection(0);
@@ -121,7 +124,8 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String group = groupSpinner.getSelectedItem().toString();
-                String semester = updateHandler.getActiveSemester();
+                if (group.equals(updateHandler.getActiveGroup())) return;
+                String semester = semesterSpinner.getSelectedItem().toString();
                 updateHandler.changeGroup(semester, group);
                 subjectSpinner.setSelection(0);
             }
@@ -135,10 +139,9 @@ public class SettingsFragment extends Fragment {
         subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String subjectFilter = subjectSpinner.getSelectedItem().toString();
                 WeekAdapter weekAdapter = mainActivity.getScheduleFragment().getWeekAdapter();
                 weekAdapter.switchBlockFilter(subjectBlockFilter, false);
-
-                String subjectFilter = subjectSpinner.getSelectedItem().toString();
                 if (subjectFilter.equals(NO_FILTER)) subjectBlockFilter = block -> true;
                 else subjectBlockFilter = block -> block.getSubject().equals(subjectFilter);
                 weekAdapter.switchBlockFilter(subjectBlockFilter, true);
@@ -153,7 +156,13 @@ public class SettingsFragment extends Fragment {
 
     }
 
+    public void exit(){
+        Animation exit = AnimationUtils.loadAnimation(mainActivity,R.anim.fragment_settings_exit);
+        exit.setDuration(500);
+        view.startAnimation(exit);
+    }
     public void setUniqueValues(Map<String, Set<String>> uniqueValues) {
+        System.out.println("settin unq vals");
         this.uniqueValues = uniqueValues;
         subjects.clear();
         subjects.add(NO_FILTER);

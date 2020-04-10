@@ -64,7 +64,11 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
             holder.blockLayout.setBackgroundColor(color);
 
             if (checkFilters(block).get()) {
-                holder.setTexts(block.getIndex(), block.getSubject(), block.getPlace(),
+                String place = block.getPlace()
+                        .replace("', '", "\n")
+                        .replace("['", "")
+                        .replace("']", "");
+                holder.setTexts(block.getIndex(), block.getSubject(), place,
                         block.getClassType(), block.getTeacher());
 
                 color = mainActivity.getResources().getColor(R.color.orange2);
