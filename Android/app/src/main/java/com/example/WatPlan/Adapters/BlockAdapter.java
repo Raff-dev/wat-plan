@@ -26,7 +26,6 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
         this.mainActivity = mainActivity;
         this.blockFilterHashSet = blockFilterHashSet;
         this.blockArrayList = blockArrayList;
-
     }
 
     static class BlockViewHolder extends RecyclerView.ViewHolder {
@@ -61,10 +60,6 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
 
         if (block == null) holder.setTexts("", "", "", "", "");
         else {
-            mainActivity.addValue("teacher", block.getTeacher());
-            mainActivity.addValue("subject", block.getSubject());
-            mainActivity.addValue("class_type", block.getClassType());
-
             int color = mainActivity.getResources().getColor(R.color.invis);
             holder.blockLayout.setBackgroundColor(color);
 
@@ -79,13 +74,11 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
     }
 
     private AtomicBoolean checkFilters(Block block) {
-        System.out.println("THATS THE LENGTH OF FILTERZZ " + blockFilterHashSet.size());
         AtomicBoolean result = new AtomicBoolean(true);
         blockFilterHashSet.forEach(blockFilter ->
                 result.set(blockFilter.filter(block) && result.get()));
         return result;
     }
-
 
     @Override
     public int getItemCount() {

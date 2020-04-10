@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray2">
@@ -94,7 +95,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/filterTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Pokaż tylko"
@@ -106,14 +107,16 @@
             app:layout_constraintTop_toTopOf="@+id/showTextView" />
 
         <Spinner
-            android:id="@+id/spinner"
-            android:layout_width="66dp"
-            android:layout_height="28dp"
+            android:id="@+id/subjectSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:backgroundTint="@color/gray3"
+            android:paddingStart="3dp"
+            android:paddingVertical="3dp"
             android:foreground="@drawable/outline2"
-            app:layout_constraintEnd_toEndOf="@+id/textView4"
-            app:layout_constraintTop_toBottomOf="@+id/textView4" />
+            app:layout_constraintEnd_toEndOf="@+id/filterTextView"
+            app:layout_constraintTop_toBottomOf="@+id/filterTextView" />
 
         <TextView
             android:id="@+id/showTextView"
@@ -161,15 +164,17 @@
             app:layout_constraintEnd_toEndOf="@+id/laboratorySwitch"
             app:layout_constraintTop_toBottomOf="@+id/laboratorySwitch" />
 
-        <Button
-            android:id="@+id/pullDataButton"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="52dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/pullDataButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pobierz cały WAT Plan"
+        app:layout_constraintBottom_toTopOf="@+id/settingsLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

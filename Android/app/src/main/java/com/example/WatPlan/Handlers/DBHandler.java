@@ -11,10 +11,14 @@ import androidx.core.util.Pair;
 
 import com.example.WatPlan.Models.Block;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class DBHandler extends SQLiteOpenHelper {
     private SQLiteDatabase readableDb;
@@ -32,8 +36,7 @@ public class DBHandler extends SQLiteOpenHelper {
         writableDb = getWritableDatabase();
     }
 
-    private boolean planExists(String... args) {
-        String groupId = getGroupId(args);
+    private boolean planExists(String groupId) {
         Cursor cursor = readableDb.rawQuery("select count(block.id) as blocks_count from block" +
                 " where block.group_id = " + groupId, null);
         cursor.moveToFirst();
@@ -43,13 +46,37 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     private String getGroupId(String... args) {
+        assert args[0] != null && args[1] != null;
+        String groupId = null;
         Cursor cursor = readableDb.rawQuery("select * from 'group'" +
                 " where semester_name = '" + args[0] + "'" +
                 " and name='" + args[1] + "'", null);
         cursor.moveToFirst();
-        String groupId = cursor.getString(cursor.getColumnIndex("id"));
+        if (cursor.getCount() > 0)
+            groupId = cursor.getString(cursor.getColumnIndex("id"));
         cursor.close();
         return groupId;
+    }
+
+    public Map<String, Set<String>> getUniqueValues(String... args) {
+        Map<String, Set<String>> uniqueValues = new HashMap<>();
+        String groupId = getGroupId(args);
+        Cursor cursor = readableDb.rawQuery(
+                "select * from block where group_id =" + groupId, null);
+        cursor.moveToFirst();
+        ArrayList<String> columnNames = new ArrayList<>(Arrays.asList(cursor.getColumnNames()));
+        columnNames.forEach(columnName -> uniqueValues.put(columnName, new HashSet<>()));
+        while (!cursor.isAfterLast()) {
+            columnNames.forEach(columnName -> {
+                String value = cursor.getString(cursor.getColumnIndex(columnName));
+                uniqueValues.get(columnName).add(value);
+            });
+            cursor.moveToNext();
+        }
+        System.out.println("GETING UNIQUE VALUES FOR: "+
+                args[0] + " " + args[1] + " " + groupId + " " + planExists(groupId));
+        cursor.close();
+        return uniqueValues;
     }
 
     void updateGroup(String semesterName, String groupName, Map<Pair<String, String>, Block> blocksMap, String version) {
@@ -57,20 +84,25 @@ public class DBHandler extends SQLiteOpenHelper {
         List<String> keyList = Arrays.asList("date", "index", "title", "subject", "teacher",
                 "place", "class_type", "class_index");
         String groupId = getGroupId(semesterName, groupName);
-        boolean exists = planExists(semesterName, groupName);
+        if (groupId == null) {
+            insertSemester(semesterName);
+            insertGroup(semesterName, groupName);
+            groupId = getGroupId(semesterName, groupName);
+        }
+        boolean exists = planExists(groupId);
 
         System.out.println("GROUP ID: " + groupId);
         System.out.println("EXISTS: " + exists);
 
+        String finalGroupId = groupId;
         blocksMap.values().forEach(block -> {
             keyList.forEach(key -> values.put("'" + key + "'", block.get(key)));
             if (exists) {
                 writableDb.update(BLOCK, values, "block.id=(" +
                         "select block.id from 'group' where " +
-                        "'group.id' ='" + groupId + "')", null);
+                        "'group.id' ='" + finalGroupId + "')", null);
             } else {
-
-                values.put("group_id", groupId);
+                values.put("group_id", finalGroupId);
                 writableDb.insert(BLOCK, null, values);
             }
             values.clear();
@@ -80,11 +112,46 @@ public class DBHandler extends SQLiteOpenHelper {
         System.out.println("FINISHED UPDATING GROUP");
     }
 
-    Map<String, Map<String, String>> getAvailableGroups() {
-        Map<String, Map<String, String>> availableGroups = new HashMap<>();
-        availableGroups.clear();
+    private ArrayList<String> getSemesters() {
+        ArrayList<String> semesters = new ArrayList<>();
+        Cursor cursor = readableDb.rawQuery("select name from semester", null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            semesters.add(cursor.getString(cursor.getColumnIndex("name")));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return semesters;
+    }
 
-        return availableGroups;
+    private ArrayList<String> getGroups(String semesterName) {
+        ArrayList<String> groups = new ArrayList<>();
+        Cursor cursor = readableDb.rawQuery("select name from 'group'" +
+                " where semester_name='" + semesterName + "'", null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            groups.add(cursor.getString(cursor.getColumnIndex("name")));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return groups;
+    }
+
+    Map<String, Map<String, String>> getVersionMap() {
+        Map<String, Map<String, String>> versionMap = new HashMap<>();
+        Cursor cursor = readableDb.rawQuery("select semester_name,name,version from 'group'", null);
+        cursor.moveToFirst();
+
+        getSemesters().forEach(semesterName -> versionMap.put(semesterName, new HashMap<>()));
+        while (!cursor.isAfterLast()) {
+            String semesterName = cursor.getString(cursor.getColumnIndex("semester_name"));
+            String groupName = cursor.getString(cursor.getColumnIndex("name"));
+            String version = cursor.getString(cursor.getColumnIndex("version"));
+            Objects.requireNonNull(versionMap.get(semesterName)).put(groupName, version);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return versionMap;
     }
 
     String getVersion(String... args) {
@@ -113,12 +180,12 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     String getActiveGroup() {
-        String groupName;
+        String groupName = null;
         Cursor cursor = readableDb.rawQuery(
                 "select value from preferences where name = 'group'", null);
         cursor.moveToFirst();
-        if (cursor.getCount() == 0) groupName = null;
-        else groupName = cursor.getString(cursor.getColumnIndex("value"));
+        if (cursor.getCount() > 0)
+            groupName = cursor.getString(cursor.getColumnIndex("value"));
         cursor.close();
         return groupName;
     }
@@ -129,6 +196,7 @@ public class DBHandler extends SQLiteOpenHelper {
         values.put("value", semesterName);
         if (getActiveSemester() == null) writableDb.insert(PREFERENCES, null, values);
         else writableDb.update(PREFERENCES, values, "name='semester'", null);
+        setActiveGroup(getGroups(semesterName).get(0));
     }
 
     public void setActiveGroup(String groupName) {
@@ -139,53 +207,52 @@ public class DBHandler extends SQLiteOpenHelper {
         else writableDb.update(PREFERENCES, values, "name='group'", null);
     }
 
-    Pair<String, String> getBorderDates(String semesterName, String groupName) {
-        Cursor cursor = readableDb.rawQuery("select first_day,last_day from 'group'" +
-                " where 'group.semester_name' = '" + semesterName + "'" +
-                " and 'group.name' = " + "'" + groupName + "'", null);
-        if (cursor.getCount() == 0) return null;
-        cursor.moveToFirst();
-        String firstDay = cursor.getString(cursor.getColumnIndex("first_day"));
-        String lastDay = cursor.getString(cursor.getColumnIndex("last_day"));
-        cursor.close();
-        return new Pair<>(firstDay, lastDay);
-    }
 
     Map<Pair<String, String>, Block> getGroupBlocks(String... args) {
         String groupId = getGroupId(args);
         Cursor cursor = readableDb.rawQuery("select * from block" +
                 " where group_id = " + groupId, null);
-        System.out.println("DAS COUNT" + cursor.getCount());
-        System.out.println("Group " + args[1] + "ID: " + groupId);
+        System.out.println("Group " + args[1] + " ID: " + groupId+ "blocks count" + cursor.getCount());
         if (cursor.getCount() == 0)
-            throw new NullPointerException("Database is missing " + args[1] + " blocks ");
-
+            throw new AssertionError("Database is missing " + args[1] + " blocks ");
         cursor.moveToFirst();
 
         Map<Pair<String, String>, Block> blocksMap = new HashMap<>();
-        do {
-            String date = cursor.getString(cursor.getColumnIndex("date"));
-            String index = cursor.getString(cursor.getColumnIndex("index"));
-            String title = cursor.getString(cursor.getColumnIndex("title"));
-            String subject = cursor.getString(cursor.getColumnIndex("subject"));
-            String teacher = cursor.getString(cursor.getColumnIndex("teacher"));
-            String place = cursor.getString(cursor.getColumnIndex("place"));
-            String classType = cursor.getString(cursor.getColumnIndex("class_type"));
-            String classIndex = cursor.getString(cursor.getColumnIndex("class_index"));
-            Block block = new Block(date, index, title, subject, teacher, place, classType, classIndex);
-            blocksMap.put(new Pair<>(date, index), block);
+        ArrayList<String> columnNames = new ArrayList<>(Arrays.asList(cursor.getColumnNames()));
+
+        while (!cursor.isAfterLast()) {
+            Map<String, String> values = new HashMap<>();
+            columnNames.forEach(columnName ->
+                    values.put(columnName, cursor.getString(cursor.getColumnIndex(columnName))));
+            Block block = new Block(values);
+            blocksMap.put(new Pair<>(values.get("date"), values.get("index")), block);
             cursor.moveToNext();
-        } while (!cursor.isLast());
+        }
         cursor.close();
         return blocksMap;
     }
 
     void updateBorderDates(String semesterName, String groupName, Pair<String, String> borderDates) {
+        String groupId = getGroupId(semesterName, groupName);
         ContentValues values = new ContentValues();
         values.put("first_day", borderDates.first);
         values.put("last_day", borderDates.second);
-        writableDb.update(GROUP, values, "'group.semester_name'='" + semesterName + "'" +
-                " AND 'group.name'='" + groupName + "'", null);
+        writableDb.update(GROUP, values, "id=" + groupId, null);
+    }
+
+
+    Pair<String, String> getBorderDates(String... args) {
+        assert args[0] != null && args[1] != null : "invalid semester or group name";
+        String groupId = getGroupId(args);
+        System.out.println(Arrays.toString(args) + " " + groupId);
+        Cursor cursor = readableDb.rawQuery("select first_day,last_day from 'group' where id=" + groupId, null);
+        cursor.moveToFirst();
+        assert cursor.getCount() > 0 : "invalid group id";
+        String firstDay = cursor.getString(cursor.getColumnIndex("first_day"));
+        String lastDay = cursor.getString(cursor.getColumnIndex("last_day"));
+        if (firstDay == null || lastDay == null) return null;
+        cursor.close();
+        return new Pair<>(firstDay, lastDay);
     }
 
     public boolean isEmpty() {
@@ -203,11 +270,25 @@ public class DBHandler extends SQLiteOpenHelper {
             groups.forEach((group, version) -> {
                 values.put("semester_name", semester);
                 values.put("name", group);
-                values.put("version", "-1");
                 writableDb.insert(GROUP, null, values);
                 values.clear();
             });
         });
+    }
+
+    private void insertGroup(String... args) {
+        assert args.length > 1;
+        ContentValues values = new ContentValues();
+        values.put("semester_name", args[0]);
+        values.put("name", args[1]);
+        writableDb.insert(GROUP, null, values);
+    }
+
+    private void insertSemester(String semesterName) {
+        assert semesterName != null;
+        ContentValues values = new ContentValues();
+        values.put("name", semesterName);
+        writableDb.insert(SEMESTER, null, values);
     }
 
     @Override
@@ -225,7 +306,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 "name varchar(30) NOT NULL," +
                 "first_day varchar(30)," +
                 "last_day varchar(30)," +
-                "version varchar(30) NOT NULL default '0')");
+                "version varchar(30) NOT NULL default '-1')");
 
         db.execSQL("CREATE TABLE " + BLOCK + " (" +
                 "id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +

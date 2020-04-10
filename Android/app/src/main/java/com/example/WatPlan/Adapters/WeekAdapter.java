@@ -30,9 +30,9 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     }
 
 
-    public void switchBlockFilter(BlockFilter blockFilter,boolean active) {
-        if (active)blockFilterHashSet.add(blockFilter);
-        else   blockFilterHashSet.remove(blockFilter);
+    public void switchBlockFilter(BlockFilter blockFilter, boolean active) {
+        if (active) blockFilterHashSet.add(blockFilter);
+        else blockFilterHashSet.remove(blockFilter);
     }
 
     public static class WeekViewHolder extends RecyclerView.ViewHolder {
