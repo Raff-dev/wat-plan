@@ -38,7 +38,7 @@ public class ScheduleFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         this.view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        switchLoading();
+        switchLoading(this.loading);
         if (plan.size() == 0) {
             updateHandler = mainActivity.getUpdateHandler();
             updateHandler.setDefaultGroup();
@@ -52,17 +52,20 @@ public class ScheduleFragment extends Fragment {
         return view;
     }
 
-    public void setPlan(ArrayList<Week> plan) {
+    public void clearPlan(){
         this.plan.clear();
+        switchLoading(true);
+    }
+    public void setPlan(ArrayList<Week> plan) {
         this.plan.addAll(plan);
-        weekAdapter.notifyDataSetChanged();
-        setLoading(false);
-        switchLoading();
+//        weekAdapter.notifyDataSetChanged();
+        switchLoading(false);
         System.out.println("FINISHED APPLYTING PLAN");
     }
 
-    private void switchLoading(){
-        if (this.loading) {
+    private void switchLoading(boolean loading){
+        this.loading=loading;
+        if (loading) {
             view.findViewById(R.id.planRecyclerView).setVisibility(View.GONE);
             view.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
         }else{
@@ -75,10 +78,10 @@ public class ScheduleFragment extends Fragment {
         this.semesterNameTextView.setText(semesterName);
         this.groupNameTextView.setText(groupName);
     }
-    public void setLoading(boolean loading){
-        this.loading = loading;
-    }
     public WeekAdapter getWeekAdapter() {
         return weekAdapter;
+    }
+
+    public void displayFailureMessage() {
     }
 }

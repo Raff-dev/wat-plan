@@ -20,6 +20,7 @@ import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 public class StartActivity extends AppCompatActivity {
     private DBHandler dbHandler;
@@ -81,7 +82,8 @@ public class StartActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 activeSemester = semesterSpinner.getSelectedItem().toString();
-                groups.addAll(versions.get(activeSemester).keySet());
+                dbHandler.setActiveSemester(activeSemester);
+                groups.addAll(Objects.requireNonNull(versions.get(activeSemester)).keySet());
                 groupAdapter.notifyDataSetChanged();
             }
 

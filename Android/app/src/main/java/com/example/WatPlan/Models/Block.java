@@ -11,8 +11,8 @@ public class Block {
     public Block() {
     }
 
-    public Block(String... args) {
-        for (int i = 0; i < args.length; i++) values.put(valueNames[i], args[i]);
+    public Block(Map<String, String> values) {
+        this.values = values;
     }
 
     public String getIndex() {

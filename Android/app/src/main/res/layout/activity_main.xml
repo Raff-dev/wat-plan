@@ -36,6 +36,7 @@
     </FrameLayout>
 
     <FrameLayout
+        android:foreground="#a333"
         android:id="@+id/search_frame"
         android:layout_width="60dp"
         android:layout_height="60dp"

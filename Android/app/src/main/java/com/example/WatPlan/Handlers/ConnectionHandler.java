@@ -21,12 +21,12 @@ public class ConnectionHandler {
     private static final String baseAddress = "http://10.0.2.2:8000/Plan/";
     private static final OkHttpClient client = new OkHttpClient();
 
-    public static Map<String, Map<String, String>> getVersionMap() throws NullPointerException {
+    public static Map<String, Map<String, String>> getVersionMap() {
         Map<String, Map<String, String>> versions = new HashMap<>();
         String address = "get_versions/";
         try {
             String data = makeRequest(address, new HashMap<>());
-            if (data == null) throw new NullPointerException("Null version list");
+            if (data == null) return null;
 
             JSONObject jData = new JSONObject(data);
             JSONArray arr = jData.getJSONArray("versions");
@@ -59,7 +59,7 @@ public class ConnectionHandler {
 
         try {
             String data = makeRequest(address, headers);
-            if (data == null) throw new NullPointerException("Null border dates");
+            if (data == null) return null;
 
             JSONObject jdata = new JSONObject(data);
             String firstDay = jdata.get("first_day").toString();
@@ -121,7 +121,9 @@ public class ConnectionHandler {
             return data;
         } catch (IOException e) {
             System.out.println("Request IOException");
+
         }
+
         return null;
     }
 }
