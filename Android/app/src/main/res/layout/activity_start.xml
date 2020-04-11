@@ -11,8 +11,7 @@
         android:id="@+id/watPlanIcon"
         android:layout_width="166dp"
         android:layout_height="175dp"
-        android:layout_marginTop="76dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/getStartedLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,9 +66,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/watPlanIcon"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/textView2"
@@ -89,7 +86,7 @@
 
         <Spinner
             android:id="@+id/semesterSpinner"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             android:layout_marginStart="15dp"
@@ -97,8 +94,9 @@
             android:backgroundTint="@color/gray3"
             android:foreground="@drawable/outline2"
             android:gravity="center"
-            android:paddingStart="3dp"
             android:paddingVertical="3dp"
+            android:paddingStart="3dp"
+            android:popupBackground="@color/gray3"
             app:layout_constraintBottom_toTopOf="@+id/groupSpinner"
             app:layout_constraintStart_toEndOf="@+id/textView2" />
 
@@ -117,14 +115,14 @@
 
         <com.toptoche.searchablespinnerlibrary.SearchableSpinner
             android:id="@+id/groupSpinner"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
             android:backgroundTint="@color/gray3"
             android:foreground="@drawable/outline2"
             android:gravity="center"
-            android:paddingStart="3dp"
             android:paddingVertical="3dp"
+            android:paddingStart="3dp"
             android:textAlignment="center"
             app:layout_constraintBottom_toTopOf="@+id/getStartedButton"
             app:layout_constraintStart_toStartOf="@+id/semesterSpinner" />

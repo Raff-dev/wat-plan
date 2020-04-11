@@ -121,9 +121,7 @@ public class ConnectionHandler {
             return data;
         } catch (IOException e) {
             System.out.println("Request IOException");
-
         }
-
         return null;
     }
 }

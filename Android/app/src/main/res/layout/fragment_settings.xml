@@ -22,8 +22,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias=".9"
+        >
+
+
 
         <TextView
             android:id="@+id/textView2"
@@ -43,8 +48,9 @@
 
         <Spinner
             android:id="@+id/semesterSpinner"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
+
             android:layout_marginHorizontal="10dp"
             android:layout_marginStart="15dp"
             android:layout_marginBottom="20dp"
@@ -71,7 +77,7 @@
 
         <com.toptoche.searchablespinnerlibrary.SearchableSpinner
             android:id="@+id/groupSpinner"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/gray3"
             android:foreground="@drawable/outline2"
@@ -81,7 +87,7 @@
             android:textAlignment="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/semesterSpinner"
-            app:layout_constraintTop_toTopOf="parent" />
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -92,77 +98,104 @@
         android:layout_marginBottom="20dp"
         app:layout_constraintBottom_toTopOf="@+id/getStartedLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        android:padding="20dp"
+        >
 
-        <TextView
-            android:id="@+id/filterTextView"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/hideLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pokaż tylko"
-            android:textColor="@color/orange1"
-            android:textSize="25sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.563"
-            app:layout_constraintStart_toEndOf="@+id/showTextView"
-            app:layout_constraintTop_toTopOf="@+id/showTextView" />
-
-        <Spinner
-            android:id="@+id/subjectSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:backgroundTint="@color/gray3"
-            android:paddingStart="3dp"
-            android:paddingVertical="3dp"
-            android:foreground="@drawable/outline2"
-            app:layout_constraintEnd_toEndOf="@+id/filterTextView"
-            app:layout_constraintTop_toBottomOf="@+id/filterTextView" />
-
-        <TextView
-            android:id="@+id/showTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ukryj"
-            android:textColor="@color/orange1"
-            android:textSize="25sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.3"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <Switch
-            android:id="@+id/lectureSwitch"
+            <TextView
+                android:id="@+id/hideTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ukryj"
+                android:textColor="@color/orange1"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Switch
+                android:id="@+id/lectureSwitch"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Wykłady "
+                android:textColor="@color/gray3"
+                android:theme="@style/switcheroo"
+                app:layout_constraintRight_toRightOf="@id/hideTextView"
+                app:layout_constraintTop_toBottomOf="@+id/hideTextView"
+                tools:layout_editor_absoluteX="67dp" />
+
+            <Switch
+                android:id="@+id/exerciseSwitch"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/orange1"
+                android:text="Ćwiczenia "
+                android:textColor="@color/gray3"
+                android:theme="@style/switcheroo"
+                app:layout_constraintRight_toRightOf="@id/hideTextView"
+                app:layout_constraintTop_toBottomOf="@id/lectureSwitch"
+                tools:layout_editor_absoluteX="56dp"
+
+                />
+
+            <Switch
+                android:id="@+id/laboratorySwitch"
+                android:layout_width="wrap_content"
+
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Laboratoria "
+                android:textColor="@color/gray3"
+                android:theme="@style/switcheroo"
+                app:layout_constraintRight_toRightOf="@id/hideTextView"
+                app:layout_constraintTop_toBottomOf="@+id/exerciseSwitch"
+                tools:layout_editor_absoluteX="47dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/filterLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="Wykłady "
-            android:textColor="@color/gray3"
-            android:theme="@style/switcheroo"
-            app:layout_constraintEnd_toEndOf="@+id/showTextView"
-            app:layout_constraintTop_toBottomOf="@+id/showTextView" />
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <Switch
-            android:id="@+id/laboratorySwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Laboratoria "
-            android:textColor="@color/gray3"
-            android:theme="@style/switcheroo"
-            app:layout_constraintEnd_toEndOf="@+id/lectureSwitch"
-            app:layout_constraintTop_toBottomOf="@+id/lectureSwitch" />
+            <TextView
+                android:id="@+id/filterTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pokaż tylko"
+                android:textColor="@color/orange1"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <Switch
-            android:id="@+id/exerciseSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/orange1"
-            android:text="Ćwiczenia "
-            android:textColor="@color/gray3"
-            android:theme="@style/switcheroo"
-            app:layout_constraintEnd_toEndOf="@+id/laboratorySwitch"
-            app:layout_constraintTop_toBottomOf="@+id/laboratorySwitch" />
+            <Spinner
+                android:id="@+id/subjectSpinner"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:backgroundTint="@color/gray3"
+                android:foreground="@drawable/outline2"
+                android:paddingVertical="3dp"
+                android:paddingStart="3dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/filterTextView" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
