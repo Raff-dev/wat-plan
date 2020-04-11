@@ -21,17 +21,17 @@
       <change beforePath="$PROJECT_DIR$/.gradle/5.6.4/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.6.4/javaCompile/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Activities/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Activities/MainActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Activities/StartActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Activities/StartActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Adapters/BlockAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Adapters/BlockAdapter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Fragments/ScheduleFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Fragments/ScheduleFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Fragments/SettingsFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Fragments/SettingsFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Handlers/DBHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Handlers/DBHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Handlers/UpdateHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Handlers/UpdateHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/anim/switch_nav_button.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/anim/hide_nav_button.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Handlers/ConnectionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/WatPlan/Handlers/ConnectionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_start.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_start.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/card_block.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/card_block.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/card_day.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/card_day.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/card_week.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/card_week.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

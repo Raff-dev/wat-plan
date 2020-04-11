@@ -19,20 +19,21 @@ import com.example.WatPlan.R;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class StartActivity extends AppCompatActivity {
     private DBHandler dbHandler;
+    private ConstraintLayout failureLayout, getStartedLayout;
     private SearchableSpinner groupSpinner;
     private Spinner semesterSpinner;
     private Button getStartedButton, tryAgainButton;
-    private ConstraintLayout failureLayout, getStartedLayout;
     private TextView messageTextView;
 
     private ArrayList<String> semesters = new ArrayList<>();
     private ArrayList<String> groups = new ArrayList<>();
-    private Map<String, Map<String, String>> versions;
+    private Map<String, Map<String, String>> versions = new HashMap<>();
     private ArrayAdapter<String> semesterAdapter,groupAdapter;
     private String activeGroup, activeSemester;
     private ProgressBar progressBar;
@@ -66,7 +67,7 @@ public class StartActivity extends AppCompatActivity {
             try {
                 dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1);
                 versions = ConnectionHandler.getVersionMap();
-                semesters.addAll(versions.keySet());
+                semesters.addAll(Objects.requireNonNull(versions).keySet());
                 semesterAdapter.notifyDataSetChanged();
                 addListeners();
                 runOnUiThread(this::setLoaded);

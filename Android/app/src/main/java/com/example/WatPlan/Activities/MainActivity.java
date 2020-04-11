@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
     private SettingsFragment settingsFragment = new SettingsFragment(this);
     private UpdateHandler updateHandler = new UpdateHandler(this);
     private Map<String, Set<String>> values = new HashMap<>();
-    private Map<String, Color> colors = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

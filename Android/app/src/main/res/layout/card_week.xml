@@ -12,7 +12,7 @@
         android:layout_alignParentTop="true">
 
         <RelativeLayout
-            android:id="@+id/nullHour"
+            android:id="@+id/hourFiller"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             >
@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
 
             android:layout_height="72dp"
-            android:layout_below="@id/nullHour"
+            android:layout_below="@id/hourFiller"
             android:gravity="center"
             android:background="@drawable/outline">
 
