@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Vector;
 
 public class UpdateHandler extends Thread {
     private DBHandler dbHandler;
@@ -26,8 +25,6 @@ public class UpdateHandler extends Thread {
     private ArrayList<String> availableGroups;
     private ArrayList<String> availableSemesters;
     private Map<String, Map<String, String>> upToDateVersions;
-    private Map<String, Vector<String>> values;
-
 
     public UpdateHandler(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -47,7 +44,6 @@ public class UpdateHandler extends Thread {
     }
 
     private void setUp() {
-        //get one from db first
         upToDateVersions = ConnectionHandler.getVersionMap();
         if (upToDateVersions == null)
             upToDateVersions = dbHandler.getVersionMap();
@@ -56,7 +52,6 @@ public class UpdateHandler extends Thread {
         availableGroups = new ArrayList<>(Objects.requireNonNull(
                 upToDateVersions.get(dbHandler.getActiveSemester())).keySet());
     }
-
 
     public void setActiveSemester(String semesterName) {
         availableGroups.clear();
@@ -72,13 +67,11 @@ public class UpdateHandler extends Thread {
     }
 
     public void changeGroup(String semesterName, String groupName) {
-        //check if the group differs from active
         mainActivity.runOnUiThread(() -> scheduleFragment.clearPlan());
         dbHandler.setActiveSemester(semesterName);
         dbHandler.setActiveGroup(groupName);
 
         addToQueue(() -> {
-//            Map<String, Set<String>> uniqueValues = new HashMap<>();
             Map<Pair<String, String>, Block> newBlocks = getBlockMap(semesterName, groupName);
             Pair<LocalDate, LocalDate> borderDates = getBorderDates(semesterName, groupName);
             LocalDate firstDay = borderDates.first;
@@ -97,11 +90,8 @@ public class UpdateHandler extends Thread {
                     for (int index = 0; index < 7; index++) {
 
                         Pair<String, String> key = new Pair<>(date, String.valueOf(index));
-                        if (newBlocks.containsKey(key)) {
-                            Block block = newBlocks.get(key);
-                            //mb try getting unique values here
-                            day.add(block);
-                        } else day.add(null);
+                        if (newBlocks.containsKey(key)) day.add(newBlocks.get(key));
+                        else day.add(null);
                     }
                     week.add(new Day(day, date));
                     firstDay = firstDay.plusDays(1);
@@ -109,9 +99,8 @@ public class UpdateHandler extends Thread {
                 plan.add(new Week(week));
             }
 
-            settingsFragment.setUniqueValues(dbHandler.getUniqueValues(semesterName, groupName));
+            settingsFragment.setFilters(dbHandler.getUniqueValues(semesterName, groupName));
             scheduleFragment.mainActivity.runOnUiThread(() -> {
-                System.out.println("UI THREAD");
                 scheduleFragment.setPlan(plan);
                 scheduleFragment.setNames(semesterName, groupName);
             });
@@ -141,16 +130,16 @@ public class UpdateHandler extends Thread {
     }
 
     private Map<Pair<String, String>, Block> getBlockMap(String semesterName, String groupName) {
-        //to mozna uproscic
-        //sprawdzic, czy sciaga najpierw z bazy danych
         Map<Pair<String, String>, Block> newBlockMap = new HashMap<>();
         try {
             assert upToDateVersions.containsKey(semesterName) : "Semester not found in versions";
             assert upToDateVersions.get(semesterName) != null;
-            assert upToDateVersions.get(semesterName).containsKey(groupName) : "Group not found in versions";
+            assert Objects.requireNonNull(upToDateVersions.get(semesterName)).containsKey(groupName)
+                    : "Group not found in versions";
 
             String version = dbHandler.getVersion(semesterName, groupName);
-            String upToDateVersion = upToDateVersions.get(semesterName).get(groupName);
+            String upToDateVersion = Objects.requireNonNull(
+                    upToDateVersions.get(semesterName)).get(groupName);
             System.out.println("versions" + version + " " + upToDateVersion);
             if (version.equals(upToDateVersion))
                 newBlockMap = dbHandler.getGroupBlocks(semesterName, groupName);
@@ -168,29 +157,6 @@ public class UpdateHandler extends Thread {
             scheduleFragment.displayFailureMessage();
         }
         return newBlockMap;
-    }
-
-    public void downloadAll() {
-        //handle group not in db possibility
-        scheduleFragment.clearPlan();
-        try {
-            Map<String, Map<String, String>> versionMap = ConnectionHandler.getVersionMap();
-            assert versionMap != null;
-            versionMap.forEach((semesterName, groupMap) -> {
-                groupMap.forEach((groupName, version) -> {
-                    Map<Pair<String, String>, Block> newBlockMap =
-                            ConnectionHandler.getGroupBlocks(semesterName, groupName);
-                    assert newBlockMap != null;
-                    dbHandler.updateGroup(semesterName, groupName, newBlockMap, version);
-                });
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error downloading plan");
-            scheduleFragment.displayFailureMessage();
-        }
-        //dbhandler set first
-        changeGroup(dbHandler.getActiveSemester(), dbHandler.getActiveGroup());
     }
 
     public ArrayList<String> getAvailableGroups() {
@@ -212,6 +178,4 @@ public class UpdateHandler extends Thread {
     private void addToQueue(Runnable runnable) {
         queue.add(runnable);
     }
-
-
 }

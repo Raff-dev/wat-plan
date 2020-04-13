@@ -23,13 +23,14 @@ import com.example.WatPlan.R;
 import java.util.ArrayList;
 
 public class ScheduleFragment extends Fragment {
-    private boolean loading = true;
+    public MainActivity mainActivity;
+    private UpdateHandler updateHandler;
     private ArrayList<Week> plan = new ArrayList<>();
     private WeekAdapter weekAdapter;
-    private UpdateHandler updateHandler;
+    private RecyclerView planRecyclerView;
     private TextView semesterNameTextView, groupNameTextView;
     private View view;
-    public MainActivity mainActivity;
+    private boolean loading = true;
 
     public ScheduleFragment(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -40,63 +41,72 @@ public class ScheduleFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         this.view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        Animation enter = AnimationUtils.loadAnimation(mainActivity,R.anim.fragment_schedule_enter);
-        enter.setDuration(500);
-        this.view.startAnimation(enter);
-
+        enter();
+        getViews();
         switchLoading(this.loading);
+
         if (plan.size() == 0) {
             updateHandler = mainActivity.getUpdateHandler();
             updateHandler.setDefaultGroup();
         }
-        RecyclerView planRecyclerView = view.findViewById(R.id.planRecyclerView);
+
+
         planRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         planRecyclerView.setAdapter(weekAdapter);
-        groupNameTextView = view.findViewById(R.id.groupTextView);
-        semesterNameTextView = view.findViewById(R.id.semesterTextView);
         setNames(updateHandler.getActiveSemester(), updateHandler.getActiveGroup());
         return view;
     }
 
-    public void clearPlan(){
+    private void getViews() {
+        planRecyclerView = view.findViewById(R.id.planRecyclerView);
+        groupNameTextView = view.findViewById(R.id.groupTextView);
+        semesterNameTextView = view.findViewById(R.id.semesterTextView);
+    }
+
+    public void clearPlan() {
         this.plan.clear();
         switchLoading(true);
     }
+
     public void setPlan(ArrayList<Week> plan) {
         this.plan.addAll(plan);
-//        weekAdapter.notifyDataSetChanged();
         switchLoading(false);
         System.out.println("FINISHED APPLYTING PLAN");
     }
 
-    private void switchLoading(boolean loading){
-        this.loading=loading;
+    private void switchLoading(boolean loading) {
+        this.loading = loading;
         if (loading) {
             view.findViewById(R.id.planRecyclerView).setVisibility(View.GONE);
             view.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-        }else{
+        } else {
             view.findViewById(R.id.progressBar).setVisibility(View.GONE);
             view.findViewById(R.id.planRecyclerView).setVisibility(View.VISIBLE);
         }
-    }
-
-    public void exit(){
-        Animation exit = AnimationUtils.loadAnimation(mainActivity,R.anim.fragment_schedule_exit);
-        exit.setDuration(500);
-        view.startAnimation(exit);
     }
 
     public void setNames(String semesterName, String groupName) {
         this.semesterNameTextView.setText(semesterName);
         this.groupNameTextView.setText(groupName);
     }
-    public WeekAdapter getWeekAdapter() {
+
+    WeekAdapter getWeekAdapter() {
         return weekAdapter;
     }
 
     public void displayFailureMessage() {
+
     }
 
-    public void onCreateAnimation() {
+    private void enter() {
+        Animation enter = AnimationUtils.loadAnimation(mainActivity, R.anim.fragment_schedule_enter);
+        enter.setDuration(500);
+        this.view.startAnimation(enter);
+    }
+
+    public void exit() {
+        Animation exit = AnimationUtils.loadAnimation(mainActivity, R.anim.fragment_schedule_exit);
+        exit.setDuration(500);
+        view.startAnimation(exit);
     }
 }
