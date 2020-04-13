@@ -48,15 +48,14 @@ public class MainActivity extends AppCompatActivity {
         FrameLayout search_frame = findViewById(R.id.search_frame);
         FrameLayout settings_frame = findViewById(R.id.settings_frame);
 
-        openFragment(scheduleFragment);
         Button search = findViewById(R.id.search);
         search_frame.startAnimation(hideButton);
         Button settings = findViewById(R.id.settings);
         search_frame.setTranslationZ(0);
         settings_frame.setTranslationZ(1);
+        openFragment(scheduleFragment);
 
         settings.setOnClickListener(v -> {
-
             search_frame.setTranslationZ(1);
             settings_frame.setTranslationZ(0);
             search_frame.startAnimation(showButton);
