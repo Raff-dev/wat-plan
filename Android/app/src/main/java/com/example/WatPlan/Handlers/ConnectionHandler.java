@@ -18,7 +18,7 @@ import java.util.Objects;
 
 
 public class ConnectionHandler {
-    private static final String baseAddress = "http://10.0.2.2:8000/Plan/";
+    private static final String baseAddress = "http://tofen.eu.pythonanywhere.com//Plan/";
     private static final OkHttpClient client = new OkHttpClient();
 
     public static Map<String, Map<String, String>> getVersionMap() {

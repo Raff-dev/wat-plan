@@ -12,6 +12,30 @@
     android:layout_height="match_parent"/>
 
     <FrameLayout
+        android:id="@+id/search_frame"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/search_background"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+
+        <Button
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#0000"
+            android:foreground="@drawable/ic_search"
+            android:foregroundTint="@color/orange1"
+            android:gravity="center"
+            android:includeFontPadding="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </FrameLayout>
+
+    <FrameLayout
         android:id="@+id/settings_frame"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -35,29 +59,7 @@
             app:layout_constraintEnd_toEndOf="parent" />
     </FrameLayout>
 
-    <FrameLayout
-        android:id="@+id/search_frame"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginBottom="15dp"
-        android:background="@drawable/search_background"
-        android:padding="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
 
-        <Button
-            android:id="@+id/search"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#0000"
-            android:foreground="@drawable/ic_search"
-            android:foregroundTint="@color/orange1"
-            android:gravity="center"
-            android:includeFontPadding="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-    </FrameLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

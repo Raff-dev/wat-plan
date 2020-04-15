@@ -8,17 +8,16 @@
     tools:context=".Activities.MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:background="@color/gray1"
         android:id="@+id/navBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/gray1"
         android:paddingHorizontal="12dp"
         android:paddingVertical="10dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/divider"
         app:layout_constraintEnd_toEndOf="parent"
-        >
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/semesterTextView"
@@ -60,8 +59,7 @@
         android:background="@color/orange1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/navBar"
-        />
+        app:layout_constraintTop_toBottomOf="@id/navBar" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/planRecyclerView"
@@ -81,12 +79,49 @@
         android:indeterminate="true"
         android:indeterminateTint="@color/orange1"
         android:indeterminateTintMode="src_atop"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/connectionFailureLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:visibility="gone"
-        />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider">
+
+        <TextView
+            android:id="@+id/messageTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message"
+            android:textAlignment="center"
+            android:textColor="@color/gray3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent"
+
+            />
+
+        <Button
+            android:id="@+id/tryAgainButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:background="@color/orange1"
+            android:text="Try Again"
+            android:textColor="@color/gray2"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/messageTextView" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
