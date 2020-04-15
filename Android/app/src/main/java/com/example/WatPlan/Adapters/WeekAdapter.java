@@ -1,6 +1,5 @@
 package com.example.WatPlan.Adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,18 +10,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.WatPlan.Activities.MainActivity;
 import com.example.WatPlan.Models.Day;
-import com.example.WatPlan.R;
 import com.example.WatPlan.Models.Week;
+import com.example.WatPlan.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder> {
     private HashSet<BlockFilter> blockFilterHashSet = new HashSet<>();
     private MainActivity mainActivity;
     private ArrayList<Week> weekArrayList;
+    private int startPosition = 0;
 
     public WeekAdapter(MainActivity mainActivity, ArrayList<Week> weekArrayList) {
         this.mainActivity = mainActivity;
@@ -35,10 +33,14 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
         else blockFilterHashSet.remove(blockFilter);
     }
 
-    public static class WeekViewHolder extends RecyclerView.ViewHolder {
+    public void setStartingWeekPosition(int startPosition) {
+        this.startPosition = startPosition;
+    }
+
+    static class WeekViewHolder extends RecyclerView.ViewHolder {
         RecyclerView dayRecyclerView;
 
-        public WeekViewHolder(@NonNull View itemView) {
+        WeekViewHolder(@NonNull View itemView) {
             super(itemView);
             dayRecyclerView = itemView.findViewById(R.id.dayRecyclerView);
         }
@@ -47,13 +49,21 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     @NonNull
     @Override
     public WeekViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_week, parent, false);
         return new WeekViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull WeekViewHolder holder, int position) {
-        Week week = weekArrayList.get(position);
+        //filtering for only future plan
+
+        Week week;
+        if (position + startPosition < weekArrayList.size())
+            week = weekArrayList.get(position + startPosition);
+        else return;
+        //weekArrayList.remove(position);
+//        Week week = weekArrayList.get(position);
         ArrayList<Day> dayArrayList = week.getDayArrayList();
         DayAdapter dayAdapter = new DayAdapter(mainActivity, dayArrayList, blockFilterHashSet);
 
@@ -65,6 +75,6 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
 
     @Override
     public int getItemCount() {
-        return weekArrayList.size();
+        return weekArrayList.size() - startPosition;
     }
 }

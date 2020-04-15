@@ -162,7 +162,7 @@
                 android:theme="@style/switcheroo"
                 app:layout_constraintRight_toRightOf="@id/hideTextView"
                 app:layout_constraintTop_toBottomOf="@+id/exerciseSwitch"
-                tools:layout_editor_absoluteX="47dp" />
+                />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -194,6 +194,18 @@
                 android:paddingStart="3dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/filterTextView" />
+
+            <Switch
+                android:id="@+id/pastPlanSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Przyszły plan "
+                android:textColor="@color/gray3"
+                android:theme="@style/switcheroo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/subjectSpinner" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
