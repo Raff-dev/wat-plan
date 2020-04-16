@@ -8,14 +8,14 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         app:layout_constraintBottom_toTopOf="@+id/settingsLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias=".2"
-        app:srcCompat="@drawable/ic_launcher_foreground" />
+        app:srcCompat="@drawable/logo_hdpi" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/getStartedLayout"
@@ -25,9 +25,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias=".9"
-        >
-
+        app:layout_constraintVertical_bias=".9">
 
 
         <TextView
@@ -57,8 +55,8 @@
             android:backgroundTint="@color/gray3"
             android:foreground="@drawable/outline2"
             android:gravity="center"
-            android:paddingStart="3dp"
             android:paddingVertical="3dp"
+            android:paddingStart="3dp"
             app:layout_constraintBottom_toTopOf="@+id/groupSpinner"
             app:layout_constraintStart_toEndOf="@+id/textView2" />
 
@@ -82,12 +80,11 @@
             android:backgroundTint="@color/gray3"
             android:foreground="@drawable/outline2"
             android:gravity="center"
-            android:paddingStart="3dp"
             android:paddingVertical="3dp"
+            android:paddingStart="3dp"
             android:textAlignment="center"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/semesterSpinner"
-            />
+            app:layout_constraintStart_toStartOf="@+id/semesterSpinner" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -96,11 +93,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
+        android:padding="20dp"
         app:layout_constraintBottom_toTopOf="@+id/getStartedLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:padding="20dp"
-        >
+        app:layout_constraintStart_toStartOf="parent">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -124,7 +120,6 @@
 
             <Switch
                 android:id="@+id/lectureSwitch"
-
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
@@ -132,12 +127,10 @@
                 android:textColor="@color/gray3"
                 android:theme="@style/switcheroo"
                 app:layout_constraintRight_toRightOf="@id/hideTextView"
-                app:layout_constraintTop_toBottomOf="@+id/hideTextView"
-                tools:layout_editor_absoluteX="67dp" />
+                app:layout_constraintTop_toBottomOf="@+id/hideTextView" />
 
             <Switch
                 android:id="@+id/exerciseSwitch"
-
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -147,22 +140,19 @@
                 android:theme="@style/switcheroo"
                 app:layout_constraintRight_toRightOf="@id/hideTextView"
                 app:layout_constraintTop_toBottomOf="@id/lectureSwitch"
-                tools:layout_editor_absoluteX="56dp"
 
                 />
 
             <Switch
                 android:id="@+id/laboratorySwitch"
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="Laboratoria "
                 android:textColor="@color/gray3"
                 android:theme="@style/switcheroo"
                 app:layout_constraintRight_toRightOf="@id/hideTextView"
-                app:layout_constraintTop_toBottomOf="@+id/exerciseSwitch"
-                />
+                app:layout_constraintTop_toBottomOf="@+id/exerciseSwitch" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

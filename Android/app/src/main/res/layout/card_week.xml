@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/weekLayout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
     <RelativeLayout
         android:id="@+id/hourRelativeLayout"
-        android:layout_width="44dp"
+        android:layout_width="120px"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
@@ -22,7 +23,6 @@
         <RelativeLayout
             android:id="@+id/firstHour"
             android:layout_width="wrap_content"
-
             android:layout_height="72dp"
             android:layout_below="@id/hourFiller"
             android:gravity="center"
@@ -248,8 +248,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_toEndOf="@id/hourRelativeLayout"
-        android:layout_toRightOf="@id/hourRelativeLayout"
         android:orientation="horizontal" />
 </RelativeLayout>

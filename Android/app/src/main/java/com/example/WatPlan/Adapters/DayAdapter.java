@@ -1,6 +1,7 @@
 package com.example.WatPlan.Adapters;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +24,13 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     private ArrayList<Day> dayArrayList;
     private MainActivity mainActivity;
     private HashSet<BlockFilter> blockFilterHashSet;
+    private int sizeModifier;
 
-    public DayAdapter(MainActivity mainActivity, ArrayList<Day> dayArrayList, HashSet<BlockFilter> blockFilterHashSet) {
+    public DayAdapter(MainActivity mainActivity, ArrayList<Day> dayArrayList, HashSet<BlockFilter> blockFilterHashSet, int sizeModifier) {
         this.dayArrayList = dayArrayList;
         this.blockFilterHashSet = blockFilterHashSet;
         this.mainActivity = mainActivity;
+        this.sizeModifier = sizeModifier;
     }
 
     public static class DayViewHolder extends RecyclerView.ViewHolder {
@@ -47,6 +50,11 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     @Override
     public DayViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_day, parent, false);
+        View dayLayout = v.findViewById(R.id.dayLayout);
+        Point size = new Point();
+        mainActivity.getWindowManager().getDefaultDisplay().getSize(size);
+
+        dayLayout.getLayoutParams().width = (size.x - 120) / 5;
         return new DayViewHolder(v);
     }
 
@@ -62,7 +70,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         holder.dayNameTextView.setText(dayName);
 
         ArrayList<Block> blockArrayList = day.getBlockArrayList();
-        BlockAdapter blockAdapter = new BlockAdapter(mainActivity,blockArrayList, blockFilterHashSet);
+        BlockAdapter blockAdapter = new BlockAdapter(mainActivity, blockArrayList, blockFilterHashSet);
 
         holder.blockRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager blockLayoutManager = new LinearLayoutManager(mainActivity) {

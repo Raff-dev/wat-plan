@@ -50,7 +50,6 @@ public class StartActivity extends AppCompatActivity {
 
     private void setUp() {
         dbHandler = new DBHandler(this);
-//        dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1);
 
         int spinnerItem = R.layout.support_simple_spinner_dropdown_item;
         semesterAdapter = new ArrayAdapter<>(this, spinnerItem, semesters);

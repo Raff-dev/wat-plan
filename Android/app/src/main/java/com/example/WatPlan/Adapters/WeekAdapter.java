@@ -1,5 +1,6 @@
 package com.example.WatPlan.Adapters;
 
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     private MainActivity mainActivity;
     private ArrayList<Week> weekArrayList;
     private int startPosition = 0;
+    private int sizeModifier =0;
 
     public WeekAdapter(MainActivity mainActivity, ArrayList<Week> weekArrayList) {
         this.mainActivity = mainActivity;
@@ -37,6 +39,10 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
         this.startPosition = startPosition;
     }
 
+    public void setSizeModifier(int scale) {
+        this.sizeModifier = scale;
+    }
+
     static class WeekViewHolder extends RecyclerView.ViewHolder {
         RecyclerView dayRecyclerView;
 
@@ -49,7 +55,6 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     @NonNull
     @Override
     public WeekViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_week, parent, false);
         return new WeekViewHolder(v);
     }
@@ -57,15 +62,12 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     @Override
     public void onBindViewHolder(@NonNull WeekViewHolder holder, int position) {
         //filtering for only future plan
-
         Week week;
         if (position + startPosition < weekArrayList.size())
             week = weekArrayList.get(position + startPosition);
         else return;
-        //weekArrayList.remove(position);
-//        Week week = weekArrayList.get(position);
         ArrayList<Day> dayArrayList = week.getDayArrayList();
-        DayAdapter dayAdapter = new DayAdapter(mainActivity, dayArrayList, blockFilterHashSet);
+        DayAdapter dayAdapter = new DayAdapter(mainActivity, dayArrayList, blockFilterHashSet, sizeModifier);
 
         holder.dayRecyclerView.setAdapter(dayAdapter);
         holder.dayRecyclerView.setHasFixedSize(true);

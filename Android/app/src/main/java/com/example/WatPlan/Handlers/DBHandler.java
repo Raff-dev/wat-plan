@@ -258,7 +258,6 @@ public class DBHandler extends SQLiteOpenHelper {
             });
         });
 
-        String date = LocalDate.now().toString();
         values.put("name", "hide_past_plan");
         values.put("value", "true");
         writableDb.insert(PREFERENCES, null, values);

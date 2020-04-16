@@ -1,5 +1,6 @@
 package com.example.WatPlan.Fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 
@@ -23,12 +25,13 @@ import com.example.WatPlan.Handlers.UpdateHandler;
 import com.example.WatPlan.R;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import static java.lang.Integer.parseInt;
 
 public class SettingsFragment extends Fragment {
     private MainActivity mainActivity;
@@ -64,6 +67,14 @@ public class SettingsFragment extends Fragment {
     public void setHandlers(UpdateHandler updateHandler, DBHandler dbHandler) {
         this.updateHandler = updateHandler;
         this.dbHandler = dbHandler;
+
+        semesters = updateHandler.getAvailableSemesters();
+        groups = updateHandler.getAvailableGroups();
+
+        int spinnerItem = R.layout.support_simple_spinner_dropdown_item;
+        smesterAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, semesters);
+        groupAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, groups);
+        subjectAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, subjects);
     }
 
     @Nullable
@@ -72,16 +83,6 @@ public class SettingsFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_settings, container, false);
         enterAnimation();
         getViews();
-
-
-        System.out.println("ONCREATE");
-        semesters = updateHandler.getAvailableSemesters();
-        groups = updateHandler.getAvailableGroups();
-
-        int spinnerItem = R.layout.support_simple_spinner_dropdown_item;
-        smesterAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, semesters);
-        groupAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, groups);
-        subjectAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, subjects);
 
         semesterSpinner.setAdapter(smesterAdapter);
         groupSpinner.setAdapter(groupAdapter);
@@ -111,7 +112,6 @@ public class SettingsFragment extends Fragment {
             mainActivity.getScheduleFragment().togglePastPlan();
         }
         ));
-
         subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

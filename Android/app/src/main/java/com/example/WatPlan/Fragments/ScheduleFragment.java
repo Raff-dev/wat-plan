@@ -27,6 +27,7 @@ import com.example.WatPlan.R;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+
 public class ScheduleFragment extends Fragment {
     private MainActivity mainActivity;
     private DBHandler dbHandler;
@@ -47,16 +48,16 @@ public class ScheduleFragment extends Fragment {
         this.updateHandler = updateHandler;
         this.updateHandler.setDefaultGroup();
         this.dbHandler = dbHandler;
+
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        this.view = inflater.inflate(R.layout.fragment_schedule, container, false);
+        view = inflater.inflate(R.layout.fragment_schedule, container, false);
         enterAnimation();
         getViews();
-        switchLoading(this.loading);
-
+        switchLoading(loading);
 
         planRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         planRecyclerView.setAdapter(weekAdapter);
@@ -123,7 +124,7 @@ public class ScheduleFragment extends Fragment {
         this.groupNameTextView.setText(groupName);
     }
 
-    WeekAdapter getWeekAdapter() {
+    public WeekAdapter getWeekAdapter() {
         return weekAdapter;
     }
 

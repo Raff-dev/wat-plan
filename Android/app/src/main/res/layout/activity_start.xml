@@ -9,15 +9,15 @@
 
     <ImageView
         android:id="@+id/watPlanIcon"
-        android:layout_width="166dp"
-        android:layout_height="175dp"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         app:layout_constraintBottom_toTopOf="@+id/getStartedLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.051"
-        app:srcCompat="@drawable/ic_launcher_foreground" />
+        app:srcCompat="@drawable/logo_hdpi" />
 
     <TextView
         android:id="@+id/messageTextView"
