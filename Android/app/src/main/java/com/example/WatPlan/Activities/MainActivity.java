@@ -5,7 +5,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -43,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setListeners() {
         settings.setOnClickListener(v -> {
-            System.out.println("settings click");
             hideButton(settingsButtonFrame);
             showButton(scheduleButtonFrame);
             settings.startAnimation(rotateSettings);

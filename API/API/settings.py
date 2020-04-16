@@ -25,7 +25,7 @@ SECRET_KEY = '4esdo(!ootxe9f%7a4fjvp@!=jvth2(pw=02e%q9%i&@$0tvby'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'tofen.eu.pythonanywhere.com/']
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'tofen.eu.pythonanywhere.com']
 
 
 # Application definition
