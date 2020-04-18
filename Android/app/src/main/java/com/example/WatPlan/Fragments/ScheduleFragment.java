@@ -1,7 +1,6 @@
 package com.example.WatPlan.Fragments;
 
 import android.os.Bundle;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,12 +19,16 @@ import com.example.WatPlan.Activities.MainActivity;
 import com.example.WatPlan.Adapters.WeekAdapter;
 import com.example.WatPlan.Handlers.DBHandler;
 import com.example.WatPlan.Handlers.UpdateHandler;
+import com.example.WatPlan.Models.BlockFilter;
 import com.example.WatPlan.Models.Week;
 import com.example.WatPlan.R;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Objects;
 
+import static com.example.WatPlan.Models.BlockFilter.NO_FILTER;
+import static com.example.WatPlan.Models.Preferences.*;
 
 public class ScheduleFragment extends Fragment {
     private MainActivity mainActivity;
@@ -37,6 +39,7 @@ public class ScheduleFragment extends Fragment {
     private RecyclerView planRecyclerView;
     private TextView semesterNameTextView, groupNameTextView;
     private View view;
+    private BlockFilter subjectBlockFilter;
     private boolean loading = true;
 
     public ScheduleFragment(MainActivity mainActivity) {
@@ -44,12 +47,12 @@ public class ScheduleFragment extends Fragment {
         weekAdapter = new WeekAdapter(mainActivity, plan);
     }
 
-    public void setHandlers(UpdateHandler updateHandler, DBHandler dbHandler) {
+    public void setUp(UpdateHandler updateHandler, DBHandler dbHandler) {
         this.updateHandler = updateHandler;
-        this.updateHandler.setDefaultGroup();
         this.dbHandler = dbHandler;
-
+        this.updateHandler.setDefaultGroup();
     }
+
 
     @Nullable
     @Override
@@ -58,6 +61,7 @@ public class ScheduleFragment extends Fragment {
         enterAnimation();
         getViews();
         switchLoading(loading);
+        applyFilters();
 
         planRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         planRecyclerView.setAdapter(weekAdapter);
@@ -71,23 +75,45 @@ public class ScheduleFragment extends Fragment {
         semesterNameTextView = view.findViewById(R.id.semesterTextView);
     }
 
-    public void togglePastPlan() {
+    public void applyFilters() {
+        setPastPlanFilter();
+        setClassTypeFilters();
+        setClassFilter();
+        weekAdapter.notifyDataSetChanged();
+    }
+
+    private void setClassTypeFilters() {
+        for (String classType : classTypes) {
+            boolean apply = dbHandler.getPreference(classType).equals(HIDDEN);
+            BlockFilter blockFilter = BlockFilter.getFiltermap().get(classType);
+            weekAdapter.switchBlockFilter(blockFilter, apply);
+        }
+    }
+
+    private void setClassFilter() {
+        String subjectName = dbHandler.getPreference(SUBJECT);
+        weekAdapter.switchBlockFilter(subjectBlockFilter, false);
+        if (subjectName.equals(NO_FILTER)) subjectBlockFilter = block -> true;
+        else subjectBlockFilter = block -> block.getSubject().equals(subjectName);
+        weekAdapter.switchBlockFilter(subjectBlockFilter, true);
+    }
+
+    public void setPastPlanFilter() {
         System.out.println("TOGGLE PLAN");
         int startWeekPosition = 0;
-        if (dbHandler.getPreference("hide_past_plan").equals("true"))
+        if (dbHandler.getPreference(PAST_PLAN).equals(HIDDEN))
             startWeekPosition = getCurrentWeekPosition();
         weekAdapter.setStartingWeekPosition(startWeekPosition);
-        weekAdapter.notifyDataSetChanged();
     }
 
     public int getCurrentWeekPosition() {
         try {
             LocalDate today = LocalDate.now();
-            String semester = dbHandler.getPreference("semester");
-            String group = dbHandler.getPreference("group");
+            String semester = dbHandler.getPreference(SEMESTER);
+            String group = dbHandler.getPreference(GROUP);
             String firstDay = dbHandler.getBorderDates(semester, group).first;
             int daysCount = 0;
-            while (!firstDay.equals(today.toString())) {
+            while (!Objects.requireNonNull(firstDay).equals(today.toString())) {
                 daysCount += 1;
                 today = today.minusDays(1);
             }
@@ -124,20 +150,19 @@ public class ScheduleFragment extends Fragment {
         this.groupNameTextView.setText(groupName);
     }
 
-    public WeekAdapter getWeekAdapter() {
-        return weekAdapter;
-    }
-
     public void displayFailureMessage() {
         TextView messageTextView = view.findViewById(R.id.messageTextView);
         messageTextView.setText(mainActivity.getString(R.string.connection_failure));
         View connectionFailureLayout = view.findViewById(R.id.connectionFailureLayout);
         Button tryAgainButtton = view.findViewById(R.id.tryAgainButton);
 
+        View progressBar = view.findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
+
         connectionFailureLayout.setVisibility(View.VISIBLE);
         tryAgainButtton.setOnClickListener(v -> {
-            String group = dbHandler.getPreference("group");
-            String semester = dbHandler.getPreference("semester");
+            String group = dbHandler.getPreference(GROUP);
+            String semester = dbHandler.getPreference(SEMESTER);
             connectionFailureLayout.setVisibility(View.GONE);
             updateHandler.changeGroup(semester, group);
         });

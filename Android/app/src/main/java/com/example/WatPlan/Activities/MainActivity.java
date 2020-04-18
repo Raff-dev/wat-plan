@@ -30,14 +30,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         dbHandler = new DBHandler(this);
         updateHandler = new UpdateHandler(this, dbHandler);
-        scheduleFragment.setHandlers(updateHandler, dbHandler);
-        settingsFragment.setHandlers(updateHandler, dbHandler);
+        scheduleFragment.setUp(updateHandler, dbHandler);
+        settingsFragment.setUp(updateHandler, dbHandler);
 
         setAnimations();
         findViews();
         hideButton(scheduleButtonFrame);
         openFragment(scheduleFragment);
         setListeners();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (settingsButtonFrame.getTranslationZ() < scheduleButtonFrame.getTranslationZ())
+            schedule.callOnClick();
+        else settings.callOnClick();
     }
 
     private void setListeners() {
@@ -56,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
             openFragment(scheduleFragment);
         });
     }
-
 
     private void setAnimations() {
         hideButton = AnimationUtils.loadAnimation(this, R.anim.hide_nav_button);

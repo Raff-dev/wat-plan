@@ -1,6 +1,5 @@
 package com.example.WatPlan.Fragments;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +8,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.SeekBar;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Switch;
 
@@ -18,53 +17,49 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.WatPlan.Activities.MainActivity;
-import com.example.WatPlan.Adapters.BlockFilter;
+import com.example.WatPlan.Models.BlockFilter;
 import com.example.WatPlan.Adapters.WeekAdapter;
 import com.example.WatPlan.Handlers.DBHandler;
 import com.example.WatPlan.Handlers.UpdateHandler;
+import com.example.WatPlan.Models.Preferences;
+import com.example.WatPlan.Models.Switch_;
 import com.example.WatPlan.R;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static java.lang.Integer.parseInt;
+import static com.example.WatPlan.Models.BlockFilter.NO_FILTER;
+import static com.example.WatPlan.Models.Preferences.*;
 
 public class SettingsFragment extends Fragment {
     private MainActivity mainActivity;
     private UpdateHandler updateHandler;
     private DBHandler dbHandler;
+
     private View view;
     private Spinner semesterSpinner, subjectSpinner;
     private SearchableSpinner groupSpinner;
+    private Button notificationButton, feedbackButton;
 
-    private WeekAdapter weekAdapter;
-    private ArrayAdapter<String> groupAdapter, smesterAdapter, subjectAdapter;
+    private ArrayAdapter<String> groupAdapter, semesterAdapter, subjectAdapter;
     private ArrayList<String> groups = new ArrayList<>();
     private ArrayList<String> semesters = new ArrayList<>();
     private ArrayList<String> subjects = new ArrayList<>();
+    private ArrayList<Switch_> switchArrayList = new ArrayList<>();
 
-    private Map<Switch, BlockFilter> switchMap = new HashMap<>();
+    private String[] switchNames = new String[]{LECTURE, EXERCISE, LABORATORY};
     private int[] switchIds = new int[]{R.id.lectureSwitch, R.id.exerciseSwitch, R.id.laboratorySwitch};
-    private BlockFilter subjectBlockFilter;
     private Switch pastPlanSwitch;
-    private BlockFilter[] switchFilters = new BlockFilter[]{
-            block -> !block.getClassType().equals("w"),
-            block -> !block.getClassType().equals("ć"),
-            block -> !block.getClassType().equals("L")
-    };
-    private String NO_FILTER = "---";
 
 
     public SettingsFragment(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
-        weekAdapter = mainActivity.getScheduleFragment().getWeekAdapter();
     }
 
-    public void setHandlers(UpdateHandler updateHandler, DBHandler dbHandler) {
+    public void setUp(UpdateHandler updateHandler, DBHandler dbHandler) {
         this.updateHandler = updateHandler;
         this.dbHandler = dbHandler;
 
@@ -72,7 +67,7 @@ public class SettingsFragment extends Fragment {
         groups = updateHandler.getAvailableGroups();
 
         int spinnerItem = R.layout.support_simple_spinner_dropdown_item;
-        smesterAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, semesters);
+        semesterAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, semesters);
         groupAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, groups);
         subjectAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, subjects);
     }
@@ -84,45 +79,45 @@ public class SettingsFragment extends Fragment {
         enterAnimation();
         getViews();
 
-        semesterSpinner.setAdapter(smesterAdapter);
+        semesterSpinner.setAdapter(semesterAdapter);
         groupSpinner.setAdapter(groupAdapter);
         subjectSpinner.setAdapter(subjectAdapter);
 
-        if (dbHandler.getPreference("hide_past_plan").equals("true"))
-            pastPlanSwitch.setChecked(true);
+        applyPreferences();
         addListeners();
         return view;
     }
 
     private void getViews() {
         for (int i = 0; i < switchIds.length; i++)
-            switchMap.put(view.findViewById(switchIds[i]), switchFilters[i]);
+            switchArrayList.add(new Switch_(
+                    view.findViewById(switchIds[i]),
+                    switchNames[i],
+                    BlockFilter.getFiltermap().get(switchNames[i])));
         semesterSpinner = view.findViewById(R.id.semesterSpinner);
         groupSpinner = view.findViewById(R.id.groupSpinner);
         subjectSpinner = view.findViewById(R.id.subjectSpinner);
         pastPlanSwitch = view.findViewById(R.id.pastPlanSwitch);
+
+        notificationButton = view.findViewById(R.id.notificationbutton);
+        feedbackButton = view.findViewById(R.id.feedbackButton);
     }
 
     private void addListeners() {
-        switchMap.forEach((switch_, filter) -> switch_.setOnCheckedChangeListener(
-                (buttonView, isChecked) -> weekAdapter.switchBlockFilter(filter, isChecked))
-        );
-        pastPlanSwitch.setOnCheckedChangeListener(((buttonView, isChecked) -> {
-            dbHandler.setPreference("hide_past_plan", String.valueOf(isChecked));
-            mainActivity.getScheduleFragment().togglePastPlan();
-        }
+        switchArrayList.forEach(switch_ ->
+                switch_.getSwitch().setOnCheckedChangeListener((buttonView, isChecked) ->
+                        dbHandler.setPreference(switch_.getName(), preferenceValue(isChecked))
+                ));
+
+        pastPlanSwitch.setOnCheckedChangeListener(((buttonView, isChecked) ->
+                dbHandler.setPreference(PAST_PLAN, preferenceValue(isChecked))
         ));
+
         subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                String subjectFilter = subjectSpinner.getSelectedItem().toString();
-                WeekAdapter weekAdapter = mainActivity.getScheduleFragment().getWeekAdapter();
-                weekAdapter.switchBlockFilter(subjectBlockFilter, false);
-                if (subjectFilter.equals(NO_FILTER)) subjectBlockFilter = block -> true;
-                else subjectBlockFilter = block -> block.getSubject().equals(subjectFilter);
-                weekAdapter.switchBlockFilter(subjectBlockFilter, true);
-                weekAdapter.notifyDataSetChanged();
+                String subjectName = subjectSpinner.getSelectedItem().toString();
+                dbHandler.setPreference(SUBJECT, subjectName);
             }
 
             @Override
@@ -135,6 +130,7 @@ public class SettingsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String semester = semesterSpinner.getSelectedItem().toString();
                 if (semester.equals(updateHandler.getActiveSemester())) return;
+                System.out.println("SEMESTER SPINNER");
                 updateHandler.setActiveSemester(semester);
                 groups = updateHandler.getAvailableGroups();
                 groupAdapter.notifyDataSetChanged();
@@ -165,6 +161,32 @@ public class SettingsFragment extends Fragment {
         });
     }
 
+    private void applyPreferences() {
+        //subject spinner
+        String subject = dbHandler.getPreference(SUBJECT);
+        for (int i = 0; i < subjects.size(); i++)
+            if (subjects.get(i).equals(subject)) subjectSpinner.setSelection(i);
+
+        //past plan switch
+        if (dbHandler.getPreference(PAST_PLAN).equals(HIDDEN))
+            pastPlanSwitch.setChecked(true);
+
+        //lecture, ex, lab switches
+        switchArrayList.forEach(switch_ -> {
+            if (dbHandler.getPreference(switch_.getName()).equals(HIDDEN))
+                switch_.getSwitch().setChecked(true);
+        });
+
+        //semester spinner
+        String semester = dbHandler.getPreference(SEMESTER);
+        for (int i = 0; i < semesters.size(); i++)
+            if (semesters.get(i).equals(semester)) semesterSpinner.setSelection(i);
+
+        //group spinner
+        String group = dbHandler.getPreference(GROUP);
+        for (int i = 0; i < groups.size(); i++)
+            if (groups.get(i).equals(group)) groupSpinner.setSelection(i);
+    }
 
     public void setFilters(Map<String, Set<String>> uniqueValues) {
         subjects.clear();
@@ -183,6 +205,4 @@ public class SettingsFragment extends Fragment {
         exit.setDuration(500);
         view.startAnimation(exit);
     }
-
-
 }

@@ -1,6 +1,5 @@
 package com.example.WatPlan.Adapters;
 
-import android.content.Context;
 import android.graphics.Point;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.WatPlan.Activities.MainActivity;
 import com.example.WatPlan.Models.Block;
+import com.example.WatPlan.Models.BlockFilter;
 import com.example.WatPlan.Models.Day;
 import com.example.WatPlan.R;
 
@@ -24,13 +24,11 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     private ArrayList<Day> dayArrayList;
     private MainActivity mainActivity;
     private HashSet<BlockFilter> blockFilterHashSet;
-    private int sizeModifier;
 
-    public DayAdapter(MainActivity mainActivity, ArrayList<Day> dayArrayList, HashSet<BlockFilter> blockFilterHashSet, int sizeModifier) {
+    public DayAdapter(MainActivity mainActivity, ArrayList<Day> dayArrayList, HashSet<BlockFilter> blockFilterHashSet) {
         this.dayArrayList = dayArrayList;
         this.blockFilterHashSet = blockFilterHashSet;
         this.mainActivity = mainActivity;
-        this.sizeModifier = sizeModifier;
     }
 
     public static class DayViewHolder extends RecyclerView.ViewHolder {
