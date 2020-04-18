@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.example.WatPlan.Models.Preferences.*;
+
 public class StartActivity extends AppCompatActivity {
     private DBHandler dbHandler;
     private ConstraintLayout failureLayout, getStartedLayout;
@@ -50,6 +52,7 @@ public class StartActivity extends AppCompatActivity {
 
     private void setUp() {
         dbHandler = new DBHandler(this);
+//        dbHandler.onUpgrade(dbHandler.getWritableDatabase(), 1, 1);
 
         int spinnerItem = R.layout.support_simple_spinner_dropdown_item;
         semesterAdapter = new ArrayAdapter<>(this, spinnerItem, semesters);
@@ -108,8 +111,8 @@ public class StartActivity extends AppCompatActivity {
             activeSemester = semesterSpinner.getSelectedItem().toString();
             activeGroup = groupSpinner.getSelectedItem().toString();
             dbHandler.initialInsert(versions);
-            dbHandler.setPreference("semester",activeSemester);
-            dbHandler.setPreference("group",activeGroup);
+            dbHandler.setPreference(SEMESTER,activeSemester);
+            dbHandler.setPreference(GROUP,activeGroup);
             startActivity(new Intent(this, MainActivity.class));
         });
     }

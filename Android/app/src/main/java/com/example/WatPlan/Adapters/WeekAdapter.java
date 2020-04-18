@@ -1,6 +1,5 @@
 package com.example.WatPlan.Adapters;
 
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.WatPlan.Activities.MainActivity;
+import com.example.WatPlan.Models.BlockFilter;
 import com.example.WatPlan.Models.Day;
 import com.example.WatPlan.Models.Week;
 import com.example.WatPlan.R;
@@ -22,7 +22,6 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
     private MainActivity mainActivity;
     private ArrayList<Week> weekArrayList;
     private int startPosition = 0;
-    private int sizeModifier =0;
 
     public WeekAdapter(MainActivity mainActivity, ArrayList<Week> weekArrayList) {
         this.mainActivity = mainActivity;
@@ -37,10 +36,6 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
 
     public void setStartingWeekPosition(int startPosition) {
         this.startPosition = startPosition;
-    }
-
-    public void setSizeModifier(int scale) {
-        this.sizeModifier = scale;
     }
 
     static class WeekViewHolder extends RecyclerView.ViewHolder {
@@ -67,7 +62,7 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.WeekViewHolder
             week = weekArrayList.get(position + startPosition);
         else return;
         ArrayList<Day> dayArrayList = week.getDayArrayList();
-        DayAdapter dayAdapter = new DayAdapter(mainActivity, dayArrayList, blockFilterHashSet, sizeModifier);
+        DayAdapter dayAdapter = new DayAdapter(mainActivity, dayArrayList, blockFilterHashSet);
 
         holder.dayRecyclerView.setAdapter(dayAdapter);
         holder.dayRecyclerView.setHasFixedSize(true);

@@ -1,7 +1,5 @@
 package com.example.WatPlan.Handlers;
 
-import android.widget.Toast;
-
 import androidx.core.util.Pair;
 
 import com.example.WatPlan.Activities.MainActivity;
@@ -10,7 +8,6 @@ import com.example.WatPlan.Fragments.SettingsFragment;
 import com.example.WatPlan.Models.Block;
 import com.example.WatPlan.Models.Day;
 import com.example.WatPlan.Models.Week;
-import com.example.WatPlan.R;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,6 +17,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import static com.example.WatPlan.Models.Preferences.*;
 
 public class UpdateHandler extends Thread {
     private DBHandler dbHandler;
@@ -45,7 +44,7 @@ public class UpdateHandler extends Thread {
         versions = dbHandler.getVersionMap();
         availableSemesters = new ArrayList<>(versions.keySet());
         availableGroups = new ArrayList<>(Objects.requireNonNull(
-                versions.get(dbHandler.getPreference("semester"))).keySet());
+                versions.get(dbHandler.getPreference(SEMESTER))).keySet());
     }
 
     @Override
@@ -72,20 +71,20 @@ public class UpdateHandler extends Thread {
     public void setActiveSemester(String semesterName) {
         availableGroups.clear();
         availableGroups.addAll(Objects.requireNonNull(versions.get(semesterName)).keySet());
-        dbHandler.setPreference("semester", availableSemesters.get(0));
+        dbHandler.setPreference(SEMESTER, availableSemesters.get(0));
     }
 
     public void setDefaultGroup() {
-        String semesterName = dbHandler.getPreference("semester");
-        String groupName = dbHandler.getPreference("group");
+        String semesterName = dbHandler.getPreference(SEMESTER);
+        String groupName = dbHandler.getPreference(GROUP);
         assert groupName != null && semesterName != null : "no semester or group in preferences";
         addToQueue(() -> changeGroup(semesterName, groupName));
     }
 
     public void changeGroup(String semesterName, String groupName) {
         mainActivity.runOnUiThread(() -> scheduleFragment.clearPlan());
-        dbHandler.setPreference("semester", semesterName);
-        dbHandler.setPreference("group", groupName);
+        dbHandler.setPreference(SEMESTER, semesterName);
+        dbHandler.setPreference(GROUP, groupName);
 
         addToQueue(() -> {
             try {
@@ -94,7 +93,6 @@ public class UpdateHandler extends Thread {
                 ArrayList<Week> plan = getPlan(newBlocks, borderDates);
                 settingsFragment.setFilters(uniqueValues);
                 mainActivity.runOnUiThread(() -> {
-                    scheduleFragment.togglePastPlan();
                     scheduleFragment.setPlan(plan);
                     scheduleFragment.setNames(semesterName, groupName);
                 });
@@ -201,11 +199,11 @@ public class UpdateHandler extends Thread {
     }
 
     public String getActiveSemester() {
-        return dbHandler.getPreference("semester");
+        return dbHandler.getPreference(SEMESTER);
     }
 
     public String getActiveGroup() {
-        return dbHandler.getPreference("group");
+        return dbHandler.getPreference(GROUP);
     }
 
     private void addToQueue(Runnable runnable) {

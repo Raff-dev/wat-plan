@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.WatPlan.Activities.MainActivity;
 import com.example.WatPlan.Models.Block;
+import com.example.WatPlan.Models.BlockFilter;
 import com.example.WatPlan.R;
 
 import java.util.ArrayList;
@@ -57,7 +58,6 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
     public void onBindViewHolder(@NonNull BlockAdapter.BlockViewHolder holder, int position) {
         Block block = blockArrayList.get(position);
 
-
         if (block == null) holder.setTexts("", "", "", "", "");
         else {
             int color = mainActivity.getResources().getColor(R.color.invis);
@@ -68,9 +68,10 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
                         .replace("', '", "\n")
                         .replace("['", "")
                         .replace("']", "");
-                holder.setTexts(block.getIndex(), block.getSubject(), place,
+                holder.setTexts(block.getClassIndex(), block.getSubject(), place,
                         block.getClassType(), block.getTeacher());
 
+                //change colors over here
                 color = mainActivity.getResources().getColor(R.color.orange2);
                 holder.blockLayout.setBackgroundColor(color);
             } else holder.setTexts("", "", "", "", "");

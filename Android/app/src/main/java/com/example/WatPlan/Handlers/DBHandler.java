@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 
 import com.example.WatPlan.Models.Block;
+import com.example.WatPlan.Models.Preferences;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,47 +22,37 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.example.WatPlan.Models.Preferences.*;
+
 public class DBHandler extends SQLiteOpenHelper {
     private SQLiteDatabase readableDb;
     private SQLiteDatabase writableDb;
     private static final String DATABASE_NAME = "WAT_PLAN";
-    private static final String PREFERENCES = "preferences";
-    private static final String SEMESTER = "semester";
-    private static final String GROUP = "'group'";
-    private static final String BLOCK = "block";
+    private static final String TABLE_PREFERENCES = "preferences";
+    private static final String TABLE_SEMESTER = "semester";
+    private static final String TABLE_GROUP = "'group'";
+    private static final String TABLE_BLOCK = "block";
     private static final int DATABASE_VERSION = 1;
 
     public DBHandler(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-
         readableDb = getReadableDatabase();
         writableDb = getWritableDatabase();
     }
-
 
     private void insertGroup(String... args) {
         assert args.length > 1;
         ContentValues values = new ContentValues();
         values.put("semester_name", args[0]);
         values.put("name", args[1]);
-        writableDb.insert(GROUP, null, values);
+        writableDb.insert(TABLE_GROUP, null, values);
     }
-
 
     private void insertSemester(String semesterName) {
         assert semesterName != null;
         ContentValues values = new ContentValues();
         values.put("name", semesterName);
-        writableDb.insert(SEMESTER, null, values);
-    }
-
-
-    public void setPreference(String name, String value) {
-        ContentValues values = new ContentValues();
-        values.put("name", name);
-        values.put("value", value);
-        if (getPreference(name) == null) writableDb.insert(PREFERENCES, null, values);
-        else writableDb.update(PREFERENCES, values, "name='" + name + "'", null);
+        writableDb.insert(TABLE_SEMESTER, null, values);
     }
 
     void updateBorderDates(String semesterName, String groupName, Pair<String, String> borderDates) {
@@ -69,14 +60,12 @@ public class DBHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("first_day", borderDates.first);
         values.put("last_day", borderDates.second);
-        writableDb.update(GROUP, values, "id=" + groupId, null);
+        writableDb.update(TABLE_GROUP, values, "id=" + groupId, null);
     }
 
     void updateVersionMap(Map<String, Map<String, String>> versionMap) {
 
         // writableDb.execSQL();
-
-
         getSemesters().forEach(semester -> {
             getGroups(semester).forEach(group -> {
 
@@ -117,22 +106,22 @@ public class DBHandler extends SQLiteOpenHelper {
         blocksMap.values().forEach(block -> {
             keyList.forEach(key -> values.put("'" + key + "'", block.get(key)));
             if (exists) {
-                writableDb.update(BLOCK, values, "block.id=(" +
+                writableDb.update(TABLE_BLOCK, values, "block.id=(" +
                         "select block.id from 'group' where " +
                         "'group.id' ='" + finalGroupId + "')", null);
             } else {
                 values.put("group_id", finalGroupId);
-                writableDb.insert(BLOCK, null, values);
+                writableDb.insert(TABLE_BLOCK, null, values);
             }
             values.clear();
         });
         values.put("version", version);
-        writableDb.update(GROUP, values, "id=" + groupId, null);
+        writableDb.update(TABLE_GROUP, values, "id=" + groupId, null);
         System.out.println("FINISHED UPDATING GROUP");
         System.out.println("OLD VERSION " + version + " NOW" + getVersion(semesterName, groupName));
     }
 
-    private ArrayList<String> getSemesters() {
+    ArrayList<String> getSemesters() {
         ArrayList<String> semesters = new ArrayList<>();
         Cursor cursor = readableDb.rawQuery("select name from semester", null);
         cursor.moveToFirst();
@@ -189,6 +178,14 @@ public class DBHandler extends SQLiteOpenHelper {
         return version;
     }
 
+    public void setPreference(String name, String value) {
+        ContentValues values = new ContentValues();
+        values.put("name", name);
+        values.put("value", value);
+        if (getPreference(name) == null) writableDb.insert(TABLE_PREFERENCES, null, values);
+        else writableDb.update(TABLE_PREFERENCES, values, "name='" + name + "'", null);
+    }
+
     public String getPreference(String name) {
         String value;
         Cursor cursor = readableDb.rawQuery(
@@ -239,7 +236,7 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public boolean isEmpty() {
-        return getPreference("group") == null || getPreference("semester") == null;
+        return getPreference(GROUP) == null || getPreference(SEMESTER) == null;
     }
 
     public void initialInsert(Map<String, Map<String, String>> versions) {
@@ -248,19 +245,31 @@ public class DBHandler extends SQLiteOpenHelper {
 
         versions.forEach((semester, groups) -> {
             values.put("name", semester);
-            writableDb.insert(SEMESTER, null, values);
+            writableDb.insert(TABLE_SEMESTER, null, values);
             values.clear();
             groups.forEach((group, version) -> {
                 values.put("semester_name", semester);
                 values.put("name", group);
-                writableDb.insert(GROUP, null, values);
+                writableDb.insert(TABLE_GROUP, null, values);
                 values.clear();
             });
         });
+        setInitialPreferences();
+    }
 
-        values.put("name", "hide_past_plan");
-        values.put("value", "true");
-        writableDb.insert(PREFERENCES, null, values);
+    private void setInitialPreferences() {
+        ContentValues values = new ContentValues();
+        Preferences preferences = new Preferences();
+        String semester = getSemesters().get(0);
+        String group = getGroups(semester).get(0);
+        preferences.addPreference(SEMESTER, semester);
+        preferences.addPreference(GROUP, group);
+        preferences.getPreferences().forEach(preference -> {
+            values.put("name", preference.getName());
+            values.put("value", preference.getDefaultValue());
+            writableDb.insert(TABLE_PREFERENCES, null, values);
+            values.clear();
+        });
     }
 
     private boolean planExists(String groupId) {
@@ -316,14 +325,14 @@ public class DBHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + PREFERENCES + "(" +
+        db.execSQL("create table " + TABLE_PREFERENCES + "(" +
                 "name varchar(30) PRIMARY KEY NOT NULL," +
                 "value varchar(30) NOT NULL)");
 
-        db.execSQL("create table " + SEMESTER + " (" +
+        db.execSQL("create table " + TABLE_SEMESTER + " (" +
                 "name varchar(30) PRIMARY KEY NOT NULL)");
 
-        db.execSQL("CREATE TABLE " + GROUP + " (" +
+        db.execSQL("CREATE TABLE " + TABLE_GROUP + " (" +
                 "id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
                 "semester_name varchar(30) NOT NULL REFERENCES semester (name) DEFERRABLE INITIALLY DEFERRED," +
                 "name varchar(30) NOT NULL," +
@@ -331,7 +340,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 "last_day varchar(30)," +
                 "version varchar(30) NOT NULL default '-1')");
 
-        db.execSQL("CREATE TABLE " + BLOCK + " (" +
+        db.execSQL("CREATE TABLE " + TABLE_BLOCK + " (" +
                 "id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
                 "group_id integer NOT NULL REFERENCES 'group' (id) DEFERRABLE INITIALLY DEFERRED," +
                 "'date' varchar(30) NOT NULL," +
