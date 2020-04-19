@@ -2,5 +2,6 @@ django
 djangorestframework
 numpy
 pandas
-beutifulsoup4
+beautifulsoup4
 requests
+WhiteNoise

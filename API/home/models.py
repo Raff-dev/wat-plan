@@ -4,7 +4,7 @@ from django.db import models
 class Apk(models.Model):
     version = models.CharField(unique=True, max_length=100)
     release_date = models.DateField(blank=True, null=True)
-    apk = models.FileField(upload_to='media/apk')
+    apk = models.FileField(upload_to='apk')
 
     def __str__(self):
         return f'WatPlan {self.version}'

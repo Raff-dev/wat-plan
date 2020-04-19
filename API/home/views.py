@@ -14,10 +14,10 @@ def home(request, *args, **kwargs):
 
 
 def download_apk(request, *args, **kwargs):
-    apks = Apk.objects.all().order_by('-release_date')
-    file_dir = apks.first().apk.name
-    file_name = file_dir.split('/')[-1]
-    response = HttpResponse(content_type='application/force-download')
+    apk = Apk.objects.all().order_by('-release_date').first().apk
+    file_name = apk.name.split('/')[-1]
+    file = apk.file
+    response = HttpResponse(file, content_type='application/force-download')
     response['Content-Disposition'] = f'attachment; filename={smart_str(file_name)}'
-    response['X-Sendfile'] = smart_str(file_dir)
+    response['X-Sendfile'] = smart_str(apk.name)
     return response
