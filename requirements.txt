@@ -1,6 +1,0 @@
-django
-djangorestframework
-numpy
-pandas
-beutifulsoup4
-requests
