@@ -2,6 +2,7 @@
     <string name="app_name">WatPlan</string>
     <string name="loading">Establishing connection with the server…</string>
     <string name="connection_failure">Failed to get response from the server.\nPlease check your internet connection, or try later.</string>
+    <string name="new_version_available">There is a new version of Wat Plan available.\nClick the button below to get redirected to the website, where you can download latest apk build.\n\n Make sure to uninstall this apk.</string>
 
 
 </resources>

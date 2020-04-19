@@ -202,7 +202,7 @@ public class DBHandler extends SQLiteOpenHelper {
         Map<Pair<String, String>, Block> blocksMap = null;
         Cursor cursor = readableDb.rawQuery("select * from block" +
                 " where group_id = " + groupId, null);
-        System.out.println("Group " + args[1] + " ID: " + groupId + "blocks count" + cursor.getCount());
+        System.out.println("Group " + args[1] + " ID: " + groupId + " blocks " + cursor.getCount());
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             blocksMap = new HashMap<>();

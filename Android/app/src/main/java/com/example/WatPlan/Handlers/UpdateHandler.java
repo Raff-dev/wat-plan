@@ -1,8 +1,11 @@
 package com.example.WatPlan.Handlers;
 
+import android.content.Intent;
+
 import androidx.core.util.Pair;
 
 import com.example.WatPlan.Activities.MainActivity;
+import com.example.WatPlan.Activities.NotificationActivity;
 import com.example.WatPlan.Fragments.ScheduleFragment;
 import com.example.WatPlan.Fragments.SettingsFragment;
 import com.example.WatPlan.Models.Block;
@@ -21,7 +24,7 @@ import java.util.Set;
 import static com.example.WatPlan.Models.Preferences.*;
 
 public class UpdateHandler extends Thread {
-    static final String VERSION = "1.1";
+    public static final String VERSION = "1.1";
     private DBHandler dbHandler;
     private MainActivity mainActivity;
     private ScheduleFragment scheduleFragment;
@@ -61,7 +64,7 @@ public class UpdateHandler extends Thread {
             Map<String, Map<String, String>> newVersions = ConnectionHandler.getVersionMap();
             if (newVersions == null) return;
             String newestVersion = ConnectionHandler.getAppVersion();
-            if (newestVersion !=null)
+            if (newestVersion != null)
                 if (!VERSION.equals(newestVersion)) openUpdateActivity();
             if (!newVersions.equals(versions))
                 addToQueue(() -> {
@@ -74,6 +77,10 @@ public class UpdateHandler extends Thread {
 
     private void openUpdateActivity() {
         System.out.println("THERE IS NEW VERSION AVAILABLE!! REE");
+        if (!NotificationActivity.isActive()) {
+            NotificationActivity.setActive(true);
+            mainActivity.startActivity(new Intent(mainActivity, NotificationActivity.class));
+        }
     }
 
     public void setActiveSemester(String semesterName) {
@@ -99,7 +106,7 @@ public class UpdateHandler extends Thread {
                 Map<Pair<String, String>, Block> newBlocks = getBlockMap(semesterName, groupName);
                 Pair<LocalDate, LocalDate> borderDates = getBorderDates(semesterName, groupName);
                 ArrayList<Week> plan = getPlan(newBlocks, borderDates);
-                settingsFragment.setFilters(uniqueValues);
+                settingsFragment.setUniqueValues(uniqueValues);
                 mainActivity.runOnUiThread(() -> {
                     scheduleFragment.setPlan(plan);
                     scheduleFragment.setNames(semesterName, groupName);

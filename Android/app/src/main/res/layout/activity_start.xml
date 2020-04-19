@@ -13,10 +13,9 @@
         android:layout_height="160dp"
         app:layout_constraintBottom_toTopOf="@+id/getStartedLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.051"
+        app:layout_constraintVertical_bias="0.05"
         app:srcCompat="@drawable/logo_hdpi" />
 
     <TextView
@@ -138,10 +137,11 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias=".8" />
+            app:layout_constraintVertical_bias=".8"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar
