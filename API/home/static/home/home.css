@@ -2,6 +2,11 @@
     margin: 0px;
     padding: 0px;
     box-sizing: border-box;
+    font-family: Montserrat;
+
+}
+body{
+    background-color: #474750;
 }
 
 nav {
@@ -9,8 +14,9 @@ nav {
     padding-right: 10px;
     display: flex;
     align-items: center;
-    background-color: #474750;
-    height: 100px;
+    background-color: #535358;
+    height: fit-content;
+    padding: 1.5vh;
     color: #DC8428;
 }
 
@@ -19,10 +25,19 @@ nav > div{
     justify-content: space-around;
 }
 nav img{
-    height: 60px;
-    width: 60px;
+    height: 6vh;
+    width: 6vh;
 }
 
+.divider{
+    height: 4px;
+    background-color: #DC8428;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+ 
+}
 main{
     padding-left: 20px;
     padding-right: 20px;
@@ -30,21 +45,49 @@ main{
 }
 
 button{
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    display: flex;
     background-color: #DC8428;
     color: white;
+    font-weight: 700;
     padding: 10px;
     border: none;
     border-radius: 15px;
 }
+button img{
+    margin-left: 8px;
+    width: 40px;
+    height: 40px;
+}
 
+main{
+    color: #fffc;
+    height: 100vh;
+
+}
 main .apk-version{
     padding-top: 20px;
     padding-bottom: 20px;
 }
+main .apk-info{
+    display: flex;
+    align-items: center;
+}
+main .apk-name{
+    color: #DC8428;
+    font-size: 24px;
+    font-weight: 600;
+}
+main .apk-date{
+    margin-left: 10px;
+    font-style: italic;
+
+}
+
 main .release-notes{
     padding-left: 20px;
-
-    background-color: tomato;
 }
 main .release-note{
     padding-top: 10px;

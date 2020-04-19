@@ -24,16 +24,24 @@
         <div class="logo">
             <img src="{%static 'home/images/logo.png'%}" alt="logo">
         </div>
-        <div>
-            Wat Plan
-        </div>
     </nav>
+    <div class="divider"> </div>
 
 
     <main>
+
+        <div>
+            <a href="{%url 'home:download'%}">
+                <button>
+                    <p>DOWNLOAD APK</p>
+                    <img src="{%static 'home/images/android-head-icon.png'%}" alt="android">
+                </button>
+            </a>
+        </div>
+
         {% for apk in apks %}
         <div class="apk-version">
-            <div class="d-flex">
+            <div class="apk-info">
                 <p class="apk-name">
                     {{apk}}
                 </p>
@@ -44,20 +52,13 @@
 
             <div class="release-notes">
                 {% for note in apk.release_notes.all%}
-                <li class="release-note">
-                    {{note.content}}
-                </li>
+                <p class="release-note">
+                    • {{note.content}}
+                </p>
                 {% endfor %}
             </div>
 
-            {%if apk.version == latest_version%}
-            <div>
-                <a href="{%url 'home:download'%}">
 
-                    <button>Download</button>
-                </a>
-            </div>
-            {% endif %}
         </div>
         {% endfor %}
 
