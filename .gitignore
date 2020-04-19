@@ -1,9 +1,15 @@
+API/staticfiles
 
 Scrapper/creds.py
 Scrapper/__pycache__/creds.cpython-38.pyc
 Scraper/creds.py
 
+# Django
+*__pycache__
+migrations
 
+
+# Android
 Android/*.iml
 Android/gradle
 Android/.gradle

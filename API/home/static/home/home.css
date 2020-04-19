@@ -44,6 +44,7 @@ main{
     padding-top: 10px;
 }
 
+
 button{
     justify-content: center;
     align-items: center;
@@ -53,9 +54,18 @@ button{
     color: white;
     font-weight: 700;
     padding: 10px;
-    border: none;
     border-radius: 15px;
+    border: none;
+    outline:none;
 }
+
+button:focus{
+    outline: none;
+}
+a:link {
+    text-decoration: none;
+}
+
 button img{
     margin-left: 8px;
     width: 40px;

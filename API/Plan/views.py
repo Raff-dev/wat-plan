@@ -121,5 +121,5 @@ class Plan(ViewSet):
 
     @action(methods=['get'], detail=False)
     def get_app_version(self, request, *args, **kwargs):
-        version = Apk.objects.last().version
+        version = Apk.objects.all().order_by('-release_date').first().version
         return Response({'version': version}, status=status.HTTP_200_OK)
