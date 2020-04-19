@@ -20,11 +20,10 @@ import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 
 import com.example.WatPlan.Activities.MainActivity;
+import com.example.WatPlan.Handlers.ConnectionHandler;
 import com.example.WatPlan.Models.BlockFilter;
-import com.example.WatPlan.Adapters.WeekAdapter;
 import com.example.WatPlan.Handlers.DBHandler;
 import com.example.WatPlan.Handlers.UpdateHandler;
-import com.example.WatPlan.Models.Preferences;
 import com.example.WatPlan.Models.Switch_;
 import com.example.WatPlan.R;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
@@ -46,7 +45,8 @@ public class SettingsFragment extends Fragment {
     private View view;
     private Spinner semesterSpinner, subjectSpinner;
     private SearchableSpinner groupSpinner;
-    private Button notificationButton, feedbackButton;
+    private Button infoButton;
+    private Switch pastPlanSwitch;
 
     private ArrayAdapter<String> groupAdapter, semesterAdapter, subjectAdapter;
     private ArrayList<String> groups = new ArrayList<>();
@@ -56,7 +56,6 @@ public class SettingsFragment extends Fragment {
 
     private String[] switchNames = new String[]{LECTURE, EXERCISE, LABORATORY};
     private int[] switchIds = new int[]{R.id.lectureSwitch, R.id.exerciseSwitch, R.id.laboratorySwitch};
-    private Switch pastPlanSwitch;
 
     private Map<String, Integer> colorMap = new Hashtable<>();
 
@@ -104,16 +103,13 @@ public class SettingsFragment extends Fragment {
         groupSpinner = view.findViewById(R.id.groupSpinner);
         subjectSpinner = view.findViewById(R.id.subjectSpinner);
         pastPlanSwitch = view.findViewById(R.id.pastPlanSwitch);
-
-        notificationButton = view.findViewById(R.id.notificationbutton);
-        feedbackButton = view.findViewById(R.id.feedbackButton);
+        infoButton = view.findViewById(R.id.infoButton);
     }
 
     private void addListeners() {
-        feedbackButton.setOnClickListener(v -> {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://tofen.eu.pythonanywhere.com/"));
-            startActivity(browserIntent);
-        });
+        infoButton.setOnClickListener(v -> startActivity(new Intent(
+                Intent.ACTION_VIEW, Uri.parse(ConnectionHandler.getBaseUrl()+ "home")))
+        );
 
         switchArrayList.forEach(switch_ ->
                 switch_.getSwitch().setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -199,14 +195,14 @@ public class SettingsFragment extends Fragment {
             if (groups.get(i).equals(group)) groupSpinner.setSelection(i);
     }
 
-    public void setFilters(Map<String, Set<String>> uniqueValues) {
+    public void setUniqueValues(Map<String, Set<String>> uniqueValues) {
         subjects.clear();
         subjects.add(NO_FILTER);
         subjects.addAll(Objects.requireNonNull(uniqueValues.get("subject")));
 
         int size = subjects.size();
         for (int i = 0; i < subjects.size(); i++) {
-            float hue = 210f / size * (i + 1) - 25f;
+            float hue = 210f / size * (i + 1) - 20f;
             float saturation = (float) (0.375 + 0.04 * (i % 3));
             float lightness = (float) (0.47 - 0.04 * (i % 3));
             colorMap.put(subjects.get(i), ColorUtils.HSLToColor(new float[]{hue, saturation, lightness}));

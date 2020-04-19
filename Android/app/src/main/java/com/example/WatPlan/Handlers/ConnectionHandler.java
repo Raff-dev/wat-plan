@@ -17,13 +17,13 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ConnectionHandler {
-//    private static final String baseAddress = "http://tofen.eu.pythonanywhere.com/Plan/";
-    private static final String baseAddress = "http://10.0.2.2:8000/Plan/";
+    private static final String baseUrl = "http://watplan.eu.pythonanywhere.com/";
+//    private static final String baseUrl = "http://10.0.2.2:8000/";
     private static final OkHttpClient client = new OkHttpClient();
 
 
     static String getAppVersion() {
-        String address = "get_app_version/";
+        String address = "Plan/get_app_version/";
         try {
             String data = makeRequest(address, new HashMap<>());
             JSONObject jdate = new JSONObject(Objects.requireNonNull(data));
@@ -37,8 +37,9 @@ public class ConnectionHandler {
 
 
     public static Map<String, Map<String, String>> getVersionMap() {
-        String address = "get_versions/";
+        String address = "Plan/get_versions/";
         Map<String, String> headers = new HashMap<>();
+        headers.put("version", UpdateHandler.VERSION);
 
         Map<String, Map<String, String>> versions = new HashMap<>();
         try {
@@ -69,10 +70,11 @@ public class ConnectionHandler {
     }
 
     static Pair<String, String> getBorderDates(String semesterName, String groupName) throws NullPointerException {
-        String address = "get_group/";
+        String address = "Plan/get_group/";
         Map<String, String> headers = new HashMap<>();
         headers.put("semester", semesterName);
         headers.put("group", groupName);
+        headers.put("version", UpdateHandler.VERSION);
 
         try {
             String data = makeRequest(address, headers);
@@ -90,10 +92,11 @@ public class ConnectionHandler {
     }
 
     static Map<Pair<String, String>, Block> getGroupBlocks(String semesterName, String groupName) throws NullPointerException {
-        String address = "get_group/";
+        String address = "Plan/get_group/";
         Map<String, String> headers = new HashMap<>();
         headers.put("semester", semesterName);
         headers.put("group", groupName);
+        headers.put("version", UpdateHandler.VERSION);
 
         try {
             Map<Pair<String, String>, Block> blockMap = new HashMap<>();
@@ -130,7 +133,7 @@ public class ConnectionHandler {
     private static String makeRequest(String address, Map<String, String> headers) {
         Request.Builder builder = new Request.Builder();
         headers.forEach(builder::addHeader);
-        Request request = builder.url(baseAddress + address).build();
+        Request request = builder.url(baseUrl + address).build();
         try {
             Response response = client.newCall(request).execute();
             String data = response.body().string();
@@ -140,5 +143,9 @@ public class ConnectionHandler {
             System.out.println("Request IOException at " + address );
         }
         return null;
+    }
+
+    public static String getBaseUrl() {
+        return baseUrl;
     }
 }
