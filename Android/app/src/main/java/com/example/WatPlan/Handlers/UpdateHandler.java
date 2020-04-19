@@ -21,6 +21,7 @@ import java.util.Set;
 import static com.example.WatPlan.Models.Preferences.*;
 
 public class UpdateHandler extends Thread {
+    static final String VERSION = "1.1";
     private DBHandler dbHandler;
     private MainActivity mainActivity;
     private ScheduleFragment scheduleFragment;
@@ -59,6 +60,9 @@ public class UpdateHandler extends Thread {
         new Thread(() -> {
             Map<String, Map<String, String>> newVersions = ConnectionHandler.getVersionMap();
             if (newVersions == null) return;
+            String newestVersion = ConnectionHandler.getAppVersion();
+            if (newestVersion !=null)
+                if (!VERSION.equals(newestVersion)) openUpdateActivity();
             if (!newVersions.equals(versions))
                 addToQueue(() -> {
                     System.out.println("VERSION MAPS DIFFER");
@@ -66,6 +70,10 @@ public class UpdateHandler extends Thread {
                     changeGroup(getActiveSemester(), getActiveGroup());
                 });
         }).start();
+    }
+
+    private void openUpdateActivity() {
+        System.out.println("THERE IS NEW VERSION AVAILABLE!! REE");
     }
 
     public void setActiveSemester(String semesterName) {

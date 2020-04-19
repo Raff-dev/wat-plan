@@ -1,5 +1,7 @@
 package com.example.WatPlan.Fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 
 import com.example.WatPlan.Activities.MainActivity;
@@ -27,6 +30,7 @@ import com.example.WatPlan.R;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -53,6 +57,8 @@ public class SettingsFragment extends Fragment {
     private String[] switchNames = new String[]{LECTURE, EXERCISE, LABORATORY};
     private int[] switchIds = new int[]{R.id.lectureSwitch, R.id.exerciseSwitch, R.id.laboratorySwitch};
     private Switch pastPlanSwitch;
+
+    private Map<String, Integer> colorMap = new Hashtable<>();
 
 
     public SettingsFragment(MainActivity mainActivity) {
@@ -104,6 +110,11 @@ public class SettingsFragment extends Fragment {
     }
 
     private void addListeners() {
+        feedbackButton.setOnClickListener(v -> {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://tofen.eu.pythonanywhere.com/"));
+            startActivity(browserIntent);
+        });
+
         switchArrayList.forEach(switch_ ->
                 switch_.getSwitch().setOnCheckedChangeListener((buttonView, isChecked) ->
                         dbHandler.setPreference(switch_.getName(), preferenceValue(isChecked))
@@ -192,6 +203,18 @@ public class SettingsFragment extends Fragment {
         subjects.clear();
         subjects.add(NO_FILTER);
         subjects.addAll(Objects.requireNonNull(uniqueValues.get("subject")));
+
+        int size = subjects.size();
+        for (int i = 0; i < subjects.size(); i++) {
+            float hue = 210f / size * (i + 1) - 25f;
+            float saturation = (float) (0.375 + 0.04 * (i % 3));
+            float lightness = (float) (0.47 - 0.04 * (i % 3));
+            colorMap.put(subjects.get(i), ColorUtils.HSLToColor(new float[]{hue, saturation, lightness}));
+        }
+    }
+
+    public Map<String, Integer> getColorMap() {
+        return colorMap;
     }
 
     private void enterAnimation() {

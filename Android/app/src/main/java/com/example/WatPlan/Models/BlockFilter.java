@@ -14,9 +14,7 @@ public interface BlockFilter {
 
     boolean filter(Block block);
 
-
     static Map<String, BlockFilter> getFiltermap() {
         return filterMap;
     }
-
 }

@@ -1,5 +1,8 @@
 package com.example.WatPlan.Adapters;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.WatPlan.Activities.MainActivity;
@@ -14,6 +18,7 @@ import com.example.WatPlan.Models.Block;
 import com.example.WatPlan.Models.BlockFilter;
 import com.example.WatPlan.R;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,6 +64,7 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
         Block block = blockArrayList.get(position);
 
         if (block == null) holder.setTexts("", "", "", "", "");
+
         else {
             int color = mainActivity.getResources().getColor(R.color.invis);
             holder.blockLayout.setBackgroundColor(color);
@@ -73,7 +79,13 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
 
                 //change colors over here
                 color = mainActivity.getResources().getColor(R.color.orange2);
-                holder.blockLayout.setBackgroundColor(color);
+                if (block.getDate().equals(LocalDate.now().toString())){
+                    holder.blockLayout.setBackgroundColor( mainActivity.getResources().getColor(R.color.orange2));
+                    holder.blockLayout.setBackground(mainActivity.getResources().getDrawable(R.drawable.outline2));
+                }
+
+                int c = mainActivity.getSettingsFragment().getColorMap().get(block.getSubject());
+                holder.blockLayout.setBackgroundColor(c);
             } else holder.setTexts("", "", "", "", "");
         }
     }

@@ -16,16 +16,33 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-
 public class ConnectionHandler {
-    private static final String baseAddress = "http://tofen.eu.pythonanywhere.com//Plan/";
+//    private static final String baseAddress = "http://tofen.eu.pythonanywhere.com/Plan/";
+    private static final String baseAddress = "http://10.0.2.2:8000/Plan/";
     private static final OkHttpClient client = new OkHttpClient();
 
-    public static Map<String, Map<String, String>> getVersionMap() {
-        Map<String, Map<String, String>> versions = new HashMap<>();
-        String address = "get_versions/";
+
+    static String getAppVersion() {
+        String address = "get_app_version/";
         try {
             String data = makeRequest(address, new HashMap<>());
+            JSONObject jdate = new JSONObject(Objects.requireNonNull(data));
+            return jdate.get("version").toString();
+        } catch (JSONException | NullPointerException e) {
+            e.printStackTrace();
+            System.out.println("bad response");
+        }
+        return null;
+    }
+
+
+    public static Map<String, Map<String, String>> getVersionMap() {
+        String address = "get_versions/";
+        Map<String, String> headers = new HashMap<>();
+
+        Map<String, Map<String, String>> versions = new HashMap<>();
+        try {
+            String data = makeRequest(address, headers);
             if (data == null) return null;
 
             JSONObject jData = new JSONObject(data);
@@ -51,7 +68,7 @@ public class ConnectionHandler {
         return versions;
     }
 
-    static Pair<String,String> getBorderDates(String semesterName, String groupName) throws NullPointerException{
+    static Pair<String, String> getBorderDates(String semesterName, String groupName) throws NullPointerException {
         String address = "get_group/";
         Map<String, String> headers = new HashMap<>();
         headers.put("semester", semesterName);
@@ -64,7 +81,7 @@ public class ConnectionHandler {
             JSONObject jdata = new JSONObject(data);
             String firstDay = jdata.get("first_day").toString();
             String lastDay = jdata.get("last_day").toString();
-            return new Pair<>(firstDay,lastDay);
+            return new Pair<>(firstDay, lastDay);
         } catch (JSONException e) {
             e.printStackTrace();
             System.out.println("bad response");
@@ -96,10 +113,10 @@ public class ConnectionHandler {
                     for (int k = 0; k < jblock.length(); k++) {
                         String name = Objects.requireNonNull(jblock.names()).get(k).toString();
                         block.insert(name, jblock.getString(name));
-                        block.insert("date",date);
+                        block.insert("date", date);
                     }
                     String index = jblock.getString("index");
-                    blockMap.put(new Pair<>(date,index),block);
+                    blockMap.put(new Pair<>(date, index), block);
                 }
             }
             return blockMap;
@@ -120,7 +137,7 @@ public class ConnectionHandler {
             response.body().close();
             return data;
         } catch (IOException e) {
-            System.out.println("Request IOException");
+            System.out.println("Request IOException at " + address );
         }
         return null;
     }

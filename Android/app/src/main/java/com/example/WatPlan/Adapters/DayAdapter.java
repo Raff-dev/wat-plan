@@ -16,6 +16,7 @@ import com.example.WatPlan.Models.BlockFilter;
 import com.example.WatPlan.Models.Day;
 import com.example.WatPlan.R;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -35,9 +36,11 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         TextView dateTextView;
         TextView dayNameTextView;
         RecyclerView blockRecyclerView;
+        View dayLayout;
 
         public DayViewHolder(@NonNull View itemView) {
             super(itemView);
+            dayLayout = itemView.findViewById(R.id.dayLayout);
             dateTextView = itemView.findViewById(R.id.dayDateTextView);
             dayNameTextView = itemView.findViewById(R.id.dayNameTextView);
             blockRecyclerView = itemView.findViewById(R.id.blockRecyclerView);
@@ -60,7 +63,12 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
         Day day = dayArrayList.get(position);
         String date = day.getDate();
+        //color today
+        if (date.equals(LocalDate.now().toString()))
+            holder.dayLayout.setBackgroundColor(mainActivity.getResources().getColor(R.color.orange3));
+        //cut date to mm-dd format
         if (date.length() > 5) date = date.substring(5);
+
         ArrayList<String> dayNames = new ArrayList<>(Arrays.asList(
                 "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"));
         String dayName = dayNames.get(position);
