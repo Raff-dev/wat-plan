@@ -15,6 +15,10 @@ public class Block {
         this.values = values;
     }
 
+    public String getDate() {
+        return values.get("date");
+    }
+
     public String getIndex() {
         return values.get("index");
     }

@@ -6,6 +6,7 @@ Scraper/creds.py
 
 Android/*.iml
 Android/gradle
+Android/.gradle
 Android/local.properties
 Android/.idea/caches
 Android/.idea/libraries
@@ -106,3 +107,4 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+API/API/secret_key.py

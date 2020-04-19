@@ -75,7 +75,7 @@ public class ScheduleFragment extends Fragment {
         semesterNameTextView = view.findViewById(R.id.semesterTextView);
     }
 
-    public void applyFilters() {
+    private void applyFilters() {
         setPastPlanFilter();
         setClassTypeFilters();
         setClassFilter();
