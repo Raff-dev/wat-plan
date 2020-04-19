@@ -12,6 +12,7 @@ from django.db.models import F
 from django.db.models import Count
 import json
 from .models import Block, Day, Group, Semester
+from home.models import Apk
 import datetime
 
 
@@ -117,3 +118,8 @@ class Plan(ViewSet):
         except KeyError as e:
             result = f'{e} not specified'
             return Response(result, status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['get'], detail=False)
+    def get_app_version(self, request, *args, **kwargs):
+        version = Apk.objects.last().version
+        return Response({'version': version}, status=status.HTTP_200_OK)

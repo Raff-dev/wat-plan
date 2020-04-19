@@ -1,3 +1,6 @@
+{% load static %}
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,34 +12,54 @@
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Raleway|Raleway:800,900|&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'home/home.css'%}">
+
 
     <title>Document</title>
 </head>
 
 
 <body>
-    <nav class="d-flex justify-content-center align-items-center">
-        <div class="px-3 p-2 d-flex">
-            <div>
-                <p>Home</p>
-            </div>
-            <div>
-                <p>Plan</p>
-            </div>
-            <div>
-                <p>Download</p>
-            </div>
-            <div>
-                <p>Patch notes</p>
-            </div>
-
+    <nav>
+        <div class="logo">
+            <img src="{%static 'home/images/logo.png'%}" alt="logo">
         </div>
-
-
-
+        <div>
+            Wat Plan
+        </div>
     </nav>
-    <main>
 
+
+    <main>
+        {% for apk in apks %}
+        <div class="apk-version">
+            <div class="d-flex">
+                <p class="apk-name">
+                    {{apk}}
+                </p>
+                <p class="apk-date">
+                    {{apk.release_date}}
+                </p>
+            </div>
+
+            <div class="release-notes">
+                {% for note in apk.release_notes.all%}
+                <li class="release-note">
+                    {{note.content}}
+                </li>
+                {% endfor %}
+            </div>
+
+            {%if apk.version == latest_version%}
+            <div>
+                <a href="{%url 'home:download'%}">
+
+                    <button>Download</button>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
 
 
 

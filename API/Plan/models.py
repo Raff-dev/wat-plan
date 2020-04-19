@@ -62,17 +62,3 @@ class Block(models.Model):
             'day__group__name',
             'day__date',
             'index']
-
-    # pervious_values = None
-
-    # def __init__(self, *args, **kwargs):
-    #     super(Block, self).__init__(*args, **kwargs)
-    #     self.pervious_values = kwargs
-
-    # def save(self, force_insert=False, force_update=False, *args, **kwargs):
-    #     super(Block, self).save(force_insert, force_update, *args, **kwargs)
-    #     if self.pervious_values != kwargs:
-    #         group = Group.objects.get(name=self.group)
-    #         group.version += 1
-    #         group.save()
-    #     self.pervious_values = kwargs
