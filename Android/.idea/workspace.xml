@@ -10,10 +10,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8c245dc5-ad8a-4212-ba8d-3d0813e20f74" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../API/API/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/../API/API/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../API/API/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/../API/API/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../API/home/static/home/home.css" beforeDir="false" afterPath="$PROJECT_DIR$/../API/home/static/home/home.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../API/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../API/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />

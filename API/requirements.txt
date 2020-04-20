@@ -1,7 +1,2 @@
 django
 djangorestframework
-numpy
-pandas
-beautifulsoup4
-requests
-WhiteNoise
