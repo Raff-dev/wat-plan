@@ -273,16 +273,16 @@ class Scraper():
 
 
 def post_result(group, semester, data):
-    # data = {
-    #     'group': group,
-    #     'semester': semester,
-    #     'plan': data
-    # }
-    # url = "http://127.0.0.1:8000/Plan/update_plan/"
-    # headers = {'Content-type': 'application/json'}
-    # r = requests.post(url, data=json.dumps(data), headers=headers)
-    # printf(
-    #     f'Request status for group {group} {semester}: {r.status_code}')
+    data = {
+        'group': group,
+        'semester': semester,
+        'plan': data
+    }
+    url = "https://watplan.eu.pythonanywhere.com/Plan/update_plan/"
+    headers = {'Content-type': 'application/json'}
+    r = requests.post(url, data=json.dumps(data), headers=headers)
+    printf(
+        f'Request status for group {group} {semester}: {r.status_code}')
     pass
 
 
