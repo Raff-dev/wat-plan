@@ -24,14 +24,14 @@ import java.util.Set;
 import static com.example.WatPlan.Models.Preferences.*;
 
 public class UpdateHandler extends Thread {
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "1.2";
     private DBHandler dbHandler;
     private MainActivity mainActivity;
     private ScheduleFragment scheduleFragment;
     private SettingsFragment settingsFragment;
     private ArrayList<Runnable> queue = new ArrayList<>();
-    private ArrayList<String> availableGroups;
-    private ArrayList<String> availableSemesters;
+    private ArrayList<String> availableGroups = new ArrayList<>();
+    private ArrayList<String> availableSemesters = new ArrayList<>();
     private Map<String, Map<String, String>> versions;
     private Map<String, Set<String>> uniqueValues;
 
@@ -40,12 +40,12 @@ public class UpdateHandler extends Thread {
         this.scheduleFragment = mainActivity.getScheduleFragment();
         this.settingsFragment = mainActivity.getSettingsFragment();
         this.dbHandler = dbHandler;
-        setUp();
         start();
     }
 
     void setUp() {
-        versions = dbHandler.getVersionMap();
+        versions = ConnectionHandler.getVersionMap();
+        if (versions == null) versions = dbHandler.getVersionMap();
         availableSemesters = new ArrayList<>(versions.keySet());
         availableGroups = new ArrayList<>(Objects.requireNonNull(
                 versions.get(dbHandler.getPreference(SEMESTER))).keySet());
@@ -53,6 +53,7 @@ public class UpdateHandler extends Thread {
 
     @Override
     public void run() {
+        setUp();
         while (true) if (queue.size() > 0) {
             queue.get(0).run();
             queue.remove(0);

@@ -53,7 +53,6 @@ public class ScheduleFragment extends Fragment {
         this.updateHandler.setDefaultGroup();
     }
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -98,7 +97,7 @@ public class ScheduleFragment extends Fragment {
         weekAdapter.switchBlockFilter(subjectBlockFilter, true);
     }
 
-    public void setPastPlanFilter() {
+    private void setPastPlanFilter() {
         System.out.println("TOGGLE PLAN");
         int startWeekPosition = 0;
         if (dbHandler.getPreference(PAST_PLAN).equals(HIDDEN))
@@ -106,7 +105,7 @@ public class ScheduleFragment extends Fragment {
         weekAdapter.setStartingWeekPosition(startWeekPosition);
     }
 
-    public int getCurrentWeekPosition() {
+    private int getCurrentWeekPosition() {
         try {
             LocalDate today = LocalDate.now();
             String semester = dbHandler.getPreference(SEMESTER);
@@ -132,6 +131,7 @@ public class ScheduleFragment extends Fragment {
         this.plan.addAll(plan);
         switchLoading(false);
         System.out.println("FINISHED APPLYTING PLAN");
+        if (this.isVisible()) applyFilters();
     }
 
     private void switchLoading(boolean loading) {
@@ -151,16 +151,17 @@ public class ScheduleFragment extends Fragment {
     }
 
     public void displayFailureMessage() {
+        System.out.println("DISPLAY FAILURE MESSAHGE");
         TextView messageTextView = view.findViewById(R.id.messageTextView);
         messageTextView.setText(mainActivity.getString(R.string.connection_failure));
         View connectionFailureLayout = view.findViewById(R.id.connectionFailureLayout);
-        Button tryAgainButtton = view.findViewById(R.id.tryAgainButton);
+        Button tryAgainButton = view.findViewById(R.id.tryAgainButton);
 
         View progressBar = view.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.GONE);
 
         connectionFailureLayout.setVisibility(View.VISIBLE);
-        tryAgainButtton.setOnClickListener(v -> {
+        tryAgainButton.setOnClickListener(v -> {
             String group = dbHandler.getPreference(GROUP);
             String semester = dbHandler.getPreference(SEMESTER);
             connectionFailureLayout.setVisibility(View.GONE);

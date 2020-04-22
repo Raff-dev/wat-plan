@@ -17,8 +17,6 @@ public class NotificationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println("IS ACTIVE INSIDE ONCREATAE? " + active);
-        System.out.println("IS ACTIVE INSIDE ONCREATAE? " + active);
         setContentView(R.layout.activity_notification);
         Button downloadButton = findViewById(R.id.downloadButton);
         TextView messageTextView = findViewById(R.id.messageTextView);
