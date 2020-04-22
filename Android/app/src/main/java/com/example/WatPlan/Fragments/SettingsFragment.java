@@ -68,9 +68,6 @@ public class SettingsFragment extends Fragment {
         this.updateHandler = updateHandler;
         this.dbHandler = dbHandler;
 
-        semesters = updateHandler.getAvailableSemesters();
-        groups = updateHandler.getAvailableGroups();
-
         int spinnerItem = R.layout.support_simple_spinner_dropdown_item;
         semesterAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, semesters);
         groupAdapter = new ArrayAdapter<>(mainActivity, spinnerItem, groups);
@@ -83,6 +80,11 @@ public class SettingsFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_settings, container, false);
         enterAnimation();
         getViews();
+
+        semesters.clear();
+        groups.clear();
+        semesters.addAll(updateHandler.getAvailableSemesters());
+        groups.addAll(updateHandler.getAvailableGroups());
 
         semesterSpinner.setAdapter(semesterAdapter);
         groupSpinner.setAdapter(groupAdapter);
@@ -108,17 +110,15 @@ public class SettingsFragment extends Fragment {
 
     private void addListeners() {
         infoButton.setOnClickListener(v -> startActivity(new Intent(
-                Intent.ACTION_VIEW, Uri.parse(ConnectionHandler.getBaseUrl()+ "home")))
+                Intent.ACTION_VIEW, Uri.parse(ConnectionHandler.getBaseUrl() + "home")))
         );
 
         switchArrayList.forEach(switch_ ->
                 switch_.getSwitch().setOnCheckedChangeListener((buttonView, isChecked) ->
-                        dbHandler.setPreference(switch_.getName(), preferenceValue(isChecked))
-                ));
+                        dbHandler.setPreference(switch_.getName(), preferenceValue(isChecked))));
 
         pastPlanSwitch.setOnCheckedChangeListener(((buttonView, isChecked) ->
-                dbHandler.setPreference(PAST_PLAN, preferenceValue(isChecked))
-        ));
+                dbHandler.setPreference(PAST_PLAN, preferenceValue(isChecked))));
 
         subjectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

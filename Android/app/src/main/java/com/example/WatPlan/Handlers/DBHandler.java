@@ -88,7 +88,6 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     void updateGroup(String semesterName, String groupName, Map<Pair<String, String>, Block> blocksMap, String version) {
-        ContentValues values = new ContentValues();
         List<String> keyList = Arrays.asList("date", "index", "title", "subject", "teacher",
                 "place", "class_type", "class_index");
         String groupId = getGroupId(semesterName, groupName);
@@ -102,24 +101,28 @@ public class DBHandler extends SQLiteOpenHelper {
         System.out.println("GROUP ID: " + groupId);
         System.out.println("EXISTS: " + exists);
 
-        String finalGroupId = groupId;
+        Cursor cursor = readableDb.rawQuery("select * from block where group_id =" + groupId,null);
+        System.out.println("COUTN " +  cursor.getCount());
+        writableDb.execSQL("delete from block where group_id =" + groupId);
+        cursor.close();
+        ContentValues values = new ContentValues();
+        values.put("group_id", groupId);
         blocksMap.values().forEach(block -> {
             keyList.forEach(key -> values.put("'" + key + "'", block.get(key)));
-            if (exists) {
-                writableDb.update(TABLE_BLOCK, values, "block.id=(" +
-                        "select block.id from 'group' where " +
-                        "'group.id' ='" + finalGroupId + "')", null);
-            } else {
-                values.put("group_id", finalGroupId);
-                writableDb.insert(TABLE_BLOCK, null, values);
-            }
-            values.clear();
+            writableDb.insert(TABLE_BLOCK, null, values);
         });
+//        String query = "select * from block where" +
+//                " group_id = " + finalGroupId +
+//                " and 'block.index' = " + block.getIndex() +
+//                " and block.date = '" + block.getDate() + "'";
+
+        values.clear();
         values.put("version", version);
         writableDb.update(TABLE_GROUP, values, "id=" + groupId, null);
         System.out.println("FINISHED UPDATING GROUP");
         System.out.println("OLD VERSION " + version + " NOW" + getVersion(semesterName, groupName));
     }
+//
 
     ArrayList<String> getSemesters() {
         ArrayList<String> semesters = new ArrayList<>();
