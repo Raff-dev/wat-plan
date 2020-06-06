@@ -23,4 +23,4 @@
     
     |first startup|changing filters|
     |---|---|
-    |<img src="preview/start.gif" width="300" height="600">|<img src="preview/features.gif" width="300" height="600">|
+    |<img src="preview/start.gif" width="285" height="600">|<img src="preview/features.gif" width="285" height="600">|
