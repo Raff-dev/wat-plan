@@ -23,4 +23,4 @@
     
     |first startup|changing filters|
     |---|---|
-    |![](preview/watplanstart.gif)|![](preview/watplansettings.gif)|
+    |<img src="preview/start.gif" width="300" height="600">|<img src="preview/features.gif" width="300" height="600">|
