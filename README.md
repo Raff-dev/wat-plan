@@ -10,7 +10,7 @@
     Scraper is a *Selenium* based bot, which uses *BeautifulSoup* to get and parse data from the departaments service,   
     in order to post the data to the web service described below afterwards.
   
-    Scrapers are organised by ScrapeSquad class, which runs multple instances of them on separate threads and gathers information about progress of scraping. 
+    Scrapers are organised by ScrapeSquad class, which runs multiple instances of them on separate threads and gathers information about progress of scraping. 
     
     ![](preview/scrapesquadinfo.png)
     
