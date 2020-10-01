@@ -3,6 +3,7 @@ API/staticfiles
 Scrapper/creds.py
 Scrapper/__pycache__/creds.cpython-38.pyc
 Scraper/creds.py
+Scraper_2_0/form_data.py
 
 # Django
 *__pycache__

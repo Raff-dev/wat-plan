@@ -58,8 +58,9 @@ class Plan(ViewSet):
                             outdated = not bcreated
                             Block.objects.filter(id=block.id).update(**data)
 
-        print(F'{group.name} : {semester.name} Updated')
+        print(F'{group.name} : {semester.name} Updated: {outdated}')
         group.version += 1 if outdated else 0
+        group.save()
         return Response({"That's": 'Tosted'}, status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=False)

@@ -232,7 +232,6 @@ class Scraper():
         self.timer['posting'] += posting
         self.timer['total'] += total
         self.groups_scraped += 1
-        print('THATS POSTING:', posting, ' ppp ', self.timer['posting'])
 
         if self.queue:
             self.queue.put({
