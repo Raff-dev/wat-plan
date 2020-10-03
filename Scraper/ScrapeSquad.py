@@ -1,5 +1,4 @@
 import Scraper
-import numpy as np
 import time
 from threading import Thread
 from multiprocessing import Process, Queue
@@ -96,7 +95,7 @@ class ScrapeSquad():
 
     def finish(self):
         finished = self.timer['finish'] = datetime.now() - self.timer['born']
-        printf(f'Scraping completed in {finished}')
+        printf(f'Scraping ended in {finished}')
         printf(f'Groups scraped {self.groups_scraped}/{self.groups_count}')
         printf(
             f'Finished: {self.scrapers_finished}/{self.pool_size} Failures: {self.failures}\n')
