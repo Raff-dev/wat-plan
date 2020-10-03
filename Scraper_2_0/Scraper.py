@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from typing import List, Dict
 
 from form_data import FORM_DATA
-from Decorators import requires_settings
+from Decorators import HasRequiredAttribute
 
 BASE_URL = 'https://s1.wcy.wat.edu.pl/ed1/'
 
@@ -16,11 +16,12 @@ WINTER, SUMMER, RETAKE = '1', '2', '3'
 SID, SEMESTER, YEAR, GROUP = 'SID', 'SEMESTER', 'YEAR', 'GROUP'
 
 
-class Scraper:
+class Scraper(HasRequiredAttribute):
     """
-        Authenticates access to the schedule site.
-
-
+    Contains all the needed functionalities to
+    obtain access to the schedule website,
+    find, parse and post the schedule data
+    to the WAT Plan API
     """
 
     def __init__(self, **kwargs):
@@ -30,18 +31,15 @@ class Scraper:
         self.GROUP = None
         self.set_settings(**kwargs)
 
-    def set_settings(self, **kwargs):
-        not_allowed = self.is_allowed(*kwargs.keys())
+    def set_settings(self, **kwargs) -> None:
+        not_allowed = self.not_allowed_attributes(*kwargs.keys())
         assert kwargs.keys() <= self.__dict__.keys(), (
             f'Provided settings: {not_allowed} are not allowed')
 
         self.__dict__.update(kwargs)
 
-    def is_allowed(self, *attribute_names):
-        return set(attribute_names).difference(self.__dict__.keys())
-
     @property
-    @requires_settings(SID, SEMESTER, YEAR)
+    @HasRequiredAttribute.requires_attribute(SID, SEMESTER, YEAR)
     def groups_url(self) -> str:
         """
         Returns an url path of a site containing all groups
@@ -52,7 +50,7 @@ class Scraper:
             SEMESTER_URL_ADDON + self.YEAR + self.SEMESTER
 
     @property
-    @requires_settings(SID, SEMESTER, YEAR, GROUP)
+    @HasRequiredAttribute.requires_attribute(SID, SEMESTER, YEAR, GROUP)
     def group_url(self) -> str:
         """
         Returns an url path of a site containing current group's plan.
@@ -73,7 +71,7 @@ class Scraper:
         # make sure it has logged in succesfully
         # check the title
 
-    @requires_settings(SID, SEMESTER, YEAR)
+    @HasRequiredAttribute.requires_attribute(SID, SEMESTER, YEAR)
     def get_groups(self) -> List[str]:
         """gets all available groups of a given semester"""
 
@@ -89,6 +87,7 @@ class Scraper:
     @staticmethod
     def get_soup(url: str) -> BeautifulSoup:
         res = requests.get(url, verify=False)
+        # --- TEST PRINT ---
         print(res)
         soup = BeautifulSoup(res.text, features="lxml")
         return soup
@@ -110,13 +109,12 @@ class Scraper:
 
 
 settings_list = [
-    {YEAR: '2019', SEMESTER: WINTER},
-    {YEAR: '2019', SEMESTER: SUMMER},
-    {YEAR: '2019', SEMESTER: RETAKE},
-    {YEAR: '2020', SEMESTER: WINTER},
-    {YEAR: '2020', SEMESTER: SUMMER},
-    {YEAR: '2020', SEMESTER: RETAKE},
+    {YEAR: year, SEMESTER: semester}
+    for year in ['2019', '2020']
+    for semester in [WINTER, SUMMER, RETAKE]
 ]
 
 if __name__ == '__main__':
-    print(Scraper.scrape(settings_list))
+    # print(settings_list)
+    a = Scraper().__dict__
+    print(a)
