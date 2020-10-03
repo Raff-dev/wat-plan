@@ -1,97 +1,122 @@
 import requests
 from bs4 import BeautifulSoup
+from typing import List, Dict
+
 from form_data import FORM_DATA
+from Decorators import requires_settings
 
 BASE_URL = 'https://s1.wcy.wat.edu.pl/ed1/'
 
 LOGGED_URL_ADDON = 'logged_inc.php?'
-GROUPS_URL_ADDON = '&MID=328'
+GROUPS_URL_ADDON = '&mid=328'
 GROUP_URL_ADDON = '&exv='
 SEMESTER_URL_ADDON = '&iid='
 
-WINTER, SUMMER, RETAKE = 1, 2, 3
-SID, SEMESTER, YEAR, GROUP = 'sid', 'semester', 'year', 'group'
+WINTER, SUMMER, RETAKE = '1', '2', '3'
+SID, SEMESTER, YEAR, GROUP = 'SID', 'SEMESTER', 'YEAR', 'GROUP'
 
 
 class Scraper:
     """
+        Authenticates access to the schedule site.
 
 
     """
 
-    def requires_data(self, func, *required):
-        for setting in required:
-            assert self.settings[setting] is not None, setting + ' is missing'
-
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-        return wrapper
-
-    def __init__(self):
-        self.sid = None
-        self.settings = {
-            SID: None,
-            SEMESTER: None,
-            YEAR: None,
-            GROUP: None,
-        }
+    def __init__(self, **kwargs):
+        self.SID = None
+        self.YEAR = None
+        self.SEMESTER = None
+        self.GROUP = None
+        self.set_settings(**kwargs)
 
     def set_settings(self, **kwargs):
-        for key, value in kwargs.items():
-            self.settings[key] = value
+        not_allowed = self.is_allowed(*kwargs.keys())
+        assert kwargs.keys() <= self.__dict__.keys(), (
+            f'Provided settings: {not_allowed} are not allowed')
 
-    @requires_data(SID, SEMESTER, YEAR)
+        self.__dict__.update(kwargs)
+
+    def is_allowed(self, *attribute_names):
+        return set(attribute_names).difference(self.__dict__.keys())
+
     @property
+    @requires_settings(SID, SEMESTER, YEAR)
     def groups_url(self) -> str:
         """
         Returns an url path of a site containing all groups
         of current year and semester.
         """
 
-        return BASE_URL + LOGGED_URL_ADDON + self.settings[SID] + GROUPS_URL_ADDON +\
-            SEMESTER_URL_ADDON + self.settings[YEAR] + self.settings[SEMESTER]
+        return BASE_URL + LOGGED_URL_ADDON + self.SID + GROUPS_URL_ADDON +\
+            SEMESTER_URL_ADDON + self.YEAR + self.SEMESTER
 
-    @requires_data(SID, SEMESTER, YEAR, GROUP)
     @property
+    @requires_settings(SID, SEMESTER, YEAR, GROUP)
     def group_url(self) -> str:
         """
         Returns an url path of a site containing current group's plan.
-
         """
-        return self.groups_url + GROUP_URL_ADDON + self.settings[GROUP]
+        return self.groups_url + GROUP_URL_ADDON + self.GROUP
 
-    @requires_data(SID, SEMESTER, YEAR)
-    def get_groups(self):
-        """gets all available groups of a given semester"""
-        soup = get_soup(self.groups_url)
-        aMenus = soup.find_all(class_='aMenu')
+    @staticmethod
+    def authenticate() -> str:
+        """ Logs into website and obtains sid """
 
-        groups = []
-        for aMenu in aMenus:
-            groups.append(aMenu.get_attribute('innerText'))
-
-        return groups
-
-    def log_in(self):
         # make sure the website isnt offline
-        res = requests.get(BASE_URL, verify=False)
-        form = BeautifulSoup(res.text).form
+        form = Scraper.get_soup(BASE_URL).form
         login_url = BASE_URL + form['action']
         res = requests.post(login_url, data=FORM_DATA, verify=False)
 
-        self.sid = form['action'][10:]
+        sid = form['action'][10:]
+        return sid
         # make sure it has logged in succesfully
         # check the title
 
+    @requires_settings(SID, SEMESTER, YEAR)
+    def get_groups(self) -> List[str]:
+        """gets all available groups of a given semester"""
 
-def get_soup(url):
-    res = requests.get(url, verify=False)
-    soup = BeautifulSoup(res.text)
-    return soup
+        soup = Scraper.get_soup(self.groups_url)
+        aMenus = soup.find_all("a", class_='aMenu')
 
+        groups = []
+        for aMenu in aMenus:
+            groups.append(aMenu.text)
+
+        return groups
+
+    @staticmethod
+    def get_soup(url: str) -> BeautifulSoup:
+        res = requests.get(url, verify=False)
+        print(res)
+        soup = BeautifulSoup(res.text, features="lxml")
+        return soup
+
+    @classmethod
+    def scrape(cls, settings_list: List[Dict]):
+        scraper = cls()
+        sid = cls.authenticate()
+        scraper.set_settings(SID=sid)
+
+        all_groups = {}
+        for settings in settings_list:
+            print(settings)
+            scraper.set_settings(**settings)
+            groups = scraper.get_groups()
+            all_groups[f'{settings[YEAR]}_{settings[SEMESTER]}'] = groups
+
+        return all_groups
+
+
+settings_list = [
+    {YEAR: '2019', SEMESTER: WINTER},
+    {YEAR: '2019', SEMESTER: SUMMER},
+    {YEAR: '2019', SEMESTER: RETAKE},
+    {YEAR: '2020', SEMESTER: WINTER},
+    {YEAR: '2020', SEMESTER: SUMMER},
+    {YEAR: '2020', SEMESTER: RETAKE},
+]
 
 if __name__ == '__main__':
-    s = Scraper()
-    s.log_in()
-    s.set_settings(YEAR=2020, SEMESTER=WINTER)
-    groups = s.get_groups()
+    print(Scraper.scrape(settings_list))
