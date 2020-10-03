@@ -1,5 +1,5 @@
-from Scraper import *
-from Decorators import requires_settings
+from Scraper import Scraper
+from Decorators import HasRequiredAttribute
 import unittest
 
 
@@ -24,33 +24,64 @@ class TestScrapper(unittest.TestCase):
             scraper = Scraper()
             scraper.set_settings(test='test')
 
-    def test_requires_settings(self):
 
-        class RequiresSettingTest(Scraper):
+class TestHasRequiredAttribute(unittest.TestCase):
+    TEST1 = 'test1'
+    TEST2 = 'test2'
 
-            @requires_settings(YEAR, GROUP)
-            def test_allowed_func(self):
-                pass
+    def test_not_allowed_attributes(self):
 
-            @requires_settings('test', 'test')
-            def test_not_allowed_func(self):
-                pass
+        class TestNotAllowedAttributes(HasRequiredAttribute):
+            def __init__(self):
+                self.test1 = None
 
-        scraper = RequiresSettingTest()
+        naa = TestNotAllowedAttributes()
+        not_allowed = naa.not_allowed_attributes(self.TEST1)
+        self.assertEqual(not_allowed, set())
+
+        not_allowed = naa.not_allowed_attributes(
+            self.TEST1, *[self.TEST1 for _ in range(21)])
+        self.assertEqual(not_allowed, set())
+
+        not_allowed = naa.not_allowed_attributes(self.TEST1, self.TEST2)
+        self.assertEqual(not_allowed, set([self.TEST2]))
+
+        not_allowed = naa.not_allowed_attributes(self.TEST2, self.TEST2)
+        self.assertEqual(not_allowed, set([self.TEST2, ]))
+
+        not_allowed = naa.not_allowed_attributes(self.TEST2)
+        self.assertEqual(not_allowed, set([self.TEST2]))
+
+    def test_requires_attribute(self):
+
+        class TestRequiresAttribute(HasRequiredAttribute):
+
+            def __init__(self):
+                self.test1 = None
+                self.test2 = None
+
+            @HasRequiredAttribute.requires_attribute(self.TEST1, self.TEST2)
+            def allowed_attributes_func(self): ...
+
+            @HasRequiredAttribute.requires_attribute('asd', 'dss')
+            def not_allowed_attributes_func(self): ...
+
+        ra = TestRequiresAttribute()
         with self.assertRaises(AssertionError):
-            scraper.test_allowed_func()
+            ra.allowed_attributes_func()
 
         with self.assertRaises(AssertionError):
-            scraper.test_not_allowed_func()
+            ra.not_allowed_attributes_func()
 
-        scraper.set_settings(YEAR='string', GROUP='string')
+        ra.test1 = self.TEST1
+        ra.test2 = self.TEST2
         try:
-            scraper.test_allowed_func()
+            ra.allowed_attributes_func()
         except AssertionError as e:
-            self.fail("requires_setting raised AssertionError unexpectedly")
+            self.fail("requires_attribute raised AssertionError unexpectedly")
         except Exception as e:
             self.fail(
-                f'{scraper.test_allowed_func.__name__} ' +
+                f'{ra.allowed_attributes_func.__name__} ' +
                 f'raised {type(e).__name__} unexpectedly')
 
 
