@@ -1,9 +1,9 @@
 import requests
-from bs4 import BeautifulSoup
 from typing import List, Dict
 
 from form_data import FORM_DATA
-from Decorators import HasRequiredAttribute
+from Decorators import HasRequiredAttribute, TimeMeasure
+from SoupParser import SoupParser
 
 BASE_URL = 'https://s1.wcy.wat.edu.pl/ed1/'
 
@@ -29,14 +29,7 @@ class Scraper(HasRequiredAttribute):
         self.YEAR = None
         self.SEMESTER = None
         self.GROUP = None
-        self.set_settings(**kwargs)
-
-    def set_settings(self, **kwargs) -> None:
-        not_allowed = self.not_allowed_attributes(*kwargs.keys())
-        assert kwargs.keys() <= self.__dict__.keys(), (
-            f'Provided settings: {not_allowed} are not allowed')
-
-        self.__dict__.update(kwargs)
+        self.set_attributes(**kwargs)
 
     @property
     @HasRequiredAttribute.requires_attribute(SID, SEMESTER, YEAR)
@@ -62,7 +55,7 @@ class Scraper(HasRequiredAttribute):
         """ Logs into website and obtains sid """
 
         # make sure the website isnt offline
-        form = Scraper.get_soup(BASE_URL).form
+        form = SoupParser.get_soup(BASE_URL).form
         login_url = BASE_URL + form['action']
         res = requests.post(login_url, data=FORM_DATA, verify=False)
 
@@ -75,7 +68,7 @@ class Scraper(HasRequiredAttribute):
     def get_groups(self) -> List[str]:
         """gets all available groups of a given semester"""
 
-        soup = Scraper.get_soup(self.groups_url)
+        soup = SoupParser.get_soup(self.groups_url)
         aMenus = soup.find_all("a", class_='aMenu')
 
         groups = []
@@ -84,24 +77,18 @@ class Scraper(HasRequiredAttribute):
 
         return groups
 
-    @staticmethod
-    def get_soup(url: str) -> BeautifulSoup:
-        res = requests.get(url, verify=False)
-        # --- TEST PRINT ---
-        print(res)
-        soup = BeautifulSoup(res.text, features="lxml")
-        return soup
-
     @classmethod
-    def scrape(cls, settings_list: List[Dict]):
+    def get_all_group_names(cls, settings_list: List[Dict]):
+        """
+        """
         scraper = cls()
         sid = cls.authenticate()
-        scraper.set_settings(SID=sid)
+        scraper.set_attributes(SID=sid)
 
         all_groups = {}
         for settings in settings_list:
             print(settings)
-            scraper.set_settings(**settings)
+            scraper.set_attributes(**settings)
             groups = scraper.get_groups()
             all_groups[f'{settings[YEAR]}_{settings[SEMESTER]}'] = groups
 
@@ -115,6 +102,5 @@ settings_list = [
 ]
 
 if __name__ == '__main__':
-    # print(settings_list)
-    a = Scraper().__dict__
-    print(a)
+    all_group_names = Scraper.get_all_group_names(settings_list)
+    print(all_group_names)
