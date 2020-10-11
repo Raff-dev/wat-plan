@@ -35,7 +35,7 @@ class SoupParser():
 
     @staticmethod
     @Setting.requires_setting(Setting.SEMESTER, Setting.YEAR, Setting.GROUP)
-    def get_group_schedule(soup: BeautifulSoup, setting: Setting):
+    def get_group_schedule(setting: Setting, soup: BeautifulSoup):
         """
          :param url -
          :return
@@ -64,16 +64,11 @@ class SoupParser():
             return None
 
         columns_count = int(len(blocks) / (DAYS_PER_WEEK*BLOCKS_PER_DAY))
-        # print(f'BLOCKS: {blocks}')
         row_blocks = SoupParser.array_split(blocks, columns_count)
-        # print(f'ROW BLOCKS: {row_blocks}')
         week_blocks = pd.DataFrame(row_blocks).T.values
-        # print(f'WEEK BLOCKS: {week_blocks}')
         sorted_blocks = [
             block for column in week_blocks for block in column]
-        # print(f'SORTED BLOCKS: {sorted_blocks}')
         sorted_days = SoupParser.array_split(sorted_blocks, DAYS_PER_WEEK)
-        # print(f'SORTED DAYS: {sorted_days}')
         return sorted_days
 
     @staticmethod

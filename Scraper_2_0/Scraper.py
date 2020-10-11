@@ -62,15 +62,15 @@ class Scraper():
     def authenticate() -> str:
         """ Logs into website and obtains sid """
 
-        # make sure the website isnt offline
-        form = Scraper.get_soup(BASE_URL).form
-        login_url = BASE_URL + form['action']
-        res = requests.post(login_url, data=FORM_DATA, verify=False)
+        soup = Scraper.get_soup(BASE_URL)
+        error = soup.find_all('b', class_='bError')
+        assert not len(error), 'The service is unavailable'
+        assert soup.form['action'], 'The sid was not found'
 
-        sid = form['action'][10:]
+        login_url = BASE_URL + soup.form['action']
+        res = requests.post(login_url, data=FORM_DATA, verify=False)
+        sid = soup.form['action'][10:]
         return sid
-        # make sure it has logged in succesfully
-        # check the title
 
     @staticmethod
     @Setting.requires_setting(Setting.SID, Setting.SEMESTER, Setting.YEAR)
@@ -79,25 +79,10 @@ class Scraper():
 
         url = Scraper.get_groups_url(setting)
         soup = Scraper.get_soup(url)
-        aMenus = soup.find_all("a", class_='aMenu')
+        group_nodes = soup.find_all("a", class_='aMenu')
 
         groups = []
-        for aMenu in aMenus:
-            groups.append(aMenu.text)
+        for group_node in group_nodes:
+            groups.append(group_node.text)
 
         return groups
-
-    @staticmethod
-    def get_all_group_names(settings_list: List[Dict]):
-        """
-        """
-        sid = Scraper.authenticate()
-        setting = Setting(sid=sid)
-
-        all_groups = {}
-        for settings in settings_list:
-            setting.set_settings(**settings)
-            groups = Scraper.get_group_names(setting)
-            all_groups[f'{settings.year}_{settings.semester}'] = groups
-
-        return all_groups
