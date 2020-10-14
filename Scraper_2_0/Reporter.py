@@ -1,6 +1,8 @@
 from __future__ import annotations
+from functools import wraps
 import inspect
 from threading import Lock
+import time
 
 
 class Reporter():
@@ -15,23 +17,17 @@ class Reporter():
             self.succedeed = 0
             self.failed = 0
             self.errors = []
-
-        def lock_required(self, func):
-            def wrapper(self, *args, **kwargs):
-                with self.lock:
-                    res = func(*args, **kwargs)
-                    return res
-            return wrapper
+            self.time = []
 
         @property
-        def finished(self):
+        def finished(self) -> int:
             with self.lock:
                 return self.ongoing + self.succedeed + self.failed
 
     def reset(self):
         self.__dict__.clear()
 
-    def report(self):
+    def report(self) -> str:
         message = ''
         for reportable_value in self.__dict__.items():
             name, value = reportable_value
@@ -41,6 +37,8 @@ class Reporter():
                     f'Ongoing: {value.ongoing}: \n'
                     f'Succededd: {value.succedeed}: \n'
                     f'Failed: {value.failed}: \n'
+                    f'Total time: {sum(value.time)}: \n'
+                    f'Average time: {sum(value.time)/len(value.time)}: \n'
                 )
                 if value.failed > 0:
                     message += f'Errors: {[error for error in value.errors]}: \n'
@@ -48,7 +46,8 @@ class Reporter():
         print(message)
         return message
 
-    def get(self, reportable_value_name: str) -> Reporter.ReportableValue:
+    def get(self, func: str) -> Reporter.ReportableValue:
+        reportable_value_name = func.__name__
         if not reportable_value_name in self.__dict__.keys():
             self.__dict__.update(
                 {reportable_value_name: Reporter.ReportableValue()})
@@ -57,33 +56,32 @@ class Reporter():
         return reportable_value
 
     @staticmethod
-    def report_on(reportable_value_name):
-        def wrapper(func):
-            def wrapper(instance, *args, **kwargs):
-                reporter = instance.reporter
-                assert reporter and isinstance(
-                    reporter, Reporter), "Reporter not found"
+    def observe(func):
+        @wraps(func)
+        def wrapper(instance, *args, **kwargs):
+            reporter = instance.reporter
+            assert reporter and isinstance(
+                reporter, Reporter), "Reporter not found"
 
-                reportable_value = reporter.get(reportable_value_name)
-
-                try:
-                    with reportable_value.lock:
-                        print(f'ongoing {reportable_value_name}')
-                        reportable_value.ongoing += 1
-                    res = func(*args, **kwargs)
-                    with reportable_value.lock:
-                        reportable_value.succedeed += 1
-                        reportable_value.ongoing -= 1
-                        print(f'succeded {reportable_value_name}')
-                    return res
-                except Exception as e:
-                    with reportable_value.lock:
-                        reportable_value.failed += 1
-                        reportable_value.ongoing -= 1
-                        print(f'\nfailed {reportable_value_name}\n'
-                              f'with {e}\n'
-                              F'at {inspect.stack()}\n')
-                        reportable_value.errors.append(e)
-                    return None
-            return wrapper
+            reportable_value = reporter.get(func)
+            start = time.time()
+            try:
+                with reportable_value.lock:
+                    reportable_value.ongoing += 1
+                res = func(instance, *args, **kwargs)
+                with reportable_value.lock:
+                    reportable_value.succedeed += 1
+                return res
+            except Exception as e:
+                with reportable_value.lock:
+                    reportable_value.failed += 1
+                    print(f'\nfailed {func.__name__}\n'
+                          f'with {e}\n'
+                          F'at {func.__name__}\n')
+                    reportable_value.errors.append(e)
+                return None
+            finally:
+                with reportable_value.lock:
+                    reportable_value.ongoing -= 1
+                    reportable_value.time.append(time.time()-start)
         return wrapper
