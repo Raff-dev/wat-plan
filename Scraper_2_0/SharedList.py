@@ -1,38 +1,35 @@
 from typing import List, TypeVar
+from copy import copy
 from threading import Lock, Semaphore
 
 
 class SharedList():
-    """
-    Implements thread safe
-    """
+    """    Implements thread safe list    """
 
-    def __init__(self, initial_values: List[TypeVar] = [], name: str = ''):
-        self.name = name
-        self.reset(initial_values)
+    def __init__(self, initial_values: List = None):
+        self.reset(initial_values if initial_values else [])
 
-    def __repr__(self):
+    def __repr__(self) -> List:
         with self.lock:
             return str(self.list)
 
-    def reset(self, initial_values: List[TypeVar] = []) -> None:
-        self.list = initial_values
-        self.semaphore = Semaphore(len(initial_values))
+    def reset(self, initial_values: List = None) -> None:
+        self.list = initial_values if initial_values else []
+        self.semaphore = Semaphore(len(self.list))
         self.lock = Lock()
 
     def append(self, value: TypeVar) -> None:
         with self.lock:
-            print(f'appending {self.name}')
-            self.list.append(value)
+            self.list.append(copy(value))
             self.semaphore.release()
 
     def pop(self, index: int = 0) -> TypeVar:
         self.semaphore.acquire()
         with self.lock:
-            print(f'poping {self.name}')
             value = self.list.pop(index)
-            return value
+            return copy(value)
 
     @property
-    def length(self):
-        return len(self.list)
+    def length(self) -> int:
+        with self.lock:
+            return len(self.list)
