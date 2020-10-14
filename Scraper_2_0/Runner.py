@@ -1,8 +1,9 @@
 from typing import List, Dict, Tuple, Iterable, TypeVar
 from bs4 import BeautifulSoup
-
-import time
 from threading import Thread, Lock
+import requests
+import time
+import json
 
 from Decorators import timer
 from Scraper import Scraper
@@ -12,6 +13,9 @@ from SoupParser import SoupParser
 from SharedList import SharedList
 
 
+API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/Plan/update_plan/'
+DEBUG_API_UPDATE_PLAN_URL = 'localhost:8000/Plan/update_plan/'
+HEADERS = {'Content-type': 'application/json'}
 KEEP_CONNECTION_DELAY = 0.2
 
 
@@ -66,7 +70,7 @@ class Runner():
         print(f'FINISHED {func.__name__} ')
 
     @Reporter.observe
-    def __scrape(self):
+    def __scrape(self) -> None:
         setting = self.setting_list.pop()
         with self.scrapeLock:
             time.sleep(KEEP_CONNECTION_DELAY)
@@ -86,6 +90,12 @@ class Runner():
     @Reporter.observe
     def __post(self) -> None:
         group_schedule = self.schedule_data.pop()
+        json_data = json.dumps(group_schedule)
+        res = requests.post(
+            url=DEBUG_API_UPDATE_PLAN_URL,
+            headers=HEADERS,
+            data=json_data
+        )
 
     @property
     def keep_scraping(self):
