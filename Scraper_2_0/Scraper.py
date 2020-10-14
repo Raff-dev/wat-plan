@@ -29,13 +29,19 @@ class Scraper():
     """
 
     @staticmethod
-    def get_soup(url: str) -> BeautifulSoup:
-        res = requests.get(url, verify=False)
-        assert res.status_code == requests.codes.ok, (
-            f'Failed to obtain soup, request status: {res.status_code}')
+    def get_soup(url: str, session: requests.Session = None) -> BeautifulSoup:
+        """Gets page content and converts it into beautifulsoup object"""
+
+        get = session.get if session else requests.get
+        res = get(url, verify=False)
+        assert res.ok and res.text, (
+            f'Failed to obtain soup\n'
+            f'request status: {res.status_code}\n'
+            f'request url: {res.url}\n'
+            f'result length: {len(res.text)}')
 
         # --- TEST PRINT ---
-        print(res)
+        print(f'RES code {res}')
         soup = BeautifulSoup(res.text, features="lxml")
         return soup
 
@@ -44,7 +50,7 @@ class Scraper():
     def get_groups_url(setting: Setting) -> str:
         """
         Returns an url path of a site containing all groups
-        of current year and semester.
+        of year and semester specified within Setting object.
         """
 
         return BASE_URL + LOGGED_URL_ADDON + setting.sid + GROUPS_URL_ADDON +\
@@ -60,12 +66,12 @@ class Scraper():
 
     @staticmethod
     def authenticate() -> str:
-        """ Logs into website and obtains sid """
+        """Logs into website and obtains sid"""
 
         soup = Scraper.get_soup(BASE_URL)
         error = soup.find_all('b', class_='bError')
-        assert not len(error), 'The service is unavailable'
-        assert soup.form['action'], 'The sid was not found'
+        assert not error, 'The service is unavailable'
+        assert soup.form, 'The form was not found'
 
         login_url = BASE_URL + soup.form['action']
         res = requests.post(login_url, data=FORM_DATA, verify=False)
