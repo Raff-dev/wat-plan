@@ -72,6 +72,7 @@ class Reporter():
                 with reportable_value.lock:
                     reportable_value.succedeed += 1
                 return res
+
             except Exception as e:
                 with reportable_value.lock:
                     reportable_value.failed += 1
@@ -80,8 +81,10 @@ class Reporter():
                           F'at {func.__name__}\n')
                     reportable_value.errors.append(e)
                 return None
+
             finally:
                 with reportable_value.lock:
                     reportable_value.ongoing -= 1
                     reportable_value.time.append(time.time()-start)
+
         return wrapper
