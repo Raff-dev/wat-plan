@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 import time
 
 from form_data import FORM_DATA
-from Decorators import timer
 from SoupParser import SoupParser
 from Setting import Setting
 
@@ -86,9 +85,5 @@ class Scraper():
         url = Scraper.get_groups_url(setting)
         soup = Scraper.get_soup(url)
         group_nodes = soup.find_all("a", class_='aMenu')
-
-        groups = []
-        for group_node in group_nodes:
-            groups.append(group_node.text)
-
-        return groups
+        group_names = [node.text for node in group_nodes]
+        return group_names

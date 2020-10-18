@@ -35,7 +35,7 @@ class SoupParser():
 
     @staticmethod
     @Setting.requires_setting(Setting.SEMESTER, Setting.YEAR, Setting.GROUP)
-    def get_group_schedule(setting: Setting, soup: BeautifulSoup):
+    def get_group_schedule(setting: Setting, soup: BeautifulSoup) -> Dict:
         """
          :param url -
          :return
@@ -45,7 +45,6 @@ class SoupParser():
             return None
 
         year = int(setting.year)
-        year = year if setting.year == Setting.WINTER else year+1
         start_date = SoupParser.__get_start_date(soup, year)
 
         group_schedule = SoupParser.__parse_semester(days_soup, start_date)
@@ -53,7 +52,7 @@ class SoupParser():
             'year': setting.year,
             'semester': setting.semester,
             'group': setting.group,
-            'plan': group_schedule
+            'schedule': group_schedule
         }
         return group_schedule_formatted
 
@@ -98,10 +97,8 @@ class SoupParser():
         assert len(day_blocks_soup) == BLOCKS_PER_DAY, (
             f'Invalid data format at {inspect.stack()[0][3]}')
 
-        day_schedule = {}
-        for block_index, block_soup in enumerate(day_blocks_soup, start=1):
-            day_schedule[block_index] = SoupParser.__parse_block(block_soup)
-
+        day_schedule = [SoupParser.__parse_block(block_soup)
+                        for block_soup in day_blocks_soup]
         return day_schedule
 
     @staticmethod

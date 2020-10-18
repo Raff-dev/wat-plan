@@ -14,54 +14,60 @@ import json
 from .models import Block, Day, Group, Semester
 from home.models import Apk
 import datetime
+import time
 
 
 class Plan(ViewSet):
 
     @action(methods=['post'], detail=False)
-    def update_plan(self, request, *args, **kwargs):
-        print('GOT REQUEST')
-        group = request.data['group']
-        semester = request.data['semester']
-        plan = request.data['plan']
-        outdated = False
-        plan_exists = plan is not None
+    def update_schedule(self, request, *args, **kwargs):
+        try:
+            start = time.time()
+            group = request.data['group']
+            semester = request.data['semester']
+            schedule = request.data['schedule']
 
-        semester, screated = Semester.objects.get_or_create(
-            name=semester)
-        group, gcreated = Group.objects.get_or_create(
-            name=group, semester=semester)
+            semester, screated = Semester.objects.get_or_create(
+                name=semester)
+            group, gcreated = Group.objects.get_or_create(
+                name=group, semester=semester)
 
-        if Day.objects.filter(group=group).exists() != plan_exists:
-            outdated = not gcreated
-            if plan is None and not gcreated:
-                Day.objects.filter(group=group).delete()
+            should_update = screated or gcreated
 
-        if plan_exists:
-            for date, plan_day in plan.items():
-                date = [int(d) for d in date.split('-')]
-                date = datetime.date(*date)
-                day, dcreated = Day.objects.get_or_create(
-                    group=group, date=date)
+            schedule_days = Day.objects.filter(group=group)
+            if schedule is None and schedule_days:
+                schedule_days.delete()
 
-                for index, data in plan_day.items():
-                    if data is None:
-                        outdated = bool(Block.objects.filter(
-                            day=day, index=index
-                        ).delete()[0]) or outdated
-                    else:
-                        block, bcreated = Block.objects.get_or_create(
-                            day=day, index=index)
-                        check = data.copy()
-                        check.pop('place')
-                        if not check.items() <= block.__dict__.items():
-                            outdated = not bcreated
-                            Block.objects.filter(id=block.id).update(**data)
+            elif schedule:
+                for date, schedule_day in schedule.items():
+                    date = datetime.date(*[int(d) for d in date.split('-')])
+                    day, dcreated = Day.objects.get_or_create(
+                        group=group, date=date)
 
-        print(F'{group.name} : {semester.name} Updated: {outdated}')
-        group.version += 1 if outdated else 0
-        group.save()
-        return Response({"That's": 'Tosted'}, status=status.HTTP_201_CREATED)
+                    for block_index, block_data in enumerate(schedule_day, start=1):
+                        if block_data is None:
+                            should_update |= Block.objects.filter(
+                                day=day, index=block_index).delete()[0]
+                        else:
+                            block, bcreated = Block.objects.get_or_create(
+                                day=day, index=block_index)
+                            check = {v for v in block_data.items()
+                                     if v[0] != 'place'}
+
+                            if not check <= block.__dict__.items():
+                                Block.objects.filter(
+                                    id=block.id).update(**block_data)
+                                should_update = True
+            end = time.time()
+            print(
+                f'{group.name} Semester: {semester.name} Updated: {should_update} time: {round(end-start,2)}')
+            if should_update:
+                group.version += 1
+                group.save()
+            return Response(group, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(f'Exception {e}')
+            return Response('konia', status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['get'], detail=False)
     def get_group(self, request, *args, **kwargs):

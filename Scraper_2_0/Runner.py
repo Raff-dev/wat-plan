@@ -5,7 +5,6 @@ import requests
 import time
 import json
 
-from Decorators import timer
 from Scraper import Scraper
 from Reporter import Reporter
 from Setting import Setting
@@ -14,47 +13,58 @@ from SharedList import SharedList
 
 
 API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/Plan/update_plan/'
-DEBUG_API_UPDATE_PLAN_URL = 'localhost:8000/Plan/update_plan/'
+DEBUG_API_UPDATE_PLAN_URL = 'http://127.0.0.1:8000/Plan/update_schedule/'
 HEADERS = {'Content-type': 'application/json'}
-KEEP_CONNECTION_DELAY = 0.2
+KEEP_CONNECTION_DELAY = 0.25
 
 
 class Runner():
 
-    def __init__(self, max_scraping_workers=5, max_posting_workers=5):
+    def __init__(self, max_scraping_workers=5):
         self.max_scraping_workers = max_scraping_workers
-        self.max_posting_workers = max_posting_workers
 
+        self.session = None
         self.scrapeLock = Lock()
         self.reporter = Reporter()
         self.setting_list = SharedList()
         self.soup_data = SharedList()
         self.schedule_data = SharedList()
 
-    def run(self, setting_list: List[Setting]):
+    @classmethod
+    def run_for_semester(cls, year: str, semester: str) -> None:
+        sid = Scraper.authenticate()
+        SETTING = {
+            Setting.SID: sid,
+            Setting.YEAR: year,
+            Setting.SEMESTER: semester,
+        }
+
+        group_names = Scraper.get_group_names(Setting(**SETTING))
+        settings = [Setting(group=group, **SETTING) for group in group_names]
+
+        runner = cls()
+        with requests.Session() as session:
+            runner.session = session
+            runner.run(settings)
+        runner.reporter.report()
+
+    @Reporter.time_measure
+    def run(self, setting_list: List[Setting]) -> None:
         self.reset(setting_list)
         scraping_workers = min(self.max_scraping_workers,
                                self.setting_list.length)
-        posting_workers = min(self.max_posting_workers,
-                              self.setting_list.length)
 
-        scrape_threads = [Thread(target=Runner.repeat,
-                                 args=(self.__scrape, lambda: self.keep_scraping
-                                       )) for _ in range(scraping_workers)]
-        parse_thread = Thread(target=Runner.repeat,
-                              args=(self.__parse, lambda: self.keep_parsing))
-        post_threads = [Thread(target=Runner.repeat,
-                               args=(self.__post, lambda: self.keep_posting
-                                     )) for _ in range(posting_workers)]
+        jobs = [
+            (self.__scrape, lambda: self.keep_scraping, 3),
+            (self.__parse, lambda: self.keep_parsing, 1),
+            (self.__post, lambda: self.keep_posting, 1)
+        ]
 
-        all_threads = [*scrape_threads, parse_thread, *post_threads]
-        for thread in all_threads:
-            thread.start()
+        threads = [Thread(target=Runner.repeat, args=args)
+                   for *args, count in jobs for _ in range(count)]
 
-        for thread in all_threads:
-            thread.join()
-
-        self.reporter.report()
+        tasks = [lambda thread: thread.start(), lambda thread: thread.join()]
+        [task(thread) for task in tasks for thread in threads]
 
     def reset(self, setting_list: List[Setting]):
         self.reporter.reset()
@@ -71,13 +81,13 @@ class Runner():
 
     @Reporter.observe
     def __scrape(self) -> None:
-        setting = self.setting_list.pop()
         with self.scrapeLock:
+            setting = self.setting_list.pop()
             time.sleep(KEEP_CONNECTION_DELAY)
         url = Scraper.get_group_url(setting)
-        soup = Scraper.get_soup(url)
+        soup = Scraper.get_soup(url, self.session)
 
-        assert soup is not None and soup.title and 'e-Dziekanat' in soup.title.text, 'Invalid soup'
+        assert soup and soup.title and 'e-Dziekanat' in soup.title.text, 'Invalid soup'
         self.soup_data.append((setting, soup))
 
     @Reporter.observe
@@ -116,21 +126,4 @@ class Runner():
 
 
 if __name__ == '__main__':
-    ALL_SEMESTERS_SETTING = [
-        {Setting.YEAR: year, Setting.SEMESTER: semester}
-        for year in ['2019', '2020']
-        for semester in [Setting.WINTER, Setting.SUMMER, Setting.RETAKE]
-    ]
-    TEST_SETTING = {
-        Setting.YEAR: '2020',
-        Setting.SEMESTER: Setting.WINTER,
-        Setting.GROUP: 'WCY18IJ6S1'
-    }
-    COUNT = 20
-    sid = Scraper.authenticate()
-    setting = Setting(sid=sid, **TEST_SETTING)
-    start = time.time()
-    runner = Runner()
-    runner.run([setting]*COUNT)
-    print(f'Total Time: {time.time()-start}')
-    print(f'Time per Setting: {(time.time()-start)/COUNT}')
+    Runner.run_for_semester(year='2020', semester='1')
