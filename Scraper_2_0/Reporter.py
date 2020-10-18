@@ -10,6 +10,9 @@ class Reporter():
     Stores statuses, and errors of methods that are decorated as reported.
     """
 
+    def __init__(self):
+        self.timer = {}
+
     class ReportableValue():
         def __init__(self):
             self.lock = Lock()
@@ -17,7 +20,6 @@ class Reporter():
             self.succedeed = 0
             self.failed = 0
             self.errors = []
-            self.time = []
 
         @property
         def finished(self) -> int:
@@ -26,23 +28,27 @@ class Reporter():
 
     def reset(self):
         self.__dict__.clear()
+        self.__init__()
 
     def report(self) -> str:
         message = ''
-        for reportable_value in self.__dict__.items():
-            name, value = reportable_value
+        reportable_values = [(name, value) for name, value in self.__dict__.items()
+                             if isinstance(value, Reporter.ReportableValue)]
+        for name, value in reportable_values:
+            if name == 'timer':
+                continue
             with value.lock:
                 message += (
                     f'\nReport on: {name} \n'
                     f'Ongoing: {value.ongoing}: \n'
                     f'Succededd: {value.succedeed}: \n'
                     f'Failed: {value.failed}: \n'
-                    f'Total time: {sum(value.time)}: \n'
-                    f'Average time: {sum(value.time)/len(value.time)}: \n'
                 )
                 if value.failed > 0:
                     message += f'Errors: {[error for error in value.errors]}: \n'
 
+        for name, time in self.timer.items():
+            message += f'\nTimer on {name}: {round(time,2)}'
         print(message)
         return message
 
@@ -56,15 +62,31 @@ class Reporter():
         return reportable_value
 
     @staticmethod
+    def find_reporter(instance):
+        reporter = instance.reporter
+        assert reporter and isinstance(
+            reporter, Reporter), "Reporter not found"
+        return reporter
+
+    @staticmethod
+    def time_measure(func):
+        @wraps(func)
+        def wrapper(instance, *args, **kwargs):
+            reporter = Reporter.find_reporter(instance)
+            start = time.time()
+            result = func(instance, *args, **kwargs)
+            end = time.time()
+            reporter.timer[func.__name__] = end - start
+            return result
+        return wrapper
+
+    @staticmethod
     def observe(func):
         @wraps(func)
         def wrapper(instance, *args, **kwargs):
-            reporter = instance.reporter
-            assert reporter and isinstance(
-                reporter, Reporter), "Reporter not found"
-
+            reporter = Reporter.find_reporter(instance)
             reportable_value = reporter.get(func)
-            start = time.time()
+
             try:
                 with reportable_value.lock:
                     reportable_value.ongoing += 1
@@ -85,6 +107,4 @@ class Reporter():
             finally:
                 with reportable_value.lock:
                     reportable_value.ongoing -= 1
-                    reportable_value.time.append(time.time()-start)
-
         return wrapper
