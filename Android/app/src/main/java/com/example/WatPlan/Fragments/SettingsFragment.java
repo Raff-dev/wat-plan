@@ -26,6 +26,7 @@ import com.example.WatPlan.Handlers.DBHandler;
 import com.example.WatPlan.Handlers.UpdateHandler;
 import com.example.WatPlan.Models.Switch_;
 import com.example.WatPlan.R;
+import com.toptoche.searchablespinnerlibrary.SearchableListDialog;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
