@@ -22,7 +22,6 @@ class Plan(ViewSet):
     @action(methods=['post'], detail=False)
     def update_schedule(self, request, *args, **kwargs):
         try:
-            start = time.time()
             group = request.data['group']
             semester = request.data['semester']
             schedule = request.data['schedule']
@@ -58,16 +57,15 @@ class Plan(ViewSet):
                                 Block.objects.filter(
                                     id=block.id).update(**block_data)
                                 should_update = True
-            end = time.time()
             print(
-                f'{group.name} Semester: {semester.name} Updated: {should_update} time: {round(end-start,2)}')
+                f'{group.name} Semester: {semester.name} Updated: {should_update}')
             if should_update:
                 group.version += 1
                 group.save()
-            return Response(group, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         except Exception as e:
             print(f'Exception {e}')
-            return Response('konia', status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['get'], detail=False)
     def get_group(self, request, *args, **kwargs):

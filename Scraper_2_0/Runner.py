@@ -12,7 +12,7 @@ from SoupParser import SoupParser
 from SharedList import SharedList
 
 
-API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/Plan/update_plan/'
+API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/Plan/update_schedule/'
 DEBUG_API_UPDATE_PLAN_URL = 'http://127.0.0.1:8000/Plan/update_schedule/'
 HEADERS = {'Content-type': 'application/json'}
 KEEP_CONNECTION_DELAY = 0.25
@@ -20,7 +20,7 @@ KEEP_CONNECTION_DELAY = 0.25
 
 class Runner():
 
-    def __init__(self, max_scraping_workers=5):
+    def __init__(self, max_scraping_workers=3):
         self.max_scraping_workers = max_scraping_workers
 
         self.session = None
@@ -55,7 +55,7 @@ class Runner():
                                self.setting_list.length)
 
         jobs = [
-            (self.__scrape, lambda: self.keep_scraping, 3),
+            (self.__scrape, lambda: self.keep_scraping, scraping_workers),
             (self.__parse, lambda: self.keep_parsing, 1),
             (self.__post, lambda: self.keep_posting, 1)
         ]
@@ -102,10 +102,11 @@ class Runner():
         group_schedule = self.schedule_data.pop()
         json_data = json.dumps(group_schedule)
         res = requests.post(
-            url=DEBUG_API_UPDATE_PLAN_URL,
+            url=API_UPDATE_PLAN_URL,
             headers=HEADERS,
             data=json_data
         )
+        print(f'DJANGO {res}')
 
     @property
     def keep_scraping(self):
