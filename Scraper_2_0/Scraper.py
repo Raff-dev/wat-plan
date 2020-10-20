@@ -23,8 +23,7 @@ class Scraper():
     """
     Contains all the needed functionalities to
     obtain access to the schedule website,
-    find, parse and post the schedule data
-    to the WAT Plan API
+    find and gather desired date
     """
 
     @staticmethod
