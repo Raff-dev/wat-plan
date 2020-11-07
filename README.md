@@ -7,12 +7,8 @@
  
 ## How does it work?
   * ### Obtaining data   
-    Scraper is a *Selenium* based bot, which uses *BeautifulSoup* to get and parse data from the departaments service,   
+    Scraper is a multithreaded, *Selenium* based bot, which uses *BeautifulSoup* to get and parse data from the departaments service,   
     in order to post the data to the web service described below afterwards.
-  
-    Scrapers are organised by ScrapeSquad class, which runs multiple instances of them on separate threads and gathers information about progress of scraping. 
-    
-    ![](preview/scrapesquadinfo.png)
     
   * ### Transfering data to the app
     To enable *WAT Plan* android app to get the desired data, I created a simple *Django* web service.   
