@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_alignParentTop="true"
+
         android:gravity="center">
         <TextView
             android:id="@+id/dayNameTextView"
@@ -18,7 +19,9 @@
             android:text="Day Name"
             android:textSize="18dp"
             android:gravity="center"
-            android:paddingTop="2px"/>
+            android:paddingTop="2px"
+            android:textColor="@color/orange2"
+            />
         <TextView
             android:id="@+id/dayDateTextView"
             android:layout_width="match_parent"
@@ -27,6 +30,7 @@
             android:textSize="18dp"
             android:gravity="center"
             android:layout_below="@id/dayNameTextView"
+            android:textColor="@color/orange2"
             android:paddingBottom="2px"/>
 
     </RelativeLayout>
