@@ -18,4 +18,4 @@ Full stack project of my university's departament of cybernetics schedule, conta
     
     |first startup|changing filters|
     |---|---|
-    |<img src="preview/start.gif" width="285" height="600">|<img src="preview/features.gif" width="285" height="600">|
+    |<img src="preview/watplanstart.gif" width="285" height="600">|<img src="preview/watplanfeatures.gif" width="285" height="600">|
