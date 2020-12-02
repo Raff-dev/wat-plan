@@ -1,14 +1,13 @@
-###  *WAT Plan* is a full stack project of my university's departament of cybernetics schedule.
-### You can download the android app's apk at https://watplan.eu.pythonanywhere.com/home
+## Wat Plan
+Full stack project of my university's departament of cybernetics schedule, containing an android application and independent web api managing the used data.
 
-<p align="center"> 
-<img src="https://imgur.com/nTTuSZb.png" height="500">
-</p>
- 
+##### You can download the android app's apk at https://watplan.eu.pythonanywhere.com/home
+
+
 ## How does it work?
   * ### Obtaining data   
-    Scraper is a multithreaded, *Selenium* based bot, which uses *BeautifulSoup* to get and parse data from the departaments service,   
-    in order to post the data to the web service described below afterwards.
+    The data is scraped by a multithreaded program, which gets the contents of the departament's service and parses 
+    it using *Beautiful Soup* library, in order to post the data to the web service described below afterwards.
     
   * ### Transfering data to the app
     To enable *WAT Plan* android app to get the desired data, I created a simple *Django* web service.   
