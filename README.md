@@ -1,10 +1,12 @@
-## Wat Plan
+Wat Plan
+---
 Full stack project of my university's departament of cybernetics schedule, containing an android application and independent web api managing the used data.
 
 ##### You can download the android app's apk at https://watplan.eu.pythonanywhere.com/home
 
 
-## How does it work?
+How does it work?
+---
   * ### Obtaining data   
     The data is scraped by a multithreaded program, which gets the contents of the departament's service and parses 
     it using *Beautiful Soup* library, in order to post the data to the web service described below afterwards.
