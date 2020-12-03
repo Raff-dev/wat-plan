@@ -19,6 +19,6 @@ How does it work?
     it using *Beautiful Soup* library, in order to post the data to the web service described below afterwards.
     
   * ### Transfering data to the app
-    To enable *WAT Plan* android app to get the desired data, I created a simple *Django* *REST API*.   
+    To enable WAT Plan android app to get the desired data, I created a simple *Django* *REST API*.   
     The service keeps track of any changes in the schedules posted to itself by scraping bots, so that WAT Plan is always up to date.
     
