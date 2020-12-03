@@ -1,4 +1,4 @@
-[tags]: <> \(Python, Java, SQL, Django, Android, REST API, BeaufitulSoup, SQLite)
+[tags]: <> (Python, Java, SQL, Django, Android, REST API, BeaufitulSoup, SQLite)
 Wat Plan
 ---
 *Full stack* project of my university's departament of cybernetics schedule, containing an android application and independent web api managing the used data.
