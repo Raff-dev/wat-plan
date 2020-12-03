@@ -10,9 +10,19 @@ How does it work?
   * ### The mobile app itself
     It is an *Andoird* application, written in *Java*, which obtains data from the web service, and saves it to local *SQL* storage using *SQLite* database, so that it is possible to acces previously visited schedules offline. Each time any schelude of a group is requested to open, app checks if its local version matches the one stored in the service's database.   
     
-    |first startup|changing filters|
-    |---|---|
-    |<img src="preview/watplanstart.gif" width="285" height="600">|<img src="preview/watplanfeatures.gif" width="285" height="600">|
+<table style="width:100%">
+<tr>
+<th>First Startup</th>
+<th>Changing Filters</th> 
+</tr>
+<tr>
+<td valign="top">
+<img src="preview/watplanstart.gif" width="285" height="600">
+</td>
+<td valign="top">
+<img src="preview/watplanfeatures.gif" width="285" height="600">
+</tr>
+</table>
 
   * ### Obtaining data   
     The data is scraped by a multithreaded *Python* program, which gets the contents of the departament's service and parses 
