@@ -4,10 +4,16 @@ Scrapper/creds.py
 Scrapper/__pycache__/creds.cpython-38.pyc
 Scraper/creds.py
 Scraper_2_0/form_data.py
+Scraper_2_0/venv/
 
 # Django
 *__pycache__
 migrations
+
+# vscode
+.vscode/
+
+
 
 
 # Android
