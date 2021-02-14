@@ -23,8 +23,12 @@ import com.example.WatPlan.Models.BlockFilter;
 import com.example.WatPlan.Models.Week;
 import com.example.WatPlan.R;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 
 import static com.example.WatPlan.Models.BlockFilter.NO_FILTER;
@@ -110,9 +114,11 @@ public class ScheduleFragment extends Fragment {
             LocalDate today = LocalDate.now();
             String semester = dbHandler.getPreference(SEMESTER);
             String group = dbHandler.getPreference(GROUP);
-            String firstDay = dbHandler.getBorderDates(semester, group).first;
+            String firstDayString = dbHandler.getBorderDates(semester, group).first;
+            LocalDate firstDay = LocalDate.parse(firstDayString);
+
             int daysCount = 0;
-            while (!Objects.requireNonNull(firstDay).equals(today.toString())) {
+            while (today.compareTo(firstDay) > 0) {
                 daysCount += 1;
                 today = today.minusDays(1);
             }
