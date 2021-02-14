@@ -127,4 +127,4 @@ class Runner():
 
 
 if __name__ == '__main__':
-    Runner.run_for_semester(year='2020', semester='1')
+    Runner.run_for_semester(year='2020', semester='2')

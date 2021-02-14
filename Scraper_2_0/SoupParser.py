@@ -44,8 +44,7 @@ class SoupParser():
         if days_soup is None:
             return None
 
-        year = int(setting.year)
-        start_date = SoupParser.__get_start_date(soup, year)
+        start_date = SoupParser.__get_start_date(soup, setting.year, setting.semester)
 
         group_schedule = SoupParser.__parse_semester(days_soup, start_date)
         group_schedule_formatted = {
@@ -71,11 +70,11 @@ class SoupParser():
         return sorted_days
 
     @staticmethod
-    def __get_start_date(soup: BeautifulSoup, year: int) -> datetime.date:
+    def __get_start_date(soup: BeautifulSoup, year: str, semester: str) -> datetime.date:
         day_month = soup.find_all(class_='thFormList1HSheTeaGrpHTM3')[0]
         day, month = SoupParser.array_split(day_month.nobr.text, 2)
         month = ROMAN_NOTATION[month]
-
+        year = int(year) if semester == Setting.WINTER else int(year)+1
         return datetime.date(year, month, int(day))
 
     @staticmethod
@@ -89,7 +88,6 @@ class SoupParser():
             date = str(date)
             semester_schedule[date] = day_schedule
 
-        # print(semester_schedule)
         return semester_schedule
 
     @staticmethod
