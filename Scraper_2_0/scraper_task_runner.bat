@@ -2,7 +2,7 @@
 echo.
 echo Activating virtual environment
 
-call C:\Users\Raff\Desktop\WAT_Plan\Scraper_2_0\venv\scripts\activate.bat
+call C:\Users\Raff\Desktop\WAT_Plan\venv\scripts\activate.bat
 python --version
 echo.
 
