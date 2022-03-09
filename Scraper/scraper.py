@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from form_data import FORM_DATA
-from Setting import Setting
+from setting import Setting
 
 _logger = logging.getLogger(__name__)
 

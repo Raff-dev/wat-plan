@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import datetime
 
-from Setting import Setting
+from setting import Setting
 
 ROMAN_NOTATION = {
     'I': 1, 'II': 2, 'III': 3, 'IV': 4,

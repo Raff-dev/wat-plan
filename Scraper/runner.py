@@ -1,21 +1,20 @@
-from typing import List
+from datetime import date
 from threading import Thread, Lock
-import requests
-import time
+from typing import List
 import json
 import logging
-from datetime import date
+import requests
+import sys
+import time
 
 from dotenv import load_dotenv
 
-from Scraper import Scraper
-from Reporter import Reporter
-from Setting import Setting
-from SoupParser import SoupParser
-from SharedList import SharedList
+from reporter import Reporter
+from scraper import Scraper
+from setting import Setting
+from shared_list import SharedList
+from soup_parser import SoupParser
 
-import logging
-import sys
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 load_dotenv()
