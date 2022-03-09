@@ -31,8 +31,10 @@ class Reporter():
 
     def report(self) -> str:
         message = ''
-        reportable_values = [(name, value) for name, value in self.__dict__.items()
-                             if isinstance(value, Reporter.ReportableValue)]
+        reportable_values = [
+            (name, value) for name, value in self.__dict__.items()
+            if isinstance(value, Reporter.ReportableValue)
+        ]
         for name, value in reportable_values:
             if name == 'timer':
                 continue
@@ -97,9 +99,11 @@ class Reporter():
             except Exception as e:
                 with reportable_value.lock:
                     reportable_value.failed += 1
-                    print(f'\nfailed {func.__name__}\n'
-                          f'with {e}\n'
-                          F'at {func.__name__}\n')
+                    print(
+                        f'\nfailed {func.__name__}\n'
+                        f'with {e}\n'
+                        F'at {func.__name__}\n'
+                    )
                     reportable_value.errors.append(e)
                 return None
 
