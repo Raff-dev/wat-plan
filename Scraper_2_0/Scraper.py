@@ -1,13 +1,14 @@
-import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from typing import List
+import logging
+import requests
 
-from typing import List, Dict
 from bs4 import BeautifulSoup
-import time
 
 from form_data import FORM_DATA
-from SoupParser import SoupParser
 from Setting import Setting
+
+_logger = logging.getLogger(__name__)
 
 BASE_URL = 'https://s1.wcy.wat.edu.pl/ed1/'
 
@@ -38,8 +39,7 @@ class Scraper():
             f'request url: {res.url}\n'
             f'result length: {len(res.text)}')
 
-        # --- TEST PRINT ---
-        print(f'RES code {res}')
+        _logger.info(f'RES code {res}')
         soup = BeautifulSoup(res.text, features="lxml")
         return soup
 
@@ -72,8 +72,17 @@ class Scraper():
         assert soup.form, 'The form was not found'
 
         login_url = BASE_URL + soup.form['action']
+
+        # form data requires structure as below
+        # FORM_DATA = {
+        #     'userid': 'userid',
+        #     'password': 'password',
+        #     'formname': 'login',
+        #     'default_fun': 1,
+        # }
         res = requests.post(login_url, data=FORM_DATA, verify=False)
-        sid = soup.form['action'][10:]
+        sid = soup.form['action']
+        sid = sid[10:]
         return sid
 
     @staticmethod
