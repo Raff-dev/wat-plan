@@ -1,3 +1,5 @@
+from collections import namedtuple
+from inspect import BlockFinder
 from rest_framework.serializers import ModelSerializer
 from rest_framework.decorators import action
 from rest_framework.authentication import TokenAuthentication
@@ -16,8 +18,11 @@ from home.models import Apk
 import datetime
 import time
 
+from django.db import transaction
+
 
 class Plan(ViewSet):
+    BlockFinder = namedtuple('BlockFinder', ['date', 'index'])
 
     @action(methods=['post'], detail=False)
     def update_schedule(self, request, *args, **kwargs):
@@ -26,42 +31,74 @@ class Plan(ViewSet):
             semester = request.data['semester']
             schedule = request.data['schedule']
 
-            semester, screated = Semester.objects.get_or_create(
-                name=semester)
+            semester, screated = Semester.objects.get_or_create(name=semester)
             group, gcreated = Group.objects.get_or_create(
-                name=group, semester=semester)
+                name=group,
+                semester=semester
+            )
+            increment_version = screated or gcreated
 
-            should_update = screated or gcreated
+            days = Day.objects.filter(group=group)
+            blocks = Block.objects.filter(day__in=days)
+            blocks_map = {self.BlockFinder(block.day.date, block.index): block for block in blocks}
 
-            schedule_days = Day.objects.filter(group=group)
-            if schedule is None and schedule_days:
-                schedule_days.delete()
+            days_to_create = []
+            blocks_to_delete = []
+            blocks_to_create = []
+            blocks_to_update: dict[BlockFinder, dict] = {}
+
+            if schedule is None and days:  # the group was removed from plan
+                increment_version = True
+                days.delete()
 
             elif schedule:
                 for date, schedule_day in schedule.items():
                     date = datetime.date(*[int(d) for d in date.split('-')])
-                    day, dcreated = Day.objects.get_or_create(
-                        group=group, date=date)
+
+                    if not [day.date == date for day in days]:
+                        day = Day(group=group, date=date)
+                        days_to_create.append(day)
 
                     for block_index, block_data in enumerate(schedule_day, start=1):
-                        if block_data is None:
-                            should_update |= Block.objects.filter(
-                                day=day, index=block_index).delete()[0]
-                        else:
-                            block, bcreated = Block.objects.get_or_create(
-                                day=day, index=block_index)
-                            check = {v for v in block_data.items()
-                                     if v[0] != 'place'}
+                        block_finder = self.BlockFinder(date, block_index)
 
-                            if not check <= block.__dict__.items():
-                                Block.objects.filter(
-                                    id=block.id).update(**block_data)
-                                should_update = True
-            print(
-                f'{group.name} Semester: {semester.name} Updated: {should_update}')
-            if should_update:
-                group.version += 1
+                        if block_data is None:
+                            if block_finder in blocks_map:  # removed from og schedule
+                                blocks_to_delete.append(blocks_map[block_finder])
+
+                        elif block_finder in blocks_map:  # such a block already exists
+                            block = blocks_map[block_finder]
+                            values = {v for v in block_data.items() if v[0] != 'place'}
+
+                            # checks whether new values differ from existing ones
+                            if not values <= block.__dict__.items():
+                                blocks_to_update[block_finder] = block_data
+                        else:
+                            blocks_to_create.append(Block(**block_data, index=block_index, day=day))
+
+            increment_version |= any([days_to_create, blocks_to_delete, blocks_to_create, blocks_to_update])
+
+            with transaction.atomic():
+                if days_to_create:
+                    Day.objects.bulk_create(days_to_create)
+
+                if blocks_to_delete:
+                    Block.objects.all().filter(pk__in=[block.pk for block in blocks_to_delete]).delete()
+
+                if blocks_to_create:
+                    for block in blocks_to_create:
+                        block.day_id = block.day.id
+                    Block.objects.bulk_create(blocks_to_create)
+
+                if blocks_to_update:
+                    for block, block_data in blocks_to_update.items():
+                        block.update(**block_data)
+
+            print(f'{group.name} Semester: {semester.name} Updated: {increment_version}')
+            if increment_version:
+                group.version = group.version + 1
                 group.save()
+
             return Response(status=status.HTTP_201_CREATED)
         except Exception as e:
             print(f'Exception {e}')
