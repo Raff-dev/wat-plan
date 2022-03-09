@@ -17,9 +17,8 @@ urlpatterns = [
 ]
 
 
-for url in router.urls:
-    print(url)
+# for url in router.urls:
+#     print(url)
 
 
-urlpatterns += static(settings.MEDIA_URL,
-                      document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
