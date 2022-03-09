@@ -11,7 +11,7 @@ Scraper_2_0/venv/
 migrations
 
 # vscode
-.vscode/
+*/.vscode/
 
 # Environments
 */venv/
