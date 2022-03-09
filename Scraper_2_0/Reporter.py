@@ -1,6 +1,5 @@
 from __future__ import annotations
 from functools import wraps
-import inspect
 from threading import Lock
 import time
 

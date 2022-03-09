@@ -1,9 +1,12 @@
-from typing import List, Dict, Tuple, Iterable, TypeVar
-from bs4 import BeautifulSoup
+from typing import List
 from threading import Thread, Lock
 import requests
 import time
 import json
+import logging
+from datetime import date
+
+from dotenv import load_dotenv
 
 from Scraper import Scraper
 from Reporter import Reporter
@@ -11,11 +14,24 @@ from Setting import Setting
 from SoupParser import SoupParser
 from SharedList import SharedList
 
+import logging
+import sys
 
-API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/Plan/update_schedule/'
-DEBUG_API_UPDATE_PLAN_URL = 'http://127.0.0.1:8000/Plan/update_schedule/'
-HEADERS = {'Content-type': 'application/json'}
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+load_dotenv()
+_logger = logging.getLogger(__name__)
+
+# DEV = os.getenv('DEV')
+DEV = 1
+
+PROD_API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/Plan/update_schedule/'
+DEV_API_UPDATE_PLAN_URL = 'http://127.0.0.1:8000/Plan/update_schedule/'
+API_UPDATE_PLAN_URL = DEV_API_UPDATE_PLAN_URL if DEV else PROD_API_UPDATE_PLAN_URL
+
 KEEP_CONNECTION_DELAY = 0.25
+
+SECOND_SEMESTER_START = 3
+FIRST_SEMESTER_START = 9
 
 
 class Runner():
@@ -51,8 +67,7 @@ class Runner():
     @Reporter.time_measure
     def run(self, setting_list: List[Setting]) -> None:
         self.reset(setting_list)
-        scraping_workers = min(self.max_scraping_workers,
-                               self.setting_list.length)
+        scraping_workers = min(self.max_scraping_workers, self.setting_list.length)
 
         jobs = [
             (self.__scrape, lambda: self.keep_scraping, scraping_workers),
@@ -60,11 +75,15 @@ class Runner():
             (self.__post, lambda: self.keep_posting, 1)
         ]
 
-        threads = [Thread(target=Runner.repeat, args=args)
-                   for *args, count in jobs for _ in range(count)]
+        threads = [
+            Thread(target=Runner.repeat, args=args)
+            for *args, count in jobs for _ in range(count)
+        ]
 
         tasks = [lambda thread: thread.start(), lambda thread: thread.join()]
-        [task(thread) for task in tasks for thread in threads]
+        for thread in threads:
+            for task in tasks:
+                task(thread)
 
     def reset(self, setting_list: List[Setting]):
         self.reporter.reset()
@@ -77,7 +96,7 @@ class Runner():
     def repeat(func, predicate, *args, **kwargs):
         while predicate():
             func(*args, **kwargs)
-        print(f'FINISHED {func.__name__} ')
+        _logger.info(f'FINISHED {func.__name__} ')
 
     @Reporter.observe
     def __scrape(self) -> None:
@@ -103,10 +122,10 @@ class Runner():
         json_data = json.dumps(group_schedule)
         res = requests.post(
             url=API_UPDATE_PLAN_URL,
-            headers=HEADERS,
+            headers={'Content-type': 'application/json'},
             data=json_data
         )
-        print(f'DJANGO {res}')
+        _logger.info(f'DJANGO {res}')
 
     @property
     def keep_scraping(self):
@@ -127,4 +146,7 @@ class Runner():
 
 
 if __name__ == '__main__':
-    Runner.run_for_semester(year='2020', semester='2')
+    today = date.today()
+    semester = (SECOND_SEMESTER_START <= today.month <= FIRST_SEMESTER_START) + 1
+    year = today.year - (semester == 2)
+    Runner.run_for_semester(year=str(year), semester=str(semester))
