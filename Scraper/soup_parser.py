@@ -78,9 +78,7 @@ class SoupParser():
         return datetime.date(year, month, int(day))
 
     @staticmethod
-    def __parse_semester(
-            days_soup: List[BeautifulSoup],
-            start_date: datetime.date):
+    def __parse_semester(days_soup: List[BeautifulSoup], start_date: datetime.date):
 
         semester_schedule = {}
         for day_data, date in SoupParser.enumerate_date(days_soup, start_date):
@@ -109,15 +107,13 @@ class SoupParser():
 
         block.title = block_soup['title']
         block.teacher = data[1].text
-        block.class_index = data[2].text.replace(
-            '[', '').replace(']', '')
+        block.class_index = data[2].text.replace('[', '').replace(']', '')
 
         data = str(data[0]).replace('<br/>', '|')
         data = BeautifulSoup(data, features="lxml").nobr.text.split('|')
 
         block.subject = data[0]
-        block.class_type = data[1].replace(
-            '(', '').replace(')', '')
+        block.class_type = data[1].replace('(', '').replace(')', '')
         block.place = data[2:]
         return block.__dict__
 

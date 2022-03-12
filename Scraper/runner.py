@@ -33,6 +33,10 @@ SECOND_SEMESTER_START = 3
 FIRST_SEMESTER_START = 9
 
 
+class InvalidResponseError(Exception):
+    pass
+
+
 class Runner():
 
     def __init__(self, max_scraping_workers=3):
@@ -124,7 +128,8 @@ class Runner():
             headers={'Content-type': 'application/json'},
             data=json_data
         )
-        _logger.info(f'DJANGO {res}')
+        if 200 >= res.status_code > 300:
+            raise InvalidResponseError(f'Invalid status: {res.status_code}')
 
     @property
     def keep_scraping(self):
