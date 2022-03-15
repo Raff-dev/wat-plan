@@ -4,8 +4,6 @@ from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework import routers
 from Plan.views import Plan
-from home.views import home
-from .settings import DEBUG
 
 router = routers.DefaultRouter()
 router.register('Plan', Plan, basename='Plan')
