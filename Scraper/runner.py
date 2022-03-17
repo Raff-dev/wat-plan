@@ -23,7 +23,7 @@ _logger = logging.getLogger(__name__)
 # DEV = os.getenv('DEV')
 DEV = 1
 
-PROD_API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/Plan/update_schedule/'
+PROD_API_UPDATE_PLAN_URL = 'http://watplan.eba-ykh43jj5.eu-central-1.elasticbeanstalk.com/Plan/update_schedule/'
 DEV_API_UPDATE_PLAN_URL = 'http://127.0.0.1:8000/Plan/update_schedule/'
 API_UPDATE_PLAN_URL = DEV_API_UPDATE_PLAN_URL if DEV else PROD_API_UPDATE_PLAN_URL
 
