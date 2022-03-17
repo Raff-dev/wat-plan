@@ -11,7 +11,7 @@ astroid==2.9.3; python_full_version >= '3.6.2'
 autopep8==1.6.0
 backports.zoneinfo==0.2.1
 django-environ==0.8.1
-django==3.2
+django==3.2.12
 djangorestframework==3.13.1
 isort==5.10.1; python_version < '4.0' and python_full_version >= '3.6.1'
 lazy-object-proxy==1.7.1; python_version >= '3.6'

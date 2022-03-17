@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ConnectionHandler {
-    private static final String baseUrl = "http://watplan.eu.pythonanywhere.com/";
+    private static final String baseUrl = "http://watplan.eba-ykh43jj5.eu-central-1.elasticbeanstalk.com/";
 //    private static final String baseUrl = "http://10.0.2.2:8000/";
     private static final OkHttpClient client = new OkHttpClient();
 
