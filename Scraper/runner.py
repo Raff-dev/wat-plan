@@ -6,26 +6,28 @@ import logging
 import requests
 import sys
 import time
+import os
 
 from dotenv import load_dotenv
 
+import soup_parser
 from reporter import Reporter
 from scraper import Scraper
 from setting import Setting
 from shared_list import SharedList
-from soup_parser import SoupParser
 
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %I:%M:%S')
 load_dotenv()
 _logger = logging.getLogger(__name__)
 
-# DEV = os.getenv('DEV')
-DEV = 1
+DEV = os.getenv('DEV')
 
-PROD_API_UPDATE_PLAN_URL = 'http://watplan.eba-ykh43jj5.eu-central-1.elasticbeanstalk.com/Plan/update_schedule/'
-DEV_API_UPDATE_PLAN_URL = 'http://127.0.0.1:8000/Plan/update_schedule/'
-API_UPDATE_PLAN_URL = DEV_API_UPDATE_PLAN_URL if DEV else PROD_API_UPDATE_PLAN_URL
+# PROD_API_UPDATE_PLAN_URL = 'http://watplan.eba-ykh43jj5.eu-central-1.elasticbeanstalk.com/'
+PROD_API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/'
+DEV_API_UPDATE_PLAN_URL = 'http://127.0.0.1:8000/'
+UPDATE_PLAN_ROUTE = 'Plan/update_schedule/'
+API_UPDATE_PLAN_URL = (DEV_API_UPDATE_PLAN_URL if DEV else PROD_API_UPDATE_PLAN_URL) + UPDATE_PLAN_ROUTE
 
 KEEP_CONNECTION_DELAY = 0.25
 
@@ -35,6 +37,12 @@ FIRST_SEMESTER_START = 9
 
 class InvalidResponseError(Exception):
     pass
+
+
+def repeat(func, predicate, *args, **kwargs):
+    while predicate():
+        func(*args, **kwargs)
+    _logger.info(f'FINISHED {func.__name__} ')
 
 
 class Runner():
@@ -79,7 +87,7 @@ class Runner():
         ]
 
         threads = [
-            Thread(target=Runner.repeat, args=args)
+            Thread(target=repeat, args=args)
             for *args, count in jobs for _ in range(count)
         ]
 
@@ -95,12 +103,6 @@ class Runner():
         self.setting_list.reset(setting_list)
         self.settings_count = len(setting_list)
 
-    @staticmethod
-    def repeat(func, predicate, *args, **kwargs):
-        while predicate():
-            func(*args, **kwargs)
-        _logger.info(f'FINISHED {func.__name__} ')
-
     @Reporter.observe
     def __scrape(self) -> None:
         with self.scrapeLock:
@@ -115,7 +117,7 @@ class Runner():
     @Reporter.observe
     def __parse(self) -> None:
         setting, soup = self.soup_data.pop()
-        group_schedule = SoupParser.get_group_schedule(
+        group_schedule = soup_parser.get_group_schedule(
             setting=setting, soup=soup)
         self.schedule_data.append(group_schedule)
 

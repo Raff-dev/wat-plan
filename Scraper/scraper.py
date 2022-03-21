@@ -2,10 +2,10 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from typing import List
 import logging
 import requests
+import os
 
 from bs4 import BeautifulSoup
 
-from form_data import FORM_DATA
 from setting import Setting
 
 _logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class Scraper():
             f'request url: {res.url}\n'
             f'result length: {len(res.text)}')
 
-        _logger.info(f'RES code {res}')
+        _logger.info(res)
         soup = BeautifulSoup(res.text, features="lxml")
         return soup
 
@@ -73,16 +73,13 @@ class Scraper():
 
         login_url = BASE_URL + soup.form['action']
 
-        # form data requires structure as below
-        # FORM_DATA = {
-        #     'userid': 'userid',
-        #     'password': 'password',
-        #     'formname': 'login',
-        #     'default_fun': 1,
-        # }
-        res = requests.post(login_url, data=FORM_DATA, verify=False)
-        sid = soup.form['action']
-        sid = sid[10:]
+        res = requests.post(login_url, verify=False, data={
+            'userid': os.getenv('SCRAPER_USER_ID'),
+            'password': os.getenv('SCRAPER_PASSWORD'),
+            'formname': 'login',
+            'default_fun': 1,
+        })
+        sid = soup.form['action'][10:]
         return sid
 
     @staticmethod

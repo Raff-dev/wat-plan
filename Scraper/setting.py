@@ -36,8 +36,7 @@ class Setting():
                     f'requested setting: {not_found} '
                     f'are not found in {func.__name__} ')
 
-                missing = [
-                    s for s in required_setting if setting.__dict__[s] is None]
+                missing = [s for s in required_setting if setting.__dict__[s] is None]
                 assert not len(missing), (
                     f'Required data error, '
                     f'{missing} is missing in {func.__name__}.')
