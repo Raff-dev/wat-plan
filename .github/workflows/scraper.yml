@@ -1,0 +1,69 @@
+name: Deploy Scraper
+
+on:
+  push:
+    branches:
+    - master
+    #trigger only on Scraper update
+    paths:
+    - Scraper/**
+    - .github/workflows/scraper.yml
+
+  # allow to run manually
+  workflow_dispatch:
+
+jobs:
+  deploy_lambda:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+          
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpoppler-cpp-dev pkg-config python-dev
+          pip install --target=python boto3
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          
+      - name: Install Python Dependencies
+        run: |
+          echo "Installing and zipping dependencies..."
+          mkdir -p python
+          pip install --target=python -r ./Scraper/requirements.txt
+          zip -r dependencies.zip ./python
+        env:
+          DEV: False
+          
+      - name: Publish Dependencies as a Layer
+        run: |
+          echo "Publishing dependencies as a layer..."
+          result=$(aws lambda publish-layer-version --layer-name "${{ env.LAMBDA_LAYER_NAME }}" --zip-file fileb://dependencies.zip)
+          echo $result
+          LAYER_VERSION_ARN=$(jq '.LayerVersionArn' <<< "$result")
+          echo ::set-env name=LAYER_VERSION_ARN::$LAYER_VERSION_ARN
+          rm -rf python
+          rm dependencies.zip
+        env:
+          LAMBDA_LAYER_NAME: watplanScrapperEnvLayer
+          
+      - name: Publish Function
+        run: |  
+          zip -j code.zip ./Scraper
+          aws lambda update-function-code \
+            --function-name ${{env.AWS_LAMBDA_FUNCTION_NAME}} \
+            --zip-file=fileb://code.zip \
+            --environment "Variables={SCRAPER_USER_ID=${{ secrets.SCRAPER_USER_ID }},SCRAPER_PASSWORD==${{ secrets.SCRAPER_PASSWORD }}}"
+        env:
+          AWS_LAMBDA_FUNCTION_NAME: watplanScrapper
