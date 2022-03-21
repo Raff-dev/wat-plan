@@ -48,7 +48,13 @@ class Plan(ViewSet):
             for date, schedule_day in schedule.items():
                 date = datetime.date(*[int(d) for d in date.split('-')])
 
-                if not [day.date == date for day in days]:
+                day = None
+                for _day in days:
+                    if _day.date == date:
+                        day = _day
+                        break
+
+                if not day:
                     day = Day(group=group, date=date)
                     days_to_create.append(day)
 
@@ -75,12 +81,16 @@ class Plan(ViewSet):
             if days_to_create:
                 Day.objects.bulk_create(days_to_create)
 
+                # assign created days to the blocks
+                days = Day.objects.filter(group=group, date__in=[block.day.date for block in blocks_to_create])
+                days = {day.date: day for day in days}
+                for block in blocks_to_create:
+                    block.day = days[block.date]
+
             if blocks_to_delete:
                 Block.objects.all().filter(pk__in=[block.pk for block in blocks_to_delete]).delete()
 
             if blocks_to_create:
-                for block in blocks_to_create:
-                    block.day_id = block.day.id
                 Block.objects.bulk_create(blocks_to_create)
 
             if blocks_to_update:
