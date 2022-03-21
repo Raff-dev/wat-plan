@@ -11,7 +11,6 @@ charset-normalizer = "==2.0.12"
 idna = "==3.3"
 urllib3 = "==1.26.9"
 python-dotenv = "*"
-pandas = "*"
 bs4 = "*"
 lxml = "*"
 

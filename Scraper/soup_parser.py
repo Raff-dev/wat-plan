@@ -4,7 +4,6 @@ import inspect
 import datetime
 
 from bs4 import BeautifulSoup
-import pandas as pd
 import cchardet
 
 from setting import Setting
@@ -55,9 +54,8 @@ def __soup_to_sorted_days_soup(soup: List[BeautifulSoup]) -> List[List[Beautiful
 
     columns_count = int(len(blocks) / (DAYS_PER_WEEK*BLOCKS_PER_DAY))
     row_blocks = array_split(blocks, columns_count)
-    week_blocks = pd.DataFrame(row_blocks).T.values
-    sorted_blocks = [
-        block for column in week_blocks for block in column]
+    week_blocks = [*zip(*row_blocks)]
+    sorted_blocks = [block for column in week_blocks for block in column]
     sorted_days = array_split(sorted_blocks, DAYS_PER_WEEK)
     return sorted_days
 

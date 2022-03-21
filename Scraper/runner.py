@@ -41,8 +41,9 @@ class InvalidResponseError(Exception):
 
 def repeat(func, predicate, *args, **kwargs):
     while predicate():
+        _logger.info(f'Running {func.__name__} ')
         func(*args, **kwargs)
-    _logger.info(f'FINISHED {func.__name__} ')
+    _logger.info(f'Finished {func.__name__} ')
 
 
 class Runner():
@@ -91,10 +92,8 @@ class Runner():
             for *args, count in jobs for _ in range(count)
         ]
 
-        tasks = [lambda thread: thread.start(), lambda thread: thread.join()]
         for thread in threads:
-            for task in tasks:
-                task(thread)
+            thread.start()
 
     def reset(self, setting_list: List[Setting]):
         self.reporter.reset()
