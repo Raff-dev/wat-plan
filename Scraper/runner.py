@@ -17,9 +17,16 @@ from scraper import Scraper
 from setting import Setting
 from shared_list import SharedList
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %I:%M:%S')
-load_dotenv()
+
+if logging.getLogger().handlers:
+    # The Lambda environment pre-configures a handler logging to stderr. If a handler is already configured,
+    # `.basicConfig` does not execute. Thus we set the level directly.
+    logging.getLogger().setLevel(logging.INFO)
+else:
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %I:%M:%S')
+    
 _logger = logging.getLogger(__name__)
+load_dotenv()
 
 DEV = strtobool(os.getenv('DEV'))
 
