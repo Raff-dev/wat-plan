@@ -4,13 +4,18 @@ on:
   push:
     branches:
     - master
-    #trigger only on Scraper update
+    # trigger only on Scraper update
     paths:
     - Scraper/**
     - .github/workflows/scraper.yml
 
   # allow to run manually
   workflow_dispatch:
+
+env:
+  AWS_LAMBDA_FUNCTION_NAME: watplanScrapper
+  LAMBDA_LAYER_NAME: watplanScrapperEnvLayer
+  DEV: False 
 
 jobs:
   deploy_lambda:
@@ -30,21 +35,19 @@ jobs:
           sudo apt-get install -y build-essential libpoppler-cpp-dev pkg-config python-dev
           pip install --target=python boto3
           
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-          
       - name: Install Python Dependencies
         run: |
           echo "Installing and zipping dependencies..."
           mkdir -p python
           pip install --target=python -r ./Scraper/requirements.txt
           zip -r dependencies.zip ./python
-        env:
-          DEV: False
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
           
       - name: Publish Dependencies as a Layer
         run: |
@@ -56,8 +59,6 @@ jobs:
             --compatible-architectures "arm64" "x86_64" 
           rm -rf python
           rm dependencies.zip
-        env:
-          LAMBDA_LAYER_NAME: watplanScrapperEnvLayer
           
       - name: Publish Function
         run: |  
@@ -67,6 +68,4 @@ jobs:
             --zip-file=fileb://code.zip
           aws lambda update-function-configuration \
             --function-name ${{ env.AWS_LAMBDA_FUNCTION_NAME }} \
-            --environment "Variables={SCRAPER_USER_ID=${{ secrets.SCRAPER_USER_ID }},SCRAPER_PASSWORD=${{ secrets.SCRAPER_PASSWORD }}}"
-        env:
-          AWS_LAMBDA_FUNCTION_NAME: watplanScrapper
+            --environment "Variables={SCRAPER_USER_ID=${{ secrets.SCRAPER_USER_ID }},SCRAPER_PASSWORD=${{ secrets.SCRAPER_PASSWORD }},UPDATE_PLAN_URL=${{ secrets.UPDATE_PLAN_URL }}}"
