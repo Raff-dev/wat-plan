@@ -9,6 +9,7 @@ import time
 import os
 
 from dotenv import load_dotenv
+from distutils.util import strtobool
 
 import soup_parser
 from reporter import Reporter
@@ -16,21 +17,16 @@ from scraper import Scraper
 from setting import Setting
 from shared_list import SharedList
 
-
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %I:%M:%S')
 load_dotenv()
 _logger = logging.getLogger(__name__)
 
-DEV = os.getenv('DEV')
+DEV = strtobool(os.getenv('DEV'))
 
-# PROD_API_UPDATE_PLAN_URL = 'http://watplan.eba-ykh43jj5.eu-central-1.elasticbeanstalk.com/'
-PROD_API_UPDATE_PLAN_URL = 'https://watplan.eu.pythonanywhere.com/'
-DEV_API_UPDATE_PLAN_URL = 'http://127.0.0.1:8000/'
 UPDATE_PLAN_ROUTE = 'Plan/update_schedule/'
-API_UPDATE_PLAN_URL = (DEV_API_UPDATE_PLAN_URL if DEV else PROD_API_UPDATE_PLAN_URL) + UPDATE_PLAN_ROUTE
+UPDATE_PLAN_URL = ('http://127.0.0.1:8000/' if DEV else os.getenv('UPDATE_PLAN_URL')) + UPDATE_PLAN_ROUTE
 
 KEEP_CONNECTION_DELAY = 0.25
-
 SECOND_SEMESTER_START = 3
 FIRST_SEMESTER_START = 9
 
@@ -94,6 +90,8 @@ class Runner():
 
         for thread in threads:
             thread.start()
+        for thread in threads:
+            thread.join()
 
     def reset(self, setting_list: List[Setting]):
         self.reporter.reset()
@@ -125,7 +123,7 @@ class Runner():
         group_schedule = self.schedule_data.pop()
         json_data = json.dumps(group_schedule)
         res = requests.post(
-            url=API_UPDATE_PLAN_URL,
+            url=UPDATE_PLAN_URL,
             headers={'Content-type': 'application/json'},
             data=json_data
         )
@@ -149,9 +147,11 @@ class Runner():
                 self.reporter.get(self.__parse).failed -
                 self.reporter.get(self.__post).finished > 0)
 
-
-if __name__ == '__main__':
+def main():
     today = date.today()
     semester = (SECOND_SEMESTER_START <= today.month <= FIRST_SEMESTER_START) + 1
     year = today.year - (semester == 2)
     Runner.run_for_semester(year=str(year), semester=str(semester))
+
+if __name__ == '__main__':
+    main()
