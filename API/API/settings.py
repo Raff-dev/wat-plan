@@ -1,5 +1,6 @@
 
 
+from datetime import date
 import os
 from pathlib import Path
 from environ import Env
@@ -145,3 +146,22 @@ STATIC_ROOT = 'static'
 
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / f'./logs/debug-{date.today().strftime("%Y-%m-%d")}.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

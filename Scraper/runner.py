@@ -24,7 +24,7 @@ if logging.getLogger().handlers:
     logging.getLogger().setLevel(logging.INFO)
 else:
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %I:%M:%S')
-    
+
 _logger = logging.getLogger(__name__)
 load_dotenv()
 
@@ -42,10 +42,17 @@ class InvalidResponseError(Exception):
     pass
 
 
+dic = {}
+
+
 def repeat(func, predicate, *args, **kwargs):
+    dic[func] = 0
+    def predicate(): return dic[func] < 3
     while predicate():
+        dic[func] += 1
         _logger.info(f'Running {func.__name__} ')
         func(*args, **kwargs)
+
     _logger.info(f'Finished {func.__name__} ')
 
 
@@ -128,7 +135,11 @@ class Runner():
     @Reporter.observe
     def __post(self) -> None:
         group_schedule = self.schedule_data.pop()
-        json_data = json.dumps(group_schedule)
+        json_data = json.dumps(group_schedule, indent=4)
+
+        with open(f"{group_schedule['group']}.py", 'w') as group_file:
+            group_file.write(str(json_data))
+
         res = requests.post(
             url=UPDATE_PLAN_URL,
             headers={'Content-type': 'application/json'},
@@ -154,11 +165,13 @@ class Runner():
                 self.reporter.get(self.__parse).failed -
                 self.reporter.get(self.__post).finished > 0)
 
+
 def main():
     today = date.today()
     semester = (SECOND_SEMESTER_START <= today.month <= FIRST_SEMESTER_START) + 1
     year = today.year - (semester == 2)
     Runner.run_for_semester(year=str(year), semester=str(semester))
+
 
 if __name__ == '__main__':
     main()

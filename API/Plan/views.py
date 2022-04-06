@@ -79,7 +79,9 @@ class Plan(ViewSet):
 
         with transaction.atomic():
             if days_to_create:
-                Day.objects.bulk_create(days_to_create)
+                days= Day.objects.bulk_create(days_to_create)
+                for day in days:
+                    day.save()
 
                 # assign created days to the blocks
                 days = Day.objects.filter(group=group, date__in=[block.day.date for block in blocks_to_create])
@@ -107,16 +109,17 @@ class Plan(ViewSet):
     @action(methods=['get'], detail=False)
     def get_group(self, request, *args, **kwargs):
         try:
-            semester = request.headers['semester']
-            semester = Semester.objects.get(name=semester)
-            group = request.headers['group']
-            group = Group.objects.get(name=group, semester=semester)
+            semester_name = request.headers['semester']
+            semester = Semester.objects.get(name=semester_name)
 
-            days = Day.objects.filter(group=group)
+            group_name = request.headers['group']
+            group = Group.objects.get(name=group_name, semester=semester)
+
+            days = Day.objects.all().filter(group=group)
             result = {
                 'version': group.version,
-                'first_day': group.days.first().date,
-                'last_day': group.days.last().date,
+                'first_day': days and days.first().date,
+                'last_day': days and days.last().date,
                 'data': [{
                     'date': str(d.date),
                     'blocks': d.blocks.values()}

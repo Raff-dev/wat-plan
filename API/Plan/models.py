@@ -12,8 +12,7 @@ class Semester(models.Model):
 
 
 class Group(models.Model):
-    semester = models.ForeignKey(
-        Semester, on_delete=models.CASCADE, related_name='groups')
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE, related_name='groups')
     name = models.CharField(max_length=30)
     version = models.IntegerField(default=0)
 
@@ -25,8 +24,7 @@ class Group(models.Model):
 
 
 class Day(models.Model):
-    group = models.ForeignKey(
-        Group, on_delete=models.CASCADE, related_name='days')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='days')
     date = models.DateField(max_length=10)
 
     class Meta():
@@ -34,26 +32,19 @@ class Day(models.Model):
         ordering = [
             'group__semester__name',
             'group__name',
-            'date']
+            'date'
+        ]
 
 
 class Block(models.Model):
     index = models.IntegerField()
-    day = models.ForeignKey(
-        Day, on_delete=models.CASCADE, related_name='blocks')
-
-    title = models.CharField(
-        default=None, max_length=256, null=True, blank=True)
-    subject = models.CharField(
-        default=None, max_length=256, null=True, blank=True)
-    teacher = models.CharField(
-        default=None, max_length=256, null=True, blank=True)
-    place = models.CharField(
-        default=None, max_length=256, null=True, blank=True)
-    class_type = models.CharField(
-        default=None, max_length=256, null=True, blank=True)
-    class_index = models.CharField(
-        max_length=256, default=None, null=True, blank=True)
+    day = models.ForeignKey(Day, on_delete=models.CASCADE, related_name='blocks')
+    title = models.CharField(default=None, max_length=256, null=True, blank=True)
+    subject = models.CharField(default=None, max_length=256, null=True, blank=True)
+    teacher = models.CharField(default=None, max_length=256, null=True, blank=True)
+    place = models.CharField(default=None, max_length=256, null=True, blank=True)
+    class_type = models.CharField(default=None, max_length=256, null=True, blank=True)
+    class_index = models.CharField(max_length=256, default=None, null=True, blank=True)
 
     class Meta():
         unique_together = ['day', 'index']
@@ -61,4 +52,5 @@ class Block(models.Model):
             'day__group__semester__name',
             'day__group__name',
             'day__date',
-            'index']
+            'index'
+        ]
