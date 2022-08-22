@@ -1,25 +1,33 @@
-from typing import List, Dict, Iterable, TypeVar
-import types
-import inspect
 import datetime
+import inspect
+import types
+from typing import Dict, Iterable, List, TypeVar
 
-from bs4 import BeautifulSoup
 import cchardet
+from bs4 import BeautifulSoup
 
 from setting import Setting
 
 ROMAN_NOTATION = {
-    'I': 1, 'II': 2, 'III': 3, 'IV': 4,
-    'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8,
-    'IX': 9, 'X': 10, 'XI': 11, 'XII': 12
+    "I": 1,
+    "II": 2,
+    "III": 3,
+    "IV": 4,
+    "V": 5,
+    "VI": 6,
+    "VII": 7,
+    "VIII": 8,
+    "IX": 9,
+    "X": 10,
+    "XI": 11,
+    "XII": 12,
 }
 
 DAYS_PER_WEEK = 7
 BLOCKS_PER_DAY = 7
 
 
-class Block():
-
+class Block:
     def __init__(self):
         self.title = None
         self.teacher = None
@@ -30,7 +38,7 @@ class Block():
 
 
 @Setting.requires_setting(Setting.SEMESTER, Setting.YEAR, Setting.GROUP)
-def get_group_schedule(setting: Setting, soup: BeautifulSoup) -> Dict:
+def get_group_schedule(setting: Setting, soup: BeautifulSoup) -> Dict | None:
     days_soup = __soup_to_sorted_days_soup(soup)
     if days_soup is None:
         return None
@@ -39,20 +47,22 @@ def get_group_schedule(setting: Setting, soup: BeautifulSoup) -> Dict:
 
     group_schedule = __parse_semester(days_soup, start_date)
     group_schedule_formatted = {
-        'year': setting.year,
-        'semester': setting.semester,
-        'group': setting.group,
-        'schedule': group_schedule
+        "year": setting.year,
+        "semester": setting.semester,
+        "group": setting.group,
+        "schedule": group_schedule,
     }
     return group_schedule_formatted
 
 
-def __soup_to_sorted_days_soup(soup: List[BeautifulSoup]) -> List[List[BeautifulSoup]]:
-    blocks = soup.find_all('td', class_='tdFormList1DSheTeaGrpHTM3')
+def __soup_to_sorted_days_soup(
+    soup: BeautifulSoup,
+) -> List[List[BeautifulSoup]] | None:
+    blocks = soup.find_all("td", class_="tdFormList1DSheTeaGrpHTM3")
     if not len(blocks):
         return None
 
-    columns_count = int(len(blocks) / (DAYS_PER_WEEK*BLOCKS_PER_DAY))
+    columns_count = int(len(blocks) / (DAYS_PER_WEEK * BLOCKS_PER_DAY))
     row_blocks = array_split(blocks, columns_count)
     week_blocks = [*zip(*row_blocks)]
     sorted_blocks = [block for column in week_blocks for block in column]
@@ -61,10 +71,10 @@ def __soup_to_sorted_days_soup(soup: List[BeautifulSoup]) -> List[List[Beautiful
 
 
 def __get_start_date(soup: BeautifulSoup, year: str, semester: str) -> datetime.date:
-    day_month = soup.find_all(class_='thFormList1HSheTeaGrpHTM3')[0]
+    day_month = soup.find_all(class_="thFormList1HSheTeaGrpHTM3")[0]
     day, month = array_split(day_month.nobr.text, 2)
     month = ROMAN_NOTATION[month]
-    year = int(year) if semester == Setting.WINTER else int(year)+1
+    year = int(year) if semester == Setting.WINTER else int(year) + 1
     return datetime.date(year, month, int(day))
 
 
@@ -80,8 +90,9 @@ def __parse_semester(days_soup: List[BeautifulSoup], start_date: datetime.date):
 
 
 def __parse_day(day_blocks_soup):
-    assert len(day_blocks_soup) == BLOCKS_PER_DAY, (
-        f'Invalid data format at {inspect.stack()[0][3]}')
+    assert (
+        len(day_blocks_soup) == BLOCKS_PER_DAY
+    ), f"Invalid data format at {inspect.stack()[0][3]}"
 
     day_schedule = [__parse_block(block_soup) for block_soup in day_blocks_soup]
     return day_schedule
@@ -92,28 +103,35 @@ def __parse_block(block_soup):
         return None
 
     block = Block()
-    data = block_soup.find_all('nobr')
+    data = block_soup.find_all("nobr")
 
-    block.title = block_soup['title']
+    block.title = block_soup["title"]
     block.teacher = data[1].text
-    block.class_index = data[2].text.replace('[', '').replace(']', '')
+    block.class_index = data[2].text.replace("[", "").replace("]", "")
 
-    data = str(data[0]).replace('<br/>', '|')
-    data = BeautifulSoup(data, features="lxml").nobr.text.split('|')
+    data = str(data[0]).replace("<br/>", "|")
+    data = BeautifulSoup(data, features="lxml").nobr.text.split("|")
 
     block.subject = data[0]
-    block.class_type = data[1].replace('(', '').replace(')', '')
+    block.class_type = data[1].replace("(", "").replace(")", "")
     block.place = data[2:]
     return block.__dict__
 
 
-def array_split(iterable: Iterable[TypeVar], chunk_length: int) -> List[List[TypeVar]]:
+def array_split(iterable: Iterable, chunk_length: int):
     if isinstance(iterable, types.GeneratorType):
-        iterable = list(iterable)
-    return [iterable[i:i+chunk_length]if len(iterable)-i != 1 else iterable[-1] for i in range(0, len(iterable), chunk_length)]
+        iterable_list = list(iterable)
+    return [
+        iterable_list[i : i + chunk_length]
+        if len(iterable_list) - i != 1
+        else iterable_list[-1]
+        for i in range(0, len(iterable_list), chunk_length)
+    ]
 
 
-def enumerate_date(iterable: Iterable[TypeVar], start_date: datetime.date, days_step: int = 1):
+def enumerate_date(
+    iterable: Iterable[TypeVar], start_date: datetime.date, days_step: int = 1
+):
     for element in iterable:
         yield element, start_date
         start_date += datetime.timedelta(days=days_step)

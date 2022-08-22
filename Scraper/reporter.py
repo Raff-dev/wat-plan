@@ -1,10 +1,13 @@
 from __future__ import annotations
+
+import time
 from functools import wraps
 from threading import Lock
-import time
+
+from typinh import Callable
 
 
-class Reporter():
+class Reporter:
     """
     Stores statuses, and errors of methods that are decorated as reported.
     """
@@ -12,7 +15,7 @@ class Reporter():
     def __init__(self):
         self.timer = {}
 
-    class ReportableValue():
+    class ReportableValue:
         def __init__(self):
             self.lock = Lock()
             self.ongoing = 0
@@ -30,34 +33,34 @@ class Reporter():
         self.__init__()
 
     def report(self) -> str:
-        message = ''
+        message = ""
         reportable_values = [
-            (name, value) for name, value in self.__dict__.items()
+            (name, value)
+            for name, value in self.__dict__.items()
             if isinstance(value, Reporter.ReportableValue)
         ]
         for name, value in reportable_values:
-            if name == 'timer':
+            if name == "timer":
                 continue
             with value.lock:
                 message += (
-                    f'\nReport on: {name} \n'
-                    f'Ongoing: {value.ongoing}: \n'
-                    f'Succededd: {value.succedeed}: \n'
-                    f'Failed: {value.failed}: \n'
+                    f"\nReport on: {name} \n"
+                    f"Ongoing: {value.ongoing}: \n"
+                    f"Succededd: {value.succedeed}: \n"
+                    f"Failed: {value.failed}: \n"
                 )
                 if value.failed > 0:
-                    message += f'Errors: {[error for error in value.errors]}: \n'
+                    message += f"Errors: {[error for error in value.errors]}: \n"
 
         for name, time in self.timer.items():
-            message += f'\nTimer on {name}: {round(time,2)}'
+            message += f"\nTimer on {name}: {round(time,2)}"
         print(message)
         return message
 
-    def get(self, func: str) -> Reporter.ReportableValue:
+    def get(self, func: Callable) -> Reporter.ReportableValue:
         reportable_value_name = func.__name__
         if not reportable_value_name in self.__dict__.keys():
-            self.__dict__.update(
-                {reportable_value_name: Reporter.ReportableValue()})
+            self.__dict__.update({reportable_value_name: Reporter.ReportableValue()})
 
         reportable_value = self.__dict__[reportable_value_name]
         return reportable_value
@@ -65,8 +68,7 @@ class Reporter():
     @staticmethod
     def find_reporter(instance):
         reporter = instance.reporter
-        assert reporter and isinstance(
-            reporter, Reporter), "Reporter not found"
+        assert reporter and isinstance(reporter, Reporter), "Reporter not found"
         return reporter
 
     @staticmethod
@@ -79,6 +81,7 @@ class Reporter():
             end = time.time()
             reporter.timer[func.__name__] = end - start
             return result
+
         return wrapper
 
     @staticmethod
@@ -100,9 +103,9 @@ class Reporter():
                 with reportable_value.lock:
                     reportable_value.failed += 1
                     print(
-                        f'\nfailed {func.__name__}\n'
-                        f'with {e}\n'
-                        F'at {func.__name__}\n'
+                        f"\nfailed {func.__name__}\n"
+                        f"with {e}\n"
+                        f"at {func.__name__}\n"
                     )
                     reportable_value.errors.append(e)
                 return None
@@ -110,4 +113,5 @@ class Reporter():
             finally:
                 with reportable_value.lock:
                     reportable_value.ongoing -= 1
+
         return wrapper

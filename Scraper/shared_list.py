@@ -1,15 +1,15 @@
-from typing import List, TypeVar
 from copy import copy
 from threading import Lock, Semaphore
+from typing import List, TypeVar
 
 
-class SharedList():
-    """    Implements thread safe list    """
+class SharedList:
+    """Implements thread safe list"""
 
     def __init__(self, initial_values: List = None):
         self.reset(initial_values if initial_values else [])
 
-    def __repr__(self) -> List:
+    def __repr__(self) -> str:
         with self.lock:
             return str(self.list)
 

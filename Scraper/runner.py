@@ -1,15 +1,15 @@
-from datetime import date
-from threading import Thread, Lock
-from typing import List
 import json
 import logging
-import requests
+import os
 import sys
 import time
-import os
-
-from dotenv import load_dotenv
+from datetime import date
 from distutils.util import strtobool
+from threading import Lock, Thread
+from typing import List
+
+import requests  # type: ignore
+from dotenv import load_dotenv
 
 import soup_parser
 from reporter import Reporter
@@ -17,21 +17,27 @@ from scraper import Scraper
 from setting import Setting
 from shared_list import SharedList
 
-
 if logging.getLogger().handlers:
     # The Lambda environment pre-configures a handler logging to stderr. If a handler is already configured,
     # `.basicConfig` does not execute. Thus we set the level directly.
     logging.getLogger().setLevel(logging.INFO)
 else:
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %I:%M:%S')
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s: %(message)s",
+        datefmt="%Y-%m-%d %I:%M:%S",
+    )
 
 _logger = logging.getLogger(__name__)
 load_dotenv()
 
-DEV = strtobool(os.getenv('DEV'))
+DEV = strtobool(str(os.getenv("DEV")))
 
-UPDATE_PLAN_ROUTE = 'Plan/update_schedule/'
-UPDATE_PLAN_URL = ('http://127.0.0.1:8000/' if DEV else os.getenv('UPDATE_PLAN_URL')) + UPDATE_PLAN_ROUTE
+UPDATE_PLAN_ROUTE = "Plan/update_schedule/"
+UPDATE_PLAN_URL = (
+    "http://127.0.0.1:8000/" if DEV else os.getenv("UPDATE_PLAN_URL", "")
+) + UPDATE_PLAN_ROUTE
 
 KEEP_CONNECTION_DELAY = 0.25
 SECOND_SEMESTER_START = 3
@@ -42,22 +48,26 @@ class InvalidResponseError(Exception):
     pass
 
 
-dic = {}
+from typing import Callable
+
+dic: dict[Callable, int] = {}
 
 
 def repeat(func, predicate, *args, **kwargs):
     dic[func] = 0
-    def predicate(): return dic[func] < 3
+
+    def predicate():
+        return dic[func] < 3
+
     while predicate():
         dic[func] += 1
-        _logger.info(f'Running {func.__name__} ')
+        _logger.info(f"Running {func.__name__} ")
         func(*args, **kwargs)
 
-    _logger.info(f'Finished {func.__name__} ')
+    _logger.info(f"Finished {func.__name__} ")
 
 
-class Runner():
-
+class Runner:
     def __init__(self, max_scraping_workers=3):
         self.max_scraping_workers = max_scraping_workers
 
@@ -94,12 +104,13 @@ class Runner():
         jobs = [
             (self.__scrape, lambda: self.keep_scraping, scraping_workers),
             (self.__parse, lambda: self.keep_parsing, 1),
-            (self.__post, lambda: self.keep_posting, 1)
+            (self.__post, lambda: self.keep_posting, 1),
         ]
 
         threads = [
             Thread(target=repeat, args=args)
-            for *args, count in jobs for _ in range(count)
+            for *args, count in jobs
+            for _ in range(count)
         ]
 
         for thread in threads:
@@ -122,14 +133,13 @@ class Runner():
         url = Scraper.get_group_url(setting)
         soup = Scraper.get_soup(url, self.session)
 
-        assert soup and soup.title and 'e-Dziekanat' in soup.title.text, 'Invalid soup'
+        assert soup and soup.title and "e-Dziekanat" in soup.title.text, "Invalid soup"
         self.soup_data.append((setting, soup))
 
     @Reporter.observe
     def __parse(self) -> None:
         setting, soup = self.soup_data.pop()
-        group_schedule = soup_parser.get_group_schedule(
-            setting=setting, soup=soup)
+        group_schedule = soup_parser.get_group_schedule(setting=setting, soup=soup)
         self.schedule_data.append(group_schedule)
 
     @Reporter.observe
@@ -137,16 +147,16 @@ class Runner():
         group_schedule = self.schedule_data.pop()
         json_data = json.dumps(group_schedule, indent=4)
 
-        with open(f"{group_schedule['group']}.py", 'w') as group_file:
+        with open(f"{group_schedule['group']}.py", "w") as group_file:
             group_file.write(str(json_data))
 
         res = requests.post(
             url=UPDATE_PLAN_URL,
-            headers={'Content-type': 'application/json'},
-            data=json_data
+            headers={"Content-type": "application/json"},
+            data=json_data,
         )
         if 200 >= res.status_code > 300:
-            raise InvalidResponseError(f'Invalid status: {res.status_code}')
+            raise InvalidResponseError(f"Invalid status: {res.status_code}")
 
     @property
     def keep_scraping(self):
@@ -154,16 +164,22 @@ class Runner():
 
     @property
     def keep_parsing(self):
-        return (self.settings_count -
-                self.reporter.get(self.__scrape).failed -
-                self.reporter.get(self.__parse).finished > 0)
+        return (
+            self.settings_count
+            - self.reporter.get(self.__scrape).failed
+            - self.reporter.get(self.__parse).finished
+            > 0
+        )
 
     @property
     def keep_posting(self):
-        return (self.settings_count -
-                self.reporter.get(self.__scrape).failed -
-                self.reporter.get(self.__parse).failed -
-                self.reporter.get(self.__post).finished > 0)
+        return (
+            self.settings_count
+            - self.reporter.get(self.__scrape).failed
+            - self.reporter.get(self.__parse).failed
+            - self.reporter.get(self.__post).finished
+            > 0
+        )
 
 
 def main():
@@ -173,5 +189,5 @@ def main():
     Runner.run_for_semester(year=str(year), semester=str(semester))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
